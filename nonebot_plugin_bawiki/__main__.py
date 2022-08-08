@@ -91,7 +91,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
             # 删掉header
             await page.add_script_tag(
                 content='document.getElementsByClassName("wiki-header")'
-                        ".forEach((v)=>{v.remove()})"
+                ".forEach((v)=>{v.remove()})"
             )
 
             # 展开折叠的语音
