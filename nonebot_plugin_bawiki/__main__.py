@@ -86,12 +86,12 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     try:
         async with get_new_page() as page:  # type:Page
-            await page.goto(url, wait_until="networkidle", timeout=60)
+            await page.goto(url, wait_until="networkidle", timeout=60 * 1000)
 
             # 删掉header
             await page.add_script_tag(
                 content='document.getElementsByClassName("wiki-header")'
-                ".forEach((v)=>{v.remove()})"
+                        ".forEach((v)=>{v.remove()})"
             )
 
             # 展开折叠的语音
