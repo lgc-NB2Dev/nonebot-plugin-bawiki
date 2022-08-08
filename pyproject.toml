@@ -4,6 +4,8 @@ version = "0.1.1"
 description = "A nonebot2 plugin for Blue Archive."
 authors = ["student_2333 <lgc2333@126.com>"]
 license = "MIT"
+requires-python = ">=3.8"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
