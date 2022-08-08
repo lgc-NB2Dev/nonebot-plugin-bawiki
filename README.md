@@ -124,6 +124,12 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 吹水群：[1105946125](https://jq.qq.com/?_wv=1027&k=Z3n1MpEp)  
 邮箱：<lgc2333@126.com>
 
+## 💡 鸣谢
+
+### [RainNight0](https://github.com/RainNight0)
+
+- 日程表 html 模板提供
+
 ## 💰 赞助
 
 感谢大家的赞助！你们的赞助将是我继续创作的动力！
@@ -138,4 +144,9 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
-无
+### 0.1.1
+
+- 日程表改为以图片形式发送
+- 日程表不会显示未开始的活动了
+- 小 bug 修复
+- ~~移除了 herobrine~~
