@@ -9,7 +9,7 @@ async def game_kee_request(url, **kwargs):
         async with s.get(
                 url,
                 headers={
-                    'game-id': '0',
+                    'game-id'   : '0',
                     'game-alias': 'ba'
                 },
                 **kwargs
@@ -28,7 +28,7 @@ async def get_calender():
             li: list = i['list']
 
             now = time.time()
-            li = [x for x in li if x['end_at'] >= now]
+            li = [x for x in li if (x['end_at'] >= now >= x['begin_at'])]
 
             li.sort(key=lambda x: x['end_at'])
             li.sort(key=lambda x: x['importance'], reverse=True)
@@ -51,7 +51,32 @@ async def get_stu_li():
 
 if __name__ == '__main__':
     async def main():
-        print(await get_stu_li())
+        import jinja2
+        from util import format_timestamp
+        from datetime import datetime
+        from pathlib import Path
+
+        ret = await get_calender()
+
+        for i in ret:
+            begin = i["begin_at"]
+            end = i["end_at"]
+            i['date'] = (
+                f'{format_timestamp(begin)} ~ {format_timestamp(end)}'
+            )
+
+            time_remain = datetime.fromtimestamp(end) - datetime.now()
+            mm, ss = divmod(time_remain.seconds, 60)
+            hh, mm = divmod(mm, 60)
+            i['dd'] = time_remain.days or 0
+            i['hh'] = hh
+            i['mm'] = mm
+            i['ss'] = ss
+
+        html = jinja2.Template(
+            (Path(__file__).parent / 'res' / 'calender.html.jinja').read_text('utf-8')
+        ).render(info=ret)
+        print(html)
 
 
     asyncio.run(main())

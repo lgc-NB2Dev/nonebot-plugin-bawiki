@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        font-size: 16px;
+      }
+
+      body {
+        background-color: #EEF9FD;
+      }
+
+      #calendar-box {
+        background-color: #FFFFFF;
+        position: absolute;
+        transform: translate(100%, 0%);
+        width: 400px;
+      }
+
+      .calendar-head {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        top: 0px;
+      }
+
+      .calendar-title {
+        position: relative;
+        background-color: #5FADE7;
+        width: 100%;
+        height: 40px;
+      }
+
+      .calendar-title-text {
+        position: relative;
+        color: #FFFFFF;
+        font-size: 22px;
+        font-weight: 1000;
+        top: 5px;
+        left: 20px;
+      }
+
+      /*margin: top, right, down, left*/
+
+      .activities-calendar-list {
+        position: relative;
+        width: 370px;
+        margin: 20px 15px 0px 15px;
+      }
+
+      .border-green > .info-box, .border-green > .desc-box {
+        /*position: relative;
+        background-color: #4ACF75;
+        width: 370px;
+        margin: 20px 15px 0px 15px;
+        height: 80px;
+        border-radius: 4px;*/
+        border-left: 4px solid #8b8b8b;
+        border-color: #4ACF75;
+      }
+
+      .border-red > .info-box, .border-red > .desc-box {
+        border-left: 4px solid #8b8b8b;
+        border-color: #FC6475;
+      }
+
+      .info-box {
+        position: relative;
+        background-color: #EFEFF0;
+        width: 351px;
+        height: 70px;
+        border-radius: 4px 4px 0px 0px;
+        margin: 15px 0px 0px 0px;
+        padding: 10px 0px 0px 15px;
+      }
+
+      .info-box .item-title {
+        position: relative;
+        /*margin: 9px 0px 0px 15px;*/
+        font-weight: 600;
+        color: #424242;
+      }
+
+      .info-box .item-date {
+        position: relative;
+        margin: 20px 0px 0px 0px;
+        color: #424242;
+        font-size: 13px;
+      }
+
+      .desc-box {
+        position: relative;
+        background-color: #EFEFF0;
+        width: 366px;
+        border-radius: 0px 0px 4px 4px;
+      }
+
+      .desc-box img {
+        position: relative;
+        width: 350px;
+        margin: 0px 8px;
+        border-radius: 4px;
+      }
+
+      .desc-box .desc {
+        position: relative;
+        margin: 0px 0px 5px 15px;
+        color: #424242;
+        font-size: 13px;
+      }
+
+      .desc-box .time {
+        position: relative;
+        margin: 0px 0px 0px 15px;
+        color: #424242;
+      }
+
+      .desc-box .time > span {
+        color: #FC6475;
+      }
+
+      #footer {
+        margin: 10px 0px 0px 0px;
+        font-size: 12px;
+        text-align: center;
+        color: gray;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="calendar-box">
+      <div class="calendar-title">
+        <span class="calendar-title-text">活动日程</span>
+      </div>
+      <div class="activities-calendar-list">
+        {% for i in info %}
+        <div class="border-{{ 'red' if i['importance']==1 else 'green' }}">
+          <div class="info-box">
+            <div class="item-title">{{ i['title'] }}</div>
+            <div class="item-date">{{ i['date'] }}</div>
+          </div>
+          <div class="desc-box">
+            {% if i['picture'] %}
+            <img src="{{ i['picture'] }}" />
+            {% endif %}
+
+            {% if i['description'] %}
+            <div class="desc">{{ i['description'] }}</div>
+            {% endif %}
+
+            <div class="time">
+              剩余时间：
+              <span>{{ i['dd'] }}</span>
+              天
+              <span>{{ i['hh'] }}</span>
+              时
+              <span>{{ i['mm'] }}</span>
+              分
+              <span>{{ i['ss'] }}</span>
+              秒
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div id="footer">HTML by RainNight0 | Plugin by student_2333</div>
+    </div>
+  </body>
+</html>
