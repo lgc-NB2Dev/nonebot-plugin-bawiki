@@ -49,7 +49,7 @@ async def _(matcher: Matcher):
         ).render(info=ret)
 
         async with get_new_page() as page:  # type:Page
-            await page.set_content(html, wait_until="networkidle")
+            await page.set_content(html)
             pic = await (
                 await page.query_selector('xpath=//div[@id="calendar-box"]')
             ).screenshot()
@@ -61,12 +61,13 @@ async def _(matcher: Matcher):
 
 
 async def send_wiki_page(sid, matcher: Matcher):
-    await matcher.send(f"请稍等，正在截取Wiki页面……\n{game_kee_page_url(sid)}")
+    url = game_kee_page_url(sid)
+    await matcher.send(f"请稍等，正在截取Wiki页面……\n{url}")
 
     try:
-        img = await get_game_kee_page(sid)
+        img = await get_game_kee_page(url)
     except:
-        logger.exception(f"截取wiki页面出错 {sid}")
+        logger.exception(f"截取wiki页面出错 {url}")
         return await matcher.finish(f"截取页面出错，请检查后台输出")
 
     await matcher.finish(MessageSegment.image(img))
