@@ -96,7 +96,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await send_wiki_page(sid, matcher)
 
 
-new_stu = on_command('ba新学生')
+new_stu = on_command("ba新学生")
 
 
 @new_stu.handle()

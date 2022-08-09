@@ -22,7 +22,7 @@ __plugin_meta__ = PluginMetadata(
                 "trigger_condition": "ba学生图鉴",
                 "brief_des": "查询学生详情",
                 "detail_des": "访问对应学生Wiki页面并截图\n"
-                              "指令示例：<ft color=(238,120,0)>ba学生图鉴 白子</ft>",
+                "指令示例：<ft color=(238,120,0)>ba学生图鉴 白子</ft>",
             },
             {
                 "func": "新学生导航",
