@@ -2,12 +2,13 @@ import asyncio
 import time
 
 from aiohttp import ClientSession
+from nonebot_plugin_htmlrender import get_new_page
 
 
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if not ret["code"] == 0:
@@ -44,6 +45,35 @@ async def get_stu_li():
     return {x["name"]: x["content_id"] for x in li}
 
 
+def game_kee_page_url(sid):
+    return f"https://ba.gamekee.com/{sid}.html"
+
+
+async def get_game_kee_page(sid):
+    async with get_new_page() as page:  # type:Page
+        await page.goto(game_kee_page_url(sid), wait_until="networkidle", timeout=60 * 1000)
+
+        # 删掉header
+        await page.add_script_tag(
+            content='document.getElementsByClassName("wiki-header")'
+                    ".forEach((v)=>{v.remove()})"
+        )
+
+        # 展开折叠的语音
+        folds = await page.query_selector_all(
+            'xpath=//div[@class="fold-table-btn"]'
+        )
+        for i in folds:
+            try:
+                await i.click()
+            except:
+                pass
+
+        return await (
+            await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
+        ).screenshot()
+
+
 if __name__ == "__main__":
 
     async def main():
@@ -71,5 +101,6 @@ if __name__ == "__main__":
             (Path(__file__).parent / "res" / "calender.html.jinja").read_text("utf-8")
         ).render(info=ret)
         print(html)
+
 
     asyncio.run(main())

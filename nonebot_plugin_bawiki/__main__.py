@@ -9,7 +9,7 @@ from nonebot.params import CommandArg
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
-from .data_source import get_calender, get_stu_li
+from .data_source import game_kee_page_url, get_calender, get_game_kee_page, get_stu_li
 from .util import format_timestamp
 
 handler_calender = on_command("ba日程表")
@@ -60,6 +60,18 @@ async def _(matcher: Matcher):
     await matcher.finish(MessageSegment.image(pic))
 
 
+async def send_wiki_page(sid, matcher: Matcher):
+    await matcher.send(f"请稍等，正在截取Wiki页面……\n{game_kee_page_url(sid)}")
+
+    try:
+        img = await get_game_kee_page(sid)
+    except:
+        logger.exception(f"截取wiki页面出错 {sid}")
+        return await matcher.finish(f"截取页面出错，请检查后台输出")
+
+    await matcher.finish(MessageSegment.image(img))
+
+
 stu_wiki = on_command("ba学生图鉴")
 
 
@@ -81,34 +93,12 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     if not (sid := ret.get(arg)):
         return await matcher.finish("未找到该学生")
 
-    url = f"https://ba.gamekee.com/{sid}.html"
-    await matcher.send(f"请稍等，正在截取Wiki页面……\n{url}")
+    await send_wiki_page(sid, matcher)
 
-    try:
-        async with get_new_page() as page:  # type:Page
-            await page.goto(url, wait_until="networkidle", timeout=60 * 1000)
 
-            # 删掉header
-            await page.add_script_tag(
-                content='document.getElementsByClassName("wiki-header")'
-                        ".forEach((v)=>{v.remove()})"
-            )
+new_stu = on_command('ba新学生')
 
-            # 展开折叠的语音
-            folds = await page.query_selector_all(
-                'xpath=//div[@class="fold-table-btn"]'
-            )
-            for i in folds:
-                try:
-                    await i.click()
-                except:
-                    pass
 
-            img = await (
-                await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
-            ).screenshot()
-    except:
-        logger.exception(f"截取wiki页面出错 {url}")
-        return await matcher.finish(f"截取页面出错，请检查后台输出")
-
-    await matcher.finish(MessageSegment.image(img))
+@new_stu.handle()
+async def _(matcher: Matcher):
+    await send_wiki_page(155684, matcher)
