@@ -9,7 +9,7 @@ from nonebot.params import CommandArg
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
-from .data_source import game_kee_page_url, get_calender, get_game_kee_page, get_stu_li
+from .data_source import game_kee_page_url, get_calender, get_game_kee_page, get_stu_li, recover_stu_alia
 from .util import format_timestamp
 
 handler_calender = on_command("ba日程表")
@@ -91,7 +91,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     if not ret:
         return await matcher.finish("没有获取到学生列表数据")
 
-    if not (sid := ret.get(arg)):
+    if not (sid := ret.get(recover_stu_alia(arg))):
         return await matcher.finish("未找到该学生")
 
     await send_wiki_page(sid, matcher)

@@ -5,6 +5,8 @@ from aiohttp import ClientSession
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
+from .const import STU_ALIAS
+
 
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
@@ -71,6 +73,26 @@ async def get_game_kee_page(url):
         return await (
             await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
         ).screenshot()
+
+
+def recover_alia(origin, alia_dict: dict):
+    # 精确匹配
+    for k, li in alia_dict.items():
+        if origin in li or origin == k:
+            return k
+
+    # 没找到，模糊匹配
+    for k, li in alia_dict.items():
+        li = [k] + li
+        for v in li:
+            if (v in origin) or (origin in v):
+                return k
+
+    return origin
+
+
+def recover_stu_alia(a):
+    return recover_alia(a, STU_ALIAS)
 
 
 if __name__ == "__main__":
