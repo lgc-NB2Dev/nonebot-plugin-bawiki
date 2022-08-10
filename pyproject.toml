@@ -5,6 +5,13 @@ description = "A nonebot2 plugin for Blue Archive."
 authors = ["student_2333 <lgc2333@126.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/lgc2333/nonebot-plugin-bawiki/"
+keywords = ["blue archive", "nonebot", "nonebot2"]
+classifiers = [
+    "Natural Language :: Chinese (Simplified)",
+    "Topic :: Communications :: Chat :: ICQ",
+    "Topic :: Games/Entertainment :: Role-Playing"
+]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
