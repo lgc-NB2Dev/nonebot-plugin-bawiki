@@ -26,5 +26,5 @@ jobs:
         git config --global user.email ${{ secrets.EMAIL }}
         git config --global user.name ${{ secrets.NAME }}
         git add .
-        git commit -m "Use Black to Format Code"
+        git commit -m "style: use black to format code"
         git push
