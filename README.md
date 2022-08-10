@@ -23,6 +23,16 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 </div>
 
+## 💬 前言
+
+诚邀各位帮忙扩充别名词库 以及更新 插件内置数据源（以后可能会有）！
+
+本人在学校没有太多时间能够写代码，所以维护插件变成了一件比较困难的事  
+感谢各位的帮助！
+
+[点击跳转学生别名字典](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L1)  
+格式：`'学生在GameKee的名称': ['别名1', '别名2', ...]`
+
 ## 📖 介绍
 
 一个碧蓝档案的 Wiki 插件，目前写了活动日程和学生图鉴，数据来源为 [GameKee](https://ba.gamekee.com/)
