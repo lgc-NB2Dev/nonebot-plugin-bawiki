@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD036 MD041 -->
 
 <div align="center">
-  <a href="https://v2.nonebot.dev/store"><img src="readme/nonebot-plugin-bawiki.png" width="200" height="200" alt="BAWiki"></a>
+  <a href="https://v2.nonebot.dev/store"><img src="https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/nonebot-plugin-bawiki.png" width="200" height="200" alt="BAWiki"></a>
 </div>
 
 <div align="center">
@@ -35,7 +35,7 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 ## 📖 介绍
 
-一个碧蓝档案的 Wiki 插件，目前写了活动日程和学生图鉴，数据来源为 [GameKee](https://ba.gamekee.com/)
+一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/)
 
 ## 💿 安装
 
@@ -126,7 +126,7 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 <details>
 <summary>长图，点击展开</summary>
 
-![example](readme/example.png)
+![example](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example.png)
 
 </details>
 
@@ -151,7 +151,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 - <details>
     <summary>赞助二维码（点击展开）</summary>
 
-  ![讨饭](https://raw.githubusercontents.com/lgc2333/ShigureBotMenu/master/src/imgs/sponsor.png)
+  ![讨饭](https://raw.githubusercontent.com/lgc2333/ShigureBotMenu/master/src/imgs/sponsor.png)
 
   </details>
 
