@@ -9,7 +9,13 @@ from nonebot.params import CommandArg
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
-from .data_source import game_kee_page_url, get_calender, get_game_kee_page, get_stu_li, recover_stu_alia
+from .data_source import (
+    game_kee_page_url,
+    get_calender,
+    get_game_kee_page,
+    get_stu_li,
+    recover_stu_alia,
+)
 from .util import format_timestamp
 
 handler_calender = on_command("ba日程表")
