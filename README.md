@@ -37,7 +37,8 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 ## 📖 介绍
 
-一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/)
+一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/)  
+插件灵感来源：[ba_calender](https://f.xiaolz.cn/forum.php?mod=viewthread&tid=145)
 
 ## 💿 安装
 
@@ -145,6 +146,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 - 日程表 html 模板提供
 
+### [黑枪灬王子](mailto:1109024495@qq.com)
+
+- 学生别名提供
+
 ## 💰 赞助
 
 感谢大家的赞助！你们的赞助将是我继续创作的动力！
@@ -158,6 +163,11 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.2.2
+
+- 添加学生别名判断
+- 修改日程表图片宽度
 
 ### 0.2.1
 
