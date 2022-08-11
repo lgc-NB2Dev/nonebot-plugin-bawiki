@@ -15,30 +15,23 @@
       #calendar-box {
         background-color: #FFFFFF;
         position: absolute;
-        transform: translate(100%, 0%);
-        width: 400px;
-      }
-
-      .calendar-head {
-        position: relative;
-        width: 100%;
-        height: 200px;
-        top: 0px;
+        transform: translate(55%, 0%);
+        width: 600px;/*400px*/
       }
 
       .calendar-title {
         position: relative;
         background-color: #5FADE7;
         width: 100%;
-        height: 40px;
+        height: 60px;/*40px*/
       }
 
       .calendar-title-text {
         position: relative;
         color: #FFFFFF;
-        font-size: 22px;
+        font-size: 33px;/*22px*/
         font-weight: 1000;
-        top: 5px;
+        top: 5.5px;
         left: 20px;
       }
 
@@ -46,9 +39,10 @@
 
       .activities-calendar-list {
         position: relative;
-        width: 370px;
+        width: 570px;/*370*/
         margin: 20px 15px 0px 15px;
       }
+
 
       .border-green > .info-box, .border-green > .desc-box {
         /*position: relative;
@@ -69,7 +63,7 @@
       .info-box {
         position: relative;
         background-color: #EFEFF0;
-        width: 351px;
+        width: 551px;/*351px*/
         height: 70px;
         border-radius: 4px 4px 0px 0px;
         margin: 15px 0px 0px 0px;
@@ -93,13 +87,13 @@
       .desc-box {
         position: relative;
         background-color: #EFEFF0;
-        width: 366px;
+        width: 566px;/*366*/
         border-radius: 0px 0px 4px 4px;
       }
 
       .desc-box img {
         position: relative;
-        width: 350px;
+        width: 550px;/*350px*/
         margin: 0px 8px;
         border-radius: 4px;
       }
@@ -123,9 +117,6 @@
 
       #footer {
         margin: 10px 0px 0px 0px;
-        font-size: 12px;
-        text-align: center;
-        color: gray;
       }
     </style>
   </head>
@@ -136,33 +127,27 @@
       </div>
       <div class="activities-calendar-list">
         {% for i in info %}
-        <div class="border-{{ 'red' if i['importance']==1 else 'green' }}">
-          <div class="info-box">
-            <div class="item-title">{{ i['title'] }}</div>
-            <div class="item-date">{{ i['date'] }}</div>
-          </div>
-          <div class="desc-box">
-            {% if i['picture'] %}
-            <img src="{{ i['picture'] }}" />
-            {% endif %}
-
-            {% if i['description'] %}
-            <div class="desc">{{ i['description'] }}</div>
-            {% endif %}
-
-            <div class="time">
-              剩余时间：
-              <span>{{ i['dd'] }}</span>
-              天
-              <span>{{ i['hh'] }}</span>
-              时
-              <span>{{ i['mm'] }}</span>
-              分
-              <span>{{ i['ss'] }}</span>
-              秒
+          <div class="border-{{ 'red' if i['importance']==1 else 'green' }}">
+            <div class="info-box">
+              <div class="item-title">{{ i['title'] }}</div>
+              <div class="item-date">{{ i['date'] }}</div>
+            </div>
+            <div class="desc-box">
+              {% if i['picture'] %}<img src="{{ i['picture'] }}" />{% endif %}
+              {% if i['description'] %}<div class="desc">{{ i['description'] }}</div>{% endif %}
+              <div class="time">
+                剩余时间：
+                <span>{{ i['dd'] }}</span>
+                天
+                <span>{{ i['hh'] }}</span>
+                时
+                <span>{{ i['mm'] }}</span>
+                分
+                <span>{{ i['ss'] }}</span>
+                秒
+              </div>
             </div>
           </div>
-        </div>
         {% endfor %}
       </div>
       <div id="footer">HTML by RainNight0 | Plugin by student_2333</div>
