@@ -20,12 +20,15 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 <a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
     <img src="https://img.shields.io/pypi/dm/nonebot-plugin-bawiki" alt="pypi download">
 </a>
+<a href="https://wakatime.com/badge/user/b61b0f9a-f40b-4c82-bc51-0a75c67bfccf/project/371bbbba-9dba-4e40-883c-72b688876575">
+    <img src="https://wakatime.com/badge/user/b61b0f9a-f40b-4c82-bc51-0a75c67bfccf/project/371bbbba-9dba-4e40-883c-72b688876575.svg" alt="wakatime">
+</a>
 
 </div>
 
 ## 💬 前言
 
-诚邀各位帮忙扩充别名词库 以及更新 插件内置数据源（以后可能会有）！
+诚邀各位帮忙扩充别名词库以及更新插件内置数据源！
 
 本人在学校没有太多时间能够写代码，所以维护插件变成了一件比较困难的事  
 感谢各位的帮助！
