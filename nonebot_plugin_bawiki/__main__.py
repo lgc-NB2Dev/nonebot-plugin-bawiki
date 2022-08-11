@@ -81,7 +81,7 @@ async def _(matcher: Matcher):
     await send_wiki_page(155684, matcher)
 
 
-l2d = on_command('bal2d')
+l2d = on_command("bal2d")
 
 
 @l2d.handle()
@@ -91,6 +91,6 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("请提供学生名称")
 
     if not (url := L2D_LI.get(recover_stu_alia(arg))):
-        return await matcher.finish('该学生没有L2D或插件没有收录该学生的L2D')
+        return await matcher.finish("该学生没有L2D或插件没有收录该学生的L2D")
 
     await matcher.finish(MessageSegment.image(url))
