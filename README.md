@@ -33,6 +33,8 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 [点击跳转学生别名字典](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L1)  
 格式：`'学生在GameKee的名称': ['别名1', '别名2', ...]`
 
+直接往本仓库提交 Pull Request 即可！
+
 ## 📖 介绍
 
 一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/)
