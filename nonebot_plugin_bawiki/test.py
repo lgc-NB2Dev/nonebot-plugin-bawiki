@@ -11,7 +11,7 @@ from const import UNLOCK_L2D_FAV
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if not ret["code"] == 0:
@@ -45,12 +45,14 @@ async def test_l2d_fav():
 
 async def get_stu_dict():
     s = await get_stu_li()
-    l = {x: '' for x in s}
+    l = {x: "" for x in s}
 
     for x, y in s.items():
         try:
-            r: dict = await game_kee_request(f'https://ba.gamekee.com/v1/content/detail/{y}')
-            r: str = r['content']
+            r: dict = await game_kee_request(
+                f"https://ba.gamekee.com/v1/content/detail/{y}"
+            )
+            r: str = r["content"]
 
             i = r.find('<div class="input-wrapper">官方介绍</div>')
             i = r.find('class="slide-item" data-index="2"', i)
@@ -61,23 +63,23 @@ async def get_stu_dict():
             img = re.findall('data-real="([^"]*)"', r)
 
             for i in img:
-                if '.gif' in i:
+                if ".gif" in i:
                     l[x] = i
 
             if not l[x]:
                 l[x] = img[0]
 
-            l[x] = 'https:' + l[x]
+            l[x] = "https:" + l[x]
             print(x, l[x])
         except:
-            print(f'err:{x}')
+            print(f"err:{x}")
         time.sleep(random.randint(1, 5))
 
-    print('{')
+    print("{")
     for x, y in l.items():
         print(f'    "{x}":"{y}",')
-    print('}')
+    print("}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(get_stu_dict())
