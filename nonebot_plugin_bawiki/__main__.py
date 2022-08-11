@@ -3,6 +3,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
+from .const import L2D_LI
 from .data_source import (
     game_kee_page_url,
     get_calender,
@@ -78,3 +79,18 @@ new_stu = on_command("ba新学生")
 @new_stu.handle()
 async def _(matcher: Matcher):
     await send_wiki_page(155684, matcher)
+
+
+l2d = on_command('bal2d')
+
+
+@l2d.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip()
+    if not arg:
+        return await matcher.finish("请提供学生名称")
+
+    if not (url := L2D_LI.get(recover_stu_alia(arg))):
+        return await matcher.finish('该学生没有L2D或插件没有收录该学生的L2D')
+
+    await matcher.finish(MessageSegment.image(url))
