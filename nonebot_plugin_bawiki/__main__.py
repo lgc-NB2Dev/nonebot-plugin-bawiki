@@ -1,22 +1,16 @@
-from datetime import datetime
-from pathlib import Path
-
-import jinja2
 from nonebot import logger, on_command
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
-from nonebot_plugin_htmlrender import get_new_page
-from playwright.async_api import Page
 
 from .data_source import (
     game_kee_page_url,
     get_calender,
+    get_calender_page,
     get_game_kee_page,
     get_stu_li,
     recover_stu_alia,
 )
-from .util import format_timestamp
 
 handler_calender = on_command("ba日程表")
 
@@ -32,33 +26,8 @@ async def _(matcher: Matcher):
     if not ret:
         return await matcher.finish("没有获取到数据")
 
-    for i in ret:
-        if pic := i["picture"]:
-            if (not pic.startswith("https:")) and (not pic.startswith("http:")):
-                i["picture"] = "https:" + pic
-
-        begin = i["begin_at"]
-        end = i["end_at"]
-        i["date"] = f"{format_timestamp(begin)} ~ {format_timestamp(end)}"
-
-        time_remain = datetime.fromtimestamp(end) - datetime.now()
-        mm, ss = divmod(time_remain.seconds, 60)
-        hh, mm = divmod(mm, 60)
-        i["dd"] = time_remain.days or 0
-        i["hh"] = hh
-        i["mm"] = mm
-        i["ss"] = ss
-
     try:
-        html = jinja2.Template(
-            (Path(__file__).parent / "res" / "calender.html.jinja").read_text("utf-8")
-        ).render(info=ret)
-
-        async with get_new_page() as page:  # type:Page
-            await page.set_content(html)
-            pic = await (
-                await page.query_selector('xpath=//div[@id="calendar-box"]')
-            ).screenshot()
+        pic = await get_calender_page(ret)
     except:
         logger.exception(f"渲染或截取页面出错")
         return await matcher.finish(f"渲染或截取页面出错，请检查后台输出")

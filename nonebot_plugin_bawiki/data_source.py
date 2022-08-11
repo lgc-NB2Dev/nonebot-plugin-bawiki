@@ -1,11 +1,15 @@
 import asyncio
 import time
+from datetime import datetime
+from pathlib import Path
 
+import jinja2
 from aiohttp import ClientSession
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
 from .const import STU_ALIAS
+from .util import format_timestamp
 
 
 async def game_kee_request(url, **kwargs):
@@ -72,6 +76,35 @@ async def get_game_kee_page(url):
 
         return await (
             await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
+        ).screenshot()
+
+
+async def get_calender_page(ret):
+    for i in ret:
+        if pic := i["picture"]:
+            if (not pic.startswith("https:")) and (not pic.startswith("http:")):
+                i["picture"] = "https:" + pic
+
+        begin = i["begin_at"]
+        end = i["end_at"]
+        i["date"] = f"{format_timestamp(begin)} ~ {format_timestamp(end)}"
+
+        time_remain = datetime.fromtimestamp(end) - datetime.now()
+        mm, ss = divmod(time_remain.seconds, 60)
+        hh, mm = divmod(mm, 60)
+        i["dd"] = time_remain.days or 0
+        i["hh"] = hh
+        i["mm"] = mm
+        i["ss"] = ss
+
+    html = jinja2.Template(
+        (Path(__file__).parent / "res" / "calender.html.jinja").read_text("utf-8")
+    ).render(info=ret)
+
+    async with get_new_page() as page:  # type:Page
+        await page.set_content(html)
+        return await (
+            await page.query_selector('xpath=//div[@id="calendar-box"]')
         ).screenshot()
 
 
