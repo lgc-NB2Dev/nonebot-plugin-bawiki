@@ -11,7 +11,7 @@ from aiohttp import ClientSession
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if not ret["code"] == 0:
@@ -71,5 +71,5 @@ async def get_stu_dict():
     print("}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(get_stu_dict())

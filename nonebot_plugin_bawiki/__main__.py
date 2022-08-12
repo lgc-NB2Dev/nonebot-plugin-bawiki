@@ -5,7 +5,8 @@ from nonebot.params import CommandArg
 
 from .const import L2D_LI, UNLOCK_L2D_FAV
 from .data_source import (
-    draw_fav_li, game_kee_page_url,
+    draw_fav_li,
+    game_kee_page_url,
     get_calender,
     get_calender_page,
     get_game_kee_page,
@@ -81,7 +82,7 @@ async def _(matcher: Matcher):
     await send_wiki_page(155684, matcher)
 
 
-l2d = on_command('bal2d', aliases={'baL2D', 'balive2d', 'baLive2D'})
+l2d = on_command("bal2d", aliases={"baL2D", "balive2d", "baLive2D"})
 
 
 @l2d.handle()
@@ -92,7 +93,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     if not (url := L2D_LI.get(recover_stu_alia(arg))):
         if isinstance(url, str):
-            await matcher.finish('该学生没有L2D或插件没有收录该学生的L2D')
+            await matcher.finish("该学生没有L2D或插件没有收录该学生的L2D")
         else:
             await matcher.finish("未找到该学生")
         return
@@ -100,7 +101,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.finish(MessageSegment.image(url))
 
 
-fav = on_command('ba好感度', aliases={'ba羁绊'})
+fav = on_command("ba好感度", aliases={"ba羁绊"})
 
 
 @fav.handle()
@@ -130,8 +131,8 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     for lvl, li in UNLOCK_L2D_FAV.items():
         for stu in li:
             if stu == arg:
-                im = MessageSegment.text(f'{arg} 在羁绊等级 {lvl} 时即可解锁L2D\nL2D预览：')
-                im += MessageSegment.image(p) if (p := L2D_LI.get(stu)) else '插件暂未收录'
+                im = MessageSegment.text(f"{arg} 在羁绊等级 {lvl} 时即可解锁L2D\nL2D预览：")
+                im += MessageSegment.image(p) if (p := L2D_LI.get(stu)) else "插件暂未收录"
                 return await matcher.finish(im)
 
     return await matcher.finish("未找到学生，可能是学生不存在或者是该学生没有L2D")

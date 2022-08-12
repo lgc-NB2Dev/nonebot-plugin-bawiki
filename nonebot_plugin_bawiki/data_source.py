@@ -19,7 +19,7 @@ from .util import format_timestamp
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if not ret["code"] == 0:
@@ -50,7 +50,7 @@ async def get_stu_li():
 
             for ii in i["child"]:
                 if ii["id"] == 49443:
-                    return {x['name']: x for x in ii["child"]}
+                    return {x["name"]: x for x in ii["child"]}
 
 
 async def get_stu_cid_li():
@@ -68,7 +68,7 @@ async def get_game_kee_page(url):
         # 删掉header
         await page.add_script_tag(
             content='document.getElementsByClassName("wiki-header")'
-                    ".forEach((v)=>{v.remove()})"
+            ".forEach((v)=>{v.remove()})"
         )
 
         # 展开折叠的语音
@@ -137,7 +137,7 @@ def recover_stu_alia(a):
 
 async def draw_fav_li(lvl):
     if not (li := UNLOCK_L2D_FAV.get(lvl)):
-        return f'没有学生在羁绊等级{lvl}时解锁L2D'
+        return f"没有学生在羁绊等级{lvl}时解锁L2D"
 
     txt_h = 96
     pic_h = 456
@@ -153,14 +153,16 @@ async def draw_fav_li(lvl):
         line = math.ceil(l / line_max_icon)
         length = line_max_icon
 
-    img = Image.new('RGB', (icon_w * length, icon_h * line), (255, 255, 255))
-    font = ImageFont.truetype(str((Path(__file__).parent / 'res' / 'SourceHanSansSC-Bold-2.otf')), 50)
+    img = Image.new("RGB", (icon_w * length, icon_h * line), (255, 255, 255))
+    font = ImageFont.truetype(
+        str((Path(__file__).parent / "res" / "SourceHanSansSC-Bold-2.otf")), 50
+    )
 
     async def draw_stu(name_, url_, line_, index_):
-        img_card = Image.new('RGB', (icon_w, icon_h), (255, 255, 255))
+        img_card = Image.new("RGB", (icon_w, icon_h), (255, 255, 255))
 
         async with ClientSession() as s:
-            async with s.get(f'https:{url_}') as r:
+            async with s.get(f"https:{url_}") as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret))
         img_card.paste(icon_img, (0, 0))
@@ -181,10 +183,12 @@ async def draw_fav_li(lvl):
         if i == line_max_icon:
             i = 0
             l += 1
-        task_li.append(draw_stu(stu, stu_li[stu]['icon'], l, i))
+        task_li.append(draw_stu(stu, stu_li[stu]["icon"], l, i))
         i += 1
     await asyncio.gather(*task_li)
 
     ret_io = BytesIO()
-    img.save(ret_io, 'PNG')
-    return MessageSegment.text(f'羁绊等级 {lvl} 时解锁L2D的学生有以下这些：') + MessageSegment.image(ret_io)
+    img.save(ret_io, "PNG")
+    return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
+        ret_io
+    )
