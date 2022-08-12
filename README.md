@@ -34,9 +34,10 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 感谢各位的帮助！
 
 [点击跳转学生别名字典](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L1)  
-格式：`'学生在GameKee的名称': ['别名1', '别名2', ...]`
+[点击跳转学生解锁 L2D 需求羁绊等级列表](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L113)  
+[点击跳转学生 L2D 预览图列表](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L192)
 
-直接往本仓库提交 Pull Request 即可！
+修改后直接往本仓库提交 Pull Request 即可！
 
 ## 📖 介绍
 
@@ -119,11 +120,7 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 兼容 [nonebot-plugin-PicMenu](https://github.com/hamo-reid/nonebot_plugin_PicMenu)
 
-|     指令     | 权限 | 需要@ | 范围 |                     说明                      |
-| :----------: | :--: | :---: | :--: | :-------------------------------------------: |
-|  `ba日程表`  |  无  |  否   | 均可 |                      无                       |
-| `ba学生图鉴` |  无  |  否   | 均可 | 需要在后面加上学生名字，比如`ba学生图鉴 白子` |
-|  `ba新学生`  |  无  |  否   | 均可 |                      无                       |
+![menu](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/menu.png)
 
 待更新
 
@@ -132,7 +129,8 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 <details>
 <summary>长图，点击展开</summary>
 
-![example](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example.png)
+![example](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example.png)  
+![example2](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example2.png)
 
 </details>
 
@@ -166,6 +164,11 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.3.0
+
+- 新指令 `baL2D`
+- 新指令 `ba羁绊`
 
 ### 0.2.2
 
