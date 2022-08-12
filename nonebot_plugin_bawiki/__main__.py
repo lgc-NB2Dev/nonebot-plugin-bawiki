@@ -3,13 +3,13 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
-from .const import L2D_LI
+from .const import L2D_LI, UNLOCK_L2D_FAV
 from .data_source import (
-    game_kee_page_url,
+    draw_fav_li, game_kee_page_url,
     get_calender,
     get_calender_page,
     get_game_kee_page,
-    get_stu_li,
+    get_stu_cid_li,
     recover_stu_alia,
 )
 
@@ -59,7 +59,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("请提供学生名称")
 
     try:
-        ret = await get_stu_li()
+        ret = await get_stu_cid_li()
     except:
         logger.exception("获取学生列表出错")
         return await matcher.finish("获取学生列表表出错，请检查后台输出")
@@ -81,7 +81,7 @@ async def _(matcher: Matcher):
     await send_wiki_page(155684, matcher)
 
 
-l2d = on_command('bal2d')
+l2d = on_command('bal2d', aliases={'baL2D', 'balive2d', 'baLive2D'})
 
 
 @l2d.handle()
@@ -91,6 +91,47 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("请提供学生名称")
 
     if not (url := L2D_LI.get(recover_stu_alia(arg))):
-        return await matcher.finish('该学生没有L2D或插件没有收录该学生的L2D')
+        if isinstance(url, str):
+            await matcher.finish('该学生没有L2D或插件没有收录该学生的L2D')
+        else:
+            await matcher.finish("未找到该学生")
+        return
 
     await matcher.finish(MessageSegment.image(url))
+
+
+fav = on_command('ba好感度')
+
+
+@fav.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip()
+    if not arg:
+        return await matcher.finish("请提供学生名称或所需的好感等级")
+
+    # 好感度等级
+    if arg.isdigit():
+        arg = int(arg)
+        if arg > 9:
+            return await matcher.finish("学生解锁L2D最高只需要9级好感度")
+        if arg < 1:
+            return await matcher.finish("学生解锁L2D最低只需要1级好感度")
+
+        try:
+            p = await draw_fav_li(arg)
+        except:
+            logger.exception("绘制图片出错")
+            return await matcher.finish("绘制图片出错，请检查后台输出")
+
+        return await matcher.finish(p)
+
+    # 学生名称
+    arg = recover_stu_alia(arg)
+    for lvl, li in UNLOCK_L2D_FAV.items():
+        for stu in li:
+            if stu == arg:
+                im = MessageSegment.text(f'{arg} 在 {lvl} 级好感度时即可解锁L2D\nL2D预览：')
+                im += MessageSegment.image(p) if (p := L2D_LI.get(stu)) else '插件暂未收录'
+                return await matcher.finish(im)
+
+    return await matcher.finish("未找到学生，可能是学生不存在或者是该学生没有L2D")
