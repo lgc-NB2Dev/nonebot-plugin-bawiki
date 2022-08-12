@@ -137,7 +137,7 @@ def recover_stu_alia(a):
 
 async def draw_fav_li(lvl):
     if not (li := UNLOCK_L2D_FAV.get(lvl)):
-        return f'没有学生在{lvl}级好感度解锁L2D'
+        return f'没有学生在羁绊等级{lvl}时解锁L2D'
 
     txt_h = 96
     pic_h = 456
@@ -187,4 +187,4 @@ async def draw_fav_li(lvl):
 
     ret_io = BytesIO()
     img.save(ret_io, 'PNG')
-    return MessageSegment.text(f'好感度等级 {lvl} 时解锁L2D的学生有以下这些：') + MessageSegment.image(ret_io)
+    return MessageSegment.text(f'羁绊等级 {lvl} 时解锁L2D的学生有以下这些：') + MessageSegment.image(ret_io)

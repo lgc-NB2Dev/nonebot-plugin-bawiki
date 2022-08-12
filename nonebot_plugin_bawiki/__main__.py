@@ -100,22 +100,22 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.finish(MessageSegment.image(url))
 
 
-fav = on_command('ba好感度')
+fav = on_command('ba好感度', aliases={'ba羁绊'})
 
 
 @fav.handle()
 async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg = arg.extract_plain_text().strip()
     if not arg:
-        return await matcher.finish("请提供学生名称或所需的好感等级")
+        return await matcher.finish("请提供学生名称或所需的羁绊等级")
 
     # 好感度等级
     if arg.isdigit():
         arg = int(arg)
         if arg > 9:
-            return await matcher.finish("学生解锁L2D最高只需要9级好感度")
+            return await matcher.finish("学生解锁L2D最高只需要羁绊等级9")
         if arg < 1:
-            return await matcher.finish("学生解锁L2D最低只需要1级好感度")
+            return await matcher.finish("学生解锁L2D最低只需要羁绊等级1")
 
         try:
             p = await draw_fav_li(arg)
@@ -130,7 +130,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     for lvl, li in UNLOCK_L2D_FAV.items():
         for stu in li:
             if stu == arg:
-                im = MessageSegment.text(f'{arg} 在 {lvl} 级好感度时即可解锁L2D\nL2D预览：')
+                im = MessageSegment.text(f'{arg} 在羁绊等级 {lvl} 时即可解锁L2D\nL2D预览：')
                 im += MessageSegment.image(p) if (p := L2D_LI.get(stu)) else '插件暂未收录'
                 return await matcher.finish(im)
 
