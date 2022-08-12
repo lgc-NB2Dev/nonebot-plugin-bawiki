@@ -1,3 +1,5 @@
+"""爬取gamekee角色介绍页面l2d"""
+
 import asyncio
 import random
 import re
