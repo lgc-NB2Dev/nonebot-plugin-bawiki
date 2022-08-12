@@ -188,35 +188,3 @@ async def draw_fav_li(lvl):
     ret_io = BytesIO()
     img.save(ret_io, 'PNG')
     return MessageSegment.text(f'好感度等级 {lvl} 时解锁L2D的学生有以下这些：') + MessageSegment.image(ret_io)
-
-
-if __name__ == "__main__":
-
-    async def main():
-        import jinja2
-        from util import format_timestamp
-        from datetime import datetime
-        from pathlib import Path
-
-        ret = await get_calender()
-
-        for i in ret:
-            begin = i["begin_at"]
-            end = i["end_at"]
-            i["date"] = f"{format_timestamp(begin)} ~ {format_timestamp(end)}"
-
-            time_remain = datetime.fromtimestamp(end) - datetime.now()
-            mm, ss = divmod(time_remain.seconds, 60)
-            hh, mm = divmod(mm, 60)
-            i["dd"] = time_remain.days or 0
-            i["hh"] = hh
-            i["mm"] = mm
-            i["ss"] = ss
-
-        html = jinja2.Template(
-            (Path(__file__).parent / "res" / "calender.html.jinja").read_text("utf-8")
-        ).render(info=ret)
-        print(html)
-
-
-    asyncio.run(main())
