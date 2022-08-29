@@ -11,8 +11,8 @@ from aiohttp import ClientSession
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-                    url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
-                ) as r:
+            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+        ) as r:
             ret = await r.json()
             if ret["code"] != 0:
                 raise ConnectionError(ret["msg"])
