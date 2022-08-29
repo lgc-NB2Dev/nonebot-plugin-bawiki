@@ -22,7 +22,7 @@ async def game_kee_request(url, **kwargs):
             url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
-            if not ret["code"] == 0:
+            if ret["code"] != 0:
                 raise ConnectionError(ret["msg"])
             return ret["data"]
 
@@ -88,7 +88,7 @@ async def get_calender_page(ret):
     for i in ret:
         if pic := i["picture"]:
             if (not pic.startswith("https:")) and (not pic.startswith("http:")):
-                i["picture"] = "https:" + pic
+                i["picture"] = f"https:{pic}"
 
         begin = i["begin_at"]
         end = i["end_at"]
