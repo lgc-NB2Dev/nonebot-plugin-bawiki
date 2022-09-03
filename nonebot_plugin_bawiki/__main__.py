@@ -3,15 +3,18 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
-from .const import L2D_LI, UNLOCK_L2D_FAV
-from .data_source import (
-    draw_fav_li, game_kee_page_url,
+from .const import L2D_LI
+from .data_gamekee import (
+    game_kee_page_url,
     get_calender,
     get_calender_page,
     get_game_kee_page,
     get_stu_cid_li,
     recover_stu_alia,
 )
+from .data_schaledb import draw_fav_li, schale_get_stu_dict, schale_get_stu_info
+
+ORIGIN_SCHALE_URL = 'https://lonqie.github.io/SchaleDB/'
 
 handler_calender = on_command("ba日程表")
 
@@ -49,7 +52,41 @@ async def send_wiki_page(sid, matcher: Matcher):
     await matcher.finish(MessageSegment.image(img))
 
 
-stu_wiki = on_command("ba学生图鉴")
+stu_schale = on_command('ba学生图鉴')
+
+
+@stu_schale.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip()
+    if not arg:
+        return await matcher.finish("请提供学生名称")
+
+    try:
+        ret = await schale_get_stu_dict()
+    except:
+        logger.exception("获取学生列表出错")
+        return await matcher.finish("获取学生列表表出错，请检查后台输出")
+
+    if not ret:
+        return await matcher.finish("没有获取到学生列表数据")
+
+    if not (data := ret.get(recover_stu_alia(arg))):
+        return await matcher.finish("未找到该学生")
+
+    stu_name = data['PathName']
+    await matcher.send(f'请稍等，正在截取SchaleDB页面～\n'
+                       f'{ORIGIN_SCHALE_URL}?chara={stu_name}')
+
+    try:
+        img = MessageSegment.image(await schale_get_stu_info(stu_name))
+    except:
+        logger.exception(f"截取schale db页面出错 chara={stu_name}")
+        return await matcher.finish(f"截取页面出错，请检查后台输出")
+
+    await matcher.finish(img)
+
+
+stu_wiki = on_command("ba学生wiki", aliases={'ba学生Wiki', 'ba学生WIKI'})
 
 
 @stu_wiki.handle()
@@ -127,11 +164,19 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     # 学生名称
     arg = recover_stu_alia(arg)
-    for lvl, li in UNLOCK_L2D_FAV.items():
-        for stu in li:
-            if stu == arg:
-                im = MessageSegment.text(f'{arg} 在羁绊等级 {lvl} 时即可解锁L2D\nL2D预览：')
-                im += MessageSegment.image(p) if (p := L2D_LI.get(stu)) else '插件暂未收录'
-                return await matcher.finish(im)
 
-    return await matcher.finish("未找到学生，可能是学生不存在或者是该学生没有L2D")
+    try:
+        ret = await schale_get_stu_dict()
+    except:
+        logger.exception("获取学生列表出错")
+        return await matcher.finish("获取学生列表表出错，请检查后台输出")
+
+    if stu := ret.get(arg):
+        if not (lvl := stu['MemoryLobby']):
+            return await matcher.finish("该学生没有L2D")
+
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im += MessageSegment.image(p) if (p := L2D_LI.get(arg)) else '插件暂未收录'
+        return await matcher.finish(im)
+
+    return await matcher.finish("未找到学生")

@@ -1,18 +1,13 @@
-import asyncio
-import math
 import time
 from datetime import datetime
-from io import BytesIO
 from pathlib import Path
 
 import jinja2
-from PIL import Image, ImageDraw, ImageFont
 from aiohttp import ClientSession
-from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
-from .const import STU_ALIAS, UNLOCK_L2D_FAV
+from .const import STU_ALIAS
 from .util import format_timestamp
 
 
@@ -133,58 +128,3 @@ def recover_alia(origin: str, alia_dict: dict):
 
 def recover_stu_alia(a):
     return recover_alia(a, STU_ALIAS)
-
-
-async def draw_fav_li(lvl):
-    if not (li := UNLOCK_L2D_FAV.get(lvl)):
-        return f'没有学生在羁绊等级{lvl}时解锁L2D'
-
-    txt_h = 96
-    pic_h = 456
-    icon_w = 404
-    icon_h = pic_h + txt_h
-    line_max_icon = 6
-    txt_y_offset = -8
-
-    if (l := len(li)) <= line_max_icon:
-        line = 1
-        length = l
-    else:
-        line = math.ceil(l / line_max_icon)
-        length = line_max_icon
-
-    img = Image.new('RGB', (icon_w * length, icon_h * line), (255, 255, 255))
-    font = ImageFont.truetype(str((Path(__file__).parent / 'res' / 'SourceHanSansSC-Bold-2.otf')), 50)
-
-    async def draw_stu(name_, url_, line_, index_):
-        img_card = Image.new('RGB', (icon_w, icon_h), (255, 255, 255))
-
-        async with ClientSession() as s:
-            async with s.get(f'https:{url_}') as r:
-                ret = await r.read()
-        icon_img = Image.open(BytesIO(ret))
-        img_card.paste(icon_img, (0, 0))
-
-        font_w, font_h = font.getsize(name_)
-        draw_x = 0 if font_w >= icon_w else round((icon_w - font_w) / 2)
-        draw_y = round((txt_h - font_h) / 2) + pic_h + txt_y_offset
-        draw = ImageDraw.Draw(img_card)
-        draw.text((draw_x, draw_y), name_, (0, 0, 0), font)
-
-        img.paste(img_card, (index_ * icon_w, line_ * icon_h))
-
-    stu_li = await get_stu_li()
-    task_li = []
-    l = 0
-    i = 0
-    for stu in li:
-        if i == line_max_icon:
-            i = 0
-            l += 1
-        task_li.append(draw_stu(stu, stu_li[stu]['icon'], l, i))
-        i += 1
-    await asyncio.gather(*task_li)
-
-    ret_io = BytesIO()
-    img.save(ret_io, 'PNG')
-    return MessageSegment.text(f'羁绊等级 {lvl} 时解锁L2D的学生有以下这些：') + MessageSegment.image(ret_io)
