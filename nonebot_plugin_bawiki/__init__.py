@@ -35,7 +35,7 @@ __plugin_meta__ = PluginMetadata(
                                "可以用这些指令触发："
                                "<ft color=(238,120,0)>ba学生wiki</ft>；"
                                "<ft color=(238,120,0)>ba学生Wiki</ft>；"
-                               "<ft color=(238,120,0)>ba学生WIKI</ft>>\n"
+                               "<ft color=(238,120,0)>ba学生WIKI</ft>\n"
                                "指令示例："
                                "<ft color=(238,120,0)>ba学生wiki 白子</ft>；"
                                "<ft color=(238,120,0)>ba学生wiki xcw</ft>"),
