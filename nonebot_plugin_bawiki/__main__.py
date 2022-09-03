@@ -14,7 +14,7 @@ from .data_gamekee import (
 )
 from .data_schaledb import draw_fav_li, schale_get_stu_dict, schale_get_stu_info
 
-ORIGIN_SCHALE_URL = 'https://lonqie.github.io/SchaleDB/'
+ORIGIN_SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
 
 handler_calender = on_command("ba日程表")
 
@@ -52,7 +52,7 @@ async def send_wiki_page(sid, matcher: Matcher):
     await matcher.finish(MessageSegment.image(img))
 
 
-stu_schale = on_command('ba学生图鉴')
+stu_schale = on_command("ba学生图鉴")
 
 
 @stu_schale.handle()
@@ -73,9 +73,8 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     if not (data := ret.get(recover_stu_alia(arg))):
         return await matcher.finish("未找到该学生")
 
-    stu_name = data['PathName']
-    await matcher.send(f'请稍等，正在截取SchaleDB页面～\n'
-                       f'{ORIGIN_SCHALE_URL}?chara={stu_name}')
+    stu_name = data["PathName"]
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{ORIGIN_SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -86,7 +85,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.finish(img)
 
 
-stu_wiki = on_command("ba学生wiki", aliases={'ba学生Wiki', 'ba学生WIKI'})
+stu_wiki = on_command("ba学生wiki", aliases={"ba学生Wiki", "ba学生WIKI"})
 
 
 @stu_wiki.handle()
@@ -118,7 +117,7 @@ async def _(matcher: Matcher):
     await send_wiki_page(155684, matcher)
 
 
-l2d = on_command('bal2d', aliases={'baL2D', 'balive2d', 'baLive2D'})
+l2d = on_command("bal2d", aliases={"baL2D", "balive2d", "baLive2D"})
 
 
 @l2d.handle()
@@ -129,7 +128,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     if not (url := L2D_LI.get(recover_stu_alia(arg))):
         if isinstance(url, str):
-            await matcher.finish('该学生没有L2D或插件没有收录该学生的L2D')
+            await matcher.finish("该学生没有L2D或插件没有收录该学生的L2D")
         else:
             await matcher.finish("未找到该学生")
         return
@@ -137,7 +136,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.finish(MessageSegment.image(url))
 
 
-fav = on_command('ba好感度', aliases={'ba羁绊'})
+fav = on_command("ba好感度", aliases={"ba羁绊"})
 
 
 @fav.handle()
@@ -172,11 +171,11 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("获取学生列表表出错，请检查后台输出")
 
     if stu := ret.get(arg):
-        if not (lvl := stu['MemoryLobby']):
+        if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
         im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
-        im += MessageSegment.image(p) if (p := L2D_LI.get(arg)) else '插件暂未收录'
+        im += MessageSegment.image(p) if (p := L2D_LI.get(arg)) else "插件暂未收录"
         return await matcher.finish(im)
 
     return await matcher.finish("未找到学生")

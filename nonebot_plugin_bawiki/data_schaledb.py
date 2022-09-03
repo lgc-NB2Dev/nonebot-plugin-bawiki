@@ -12,18 +12,18 @@ from playwright.async_api import Page, ViewportSize
 
 from .const import SCHALE_DB_DIFFERENT
 
-BASE_URL = 'http://schale.lgc2333.top/'
+BASE_URL = "http://schale.lgc2333.top/"
 
 
 async def schale_get_stu_data():
     async with ClientSession() as c:
-        async with c.get(f'{BASE_URL}data/cn/students.min.json') as r:
+        async with c.get(f"{BASE_URL}data/cn/students.min.json") as r:
             return await r.json()
 
 
 async def schale_get_stu_dict():
     ret = await schale_get_stu_data()
-    data = {x['Name'].replace('(', '（').replace(')', '）'): x for x in ret}
+    data = {x["Name"].replace("(", "（").replace(")", "）"): x for x in ret}
 
     for schale, gamekee in SCHALE_DB_DIFFERENT.items():
         if schale in data:
@@ -34,26 +34,32 @@ async def schale_get_stu_dict():
 
 
 async def schale_get_stu_info(stu):
-    async with get_new_page(is_mobile=True, viewport=ViewportSize(width=767, height=800)) as page:  # type:Page
-        await page.goto(f'{BASE_URL}?chara={stu}', timeout=60 * 1000, wait_until='networkidle')
+    async with get_new_page(
+        is_mobile=True, viewport=ViewportSize(width=767, height=800)
+    ) as page:  # type:Page
+        await page.goto(
+            f"{BASE_URL}?chara={stu}", timeout=60 * 1000, wait_until="networkidle"
+        )
 
         # 进度条拉最大
-        await page.add_script_tag(
-            content='utilStuSetAllProgressMax();'
-        )
+        await page.add_script_tag(content="utilStuSetAllProgressMax();")
 
         return await page.screenshot(full_page=True)
 
 
 async def draw_fav_li(lvl):
     try:
-        stu_li = [x for x in await schale_get_stu_data() if (x['MemoryLobby'] and x['MemoryLobby'][0] == lvl)]
+        stu_li = [
+            x
+            for x in await schale_get_stu_data()
+            if (x["MemoryLobby"] and x["MemoryLobby"][0] == lvl)
+        ]
     except:
-        logger.exception('获取schale db学生数据失败')
-        return '获取SchaleDB学生数据失败，请检查后台输出'
+        logger.exception("获取schale db学生数据失败")
+        return "获取SchaleDB学生数据失败，请检查后台输出"
 
     if not stu_li:
-        return f'没有学生在羁绊等级{lvl}时解锁L2D'
+        return f"没有学生在羁绊等级{lvl}时解锁L2D"
 
     txt_h = 48
     pic_h = 144
@@ -69,16 +75,20 @@ async def draw_fav_li(lvl):
         line = math.ceil(l / line_max_icon)
         length = line_max_icon
 
-    img = Image.new('RGBA', (icon_w * length, icon_h * line), (255, 255, 255))
-    font = ImageFont.truetype(str((Path(__file__).parent / 'res' / 'SourceHanSansSC-Bold-2.otf')), 25)
+    img = Image.new("RGBA", (icon_w * length, icon_h * line), (255, 255, 255))
+    font = ImageFont.truetype(
+        str((Path(__file__).parent / "res" / "SourceHanSansSC-Bold-2.otf")), 25
+    )
 
     async def draw_stu(name_, dev_name_, line_, index_):
-        img_card = Image.new('RGBA', (icon_w, icon_h), (255, 255, 255))
+        img_card = Image.new("RGBA", (icon_w, icon_h), (255, 255, 255))
 
         async with ClientSession() as s:
-            async with s.get(f'{BASE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png') as r:
+            async with s.get(
+                f"{BASE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png"
+            ) as r:
                 ret = await r.read()
-        icon_img = Image.open(BytesIO(ret)).convert('RGBA')
+        icon_img = Image.open(BytesIO(ret)).convert("RGBA")
         img_card.paste(icon_img, (0, 0), icon_img)
 
         font_w, font_h = font.getsize(name_)
@@ -96,10 +106,12 @@ async def draw_fav_li(lvl):
         if i == line_max_icon:
             i = 0
             l += 1
-        task_li.append(draw_stu(stu['Name'], stu['DevName'], l, i))
+        task_li.append(draw_stu(stu["Name"], stu["DevName"], l, i))
         i += 1
     await asyncio.gather(*task_li)
 
     ret_io = BytesIO()
-    img.save(ret_io, 'PNG')
-    return MessageSegment.text(f'羁绊等级 {lvl} 时解锁L2D的学生有以下这些：') + MessageSegment.image(ret_io)
+    img.save(ret_io, "PNG")
+    return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
+        ret_io
+    )
