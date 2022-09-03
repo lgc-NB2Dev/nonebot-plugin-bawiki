@@ -33,8 +33,8 @@ async def _(matcher: Matcher):
     try:
         pic = await get_calender_page(ret)
     except:
-        logger.exception(f"渲染或截取页面出错")
-        return await matcher.finish(f"渲染或截取页面出错，请检查后台输出")
+        logger.exception("渲染或截取页面出错")
+        return await matcher.finish("渲染或截取页面出错，请检查后台输出")
 
     await matcher.finish(MessageSegment.image(pic))
 
@@ -47,7 +47,7 @@ async def send_wiki_page(sid, matcher: Matcher):
         img = await get_game_kee_page(url)
     except:
         logger.exception(f"截取wiki页面出错 {url}")
-        return await matcher.finish(f"截取页面出错，请检查后台输出")
+        return await matcher.finish("截取页面出错，请检查后台输出")
 
     await matcher.finish(MessageSegment.image(img))
 
@@ -80,7 +80,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
     except:
         logger.exception(f"截取schale db页面出错 chara={stu_name}")
-        return await matcher.finish(f"截取页面出错，请检查后台输出")
+        return await matcher.finish("截取页面出错，请检查后台输出")
 
     await matcher.finish(img)
 
