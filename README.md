@@ -34,14 +34,13 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 感谢各位的帮助！
 
 [点击跳转学生别名字典](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L1)  
-[点击跳转学生解锁 L2D 需求羁绊等级列表](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L113)  
-[点击跳转学生 L2D 预览图列表](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L192)
+[点击跳转学生 L2D 预览图列表](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L125)
 
 修改后直接往本仓库提交 Pull Request 即可！
 
 ## 📖 介绍
 
-一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/)  
+一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/) 与 [SchaleDB](https://lonqie.github.io/SchaleDB/)  
 插件灵感来源：[ba_calender](https://f.xiaolz.cn/forum.php?mod=viewthread&tid=145)
 
 ## 💿 安装
