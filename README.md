@@ -164,6 +164,12 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.4.0
+
+- `ba日程表`的`SchaleDB`数据源
+- `ba学生图鉴` `ba羁绊` 数据源更换为`SchaleDB`
+- 原`ba学生图鉴`修改为`ba学生wiki`
+
 ### 0.3.0
 
 - 新指令 `baL2D`
