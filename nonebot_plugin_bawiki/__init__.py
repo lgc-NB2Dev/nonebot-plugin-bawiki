@@ -14,7 +14,14 @@ __plugin_meta__ = PluginMetadata(
                 "trigger_method": "指令",
                 "trigger_condition": "ba日程表",
                 "brief_des": "查看活动日程表",
-                "detail_des": "查看当前未结束的卡池、活动以及起止时间，目前只有日服数据源",
+                "detail_des": (
+                    "查看当前未结束的卡池、活动以及起止时间，"
+                    "默认为GameKee源，可以在指令后带参数使用SchaleDB数据源\n"
+                    "指令示例：\n"
+                    "<ft color=(238,120,0)>ba日程表</ft> （GameKee源）；\n"
+                    "<ft color=(238,120,0)>ba日程表 schaledb</ft> （SchaleDB源，日服）；\n"
+                    "<ft color=(238,120,0)>ba日程表 国际服</ft> （SchaleDB源，国际服）"
+                ),
             },
             {
                 "func": "学生图鉴",
