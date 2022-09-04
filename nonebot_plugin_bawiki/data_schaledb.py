@@ -35,7 +35,7 @@ async def schale_get_stu_dict():
 
 async def schale_get_stu_info(stu):
     async with get_new_page(
-            is_mobile=True, viewport=ViewportSize(width=767, height=800)
+        is_mobile=True, viewport=ViewportSize(width=767, height=800)
     ) as page:  # type:Page
         await page.goto(
             f"{BASE_URL}?chara={stu}", timeout=60 * 1000, wait_until="networkidle"
@@ -49,21 +49,16 @@ async def schale_get_stu_info(stu):
 
 async def schale_get_calender(server=1):
     async with get_new_page(
-            is_mobile=True, viewport=ViewportSize(width=767, height=800)
+        is_mobile=True, viewport=ViewportSize(width=767, height=800)
     ) as page:  # type:Page
         await page.goto(
-            BASE_URL,
-            timeout=60 * 1000,
-            wait_until='domcontentloaded'  # html加载完成需要立马改服
+            BASE_URL, timeout=60 * 1000, wait_until="domcontentloaded"  # html加载完成需要立马改服
         )
 
         await page.add_script_tag(
-            content=(
-                f"regionID={server};"  # 改服
-                "loadModule('home');"  # 防止进入之前的模块
-            )
+            content=(f"regionID={server};" "loadModule('home');")  # 改服  # 防止进入之前的模块
         )
-        await page.wait_for_load_state('networkidle')
+        await page.wait_for_load_state("networkidle")
 
         return await (
             # 当时活动标题的上级节点
@@ -109,7 +104,7 @@ async def draw_fav_li(lvl):
 
         async with ClientSession() as s:
             async with s.get(
-                    f"{BASE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png"
+                f"{BASE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png"
             ) as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
@@ -136,7 +131,6 @@ async def draw_fav_li(lvl):
 
     ret_io = BytesIO()
     img.save(ret_io, "PNG")
-    return MessageSegment.text(
-        f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
+    return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
         ret_io
     )

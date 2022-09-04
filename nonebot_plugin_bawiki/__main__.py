@@ -12,15 +12,18 @@ from .data_gamekee import (
     get_stu_cid_li,
     recover_stu_alia,
 )
-from .data_schaledb import (draw_fav_li, schale_get_calender, schale_get_stu_dict,
-                            schale_get_stu_info)
+from .data_schaledb import (
+    draw_fav_li,
+    schale_get_calender,
+    schale_get_stu_dict,
+    schale_get_stu_info,
+)
 
 ORIGIN_SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
 
 
 async def schale_calender(matcher: Matcher, server=1):
-    await matcher.send(
-        f"请稍等，正在截取SchaleDB首页日程表～\n" f"{ORIGIN_SCHALE_URL}")
+    await matcher.send(f"请稍等，正在截取SchaleDB首页日程表～\n" f"{ORIGIN_SCHALE_URL}")
 
     try:
         img = MessageSegment.image(await schale_get_calender(server))
@@ -41,7 +44,7 @@ async def game_kee_calender(matcher: Matcher):
     if not ret:
         return await matcher.finish("没有获取到数据")
 
-    await matcher.send('正在渲染页面，请稍等')
+    await matcher.send("正在渲染页面，请稍等")
     try:
         pic = await get_calender_page(ret)
     except:
@@ -57,9 +60,9 @@ handler_calender = on_command("ba日程表")
 @handler_calender.handle()
 async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg: str = arg.extract_plain_text()
-    if '国际服' in arg:
+    if "国际服" in arg:
         await schale_calender(matcher)
-    elif 'schaledb' in arg.lower():
+    elif "schaledb" in arg.lower():
         await schale_calender(matcher, 0)
     else:
         await game_kee_calender(matcher)
@@ -100,8 +103,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(
-        f"请稍等，正在截取SchaleDB页面～\n" f"{ORIGIN_SCHALE_URL}?chara={stu_name}")
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{ORIGIN_SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -201,8 +203,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(
-            f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         im += MessageSegment.image(p) if (p := L2D_LI.get(arg)) else "插件暂未收录"
         return await matcher.finish(im)
 
