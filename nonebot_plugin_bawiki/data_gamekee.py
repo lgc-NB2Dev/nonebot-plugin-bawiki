@@ -7,14 +7,13 @@ from aiohttp import ClientSession
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
-from .const import STU_ALIAS
 from .util import format_timestamp
 
 
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if ret["code"] != 0:
@@ -63,7 +62,7 @@ async def get_game_kee_page(url):
         # 删掉header
         await page.add_script_tag(
             content='document.getElementsByClassName("wiki-header")'
-            ".forEach((v)=>{v.remove()})"
+                    ".forEach((v)=>{v.remove()})"
         )
 
         # 展开折叠的语音
@@ -106,25 +105,3 @@ async def get_calender_page(ret):
         return await (
             await page.query_selector('xpath=//div[@id="calendar-box"]')
         ).screenshot()
-
-
-def recover_alia(origin: str, alia_dict: dict):
-    origin = origin.lower()
-
-    # 精确匹配
-    for k, li in alia_dict.items():
-        if origin in li or origin == k:
-            return k
-
-    # 没找到，模糊匹配
-    for k, li in alia_dict.items():
-        li = [k] + li
-        for v in li:
-            if (v in origin) or (origin in v):
-                return k
-
-    return origin
-
-
-def recover_stu_alia(a):
-    return recover_alia(a, STU_ALIAS)
