@@ -16,7 +16,7 @@ def recover_alia(origin: str, alia_dict: dict[str, list[str]]):
             return k
 
     # 匹配括号别名
-    for k, li in alia_dict.items():
+    for k in alia_dict:
         if (p := k.find("（")) != -1:
             prefixes = [k[:p]]
             suffixes = [k[p + 1 : -1]]
