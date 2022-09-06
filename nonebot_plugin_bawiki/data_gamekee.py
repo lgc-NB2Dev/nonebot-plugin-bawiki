@@ -13,7 +13,7 @@ from .util import format_timestamp
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if ret["code"] != 0:
@@ -62,7 +62,7 @@ async def get_game_kee_page(url):
         # 删掉header
         await page.add_script_tag(
             content='document.getElementsByClassName("wiki-header")'
-                    ".forEach((v)=>{v.remove()})"
+            ".forEach((v)=>{v.remove()})"
         )
 
         # 展开折叠的语音

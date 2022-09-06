@@ -17,9 +17,9 @@ def recover_alia(origin: str, alia_dict: dict[str, list[str]]):
 
     # 匹配括号别名
     for k, li in alia_dict.items():
-        if (p := k.find('（')) != -1:
+        if (p := k.find("（")) != -1:
             prefixes = [k[:p]]
-            suffixes = [k[p + 1:-1]]
+            suffixes = [k[p + 1 : -1]]
 
             if a := alia_dict.get(prefixes[0]):
                 prefixes.extend(a)
@@ -28,7 +28,7 @@ def recover_alia(origin: str, alia_dict: dict[str, list[str]]):
 
             for s in suffixes:
                 for p in prefixes:
-                    if f'{p}{s}' == origin or f'{s}{p}' == origin:
+                    if f"{p}{s}" == origin or f"{s}{p}" == origin:
                         return k
 
     # 没找到，模糊匹配
