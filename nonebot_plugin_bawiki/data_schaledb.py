@@ -13,16 +13,14 @@ from playwright.async_api import Page, ViewportSize
 from .const import SCHALE_DB_DIFFERENT, SCHALE_URL
 
 PAGE_KWARGS = {
-    'is_mobile': True,
-    'viewport': ViewportSize(width=767, height=800),
+    "is_mobile": True,
+    "viewport": ViewportSize(width=767, height=800),
 }
 
 
 async def schale_get_stu_data():
     async with ClientSession() as c:
-        async with c.get(
-                f"{SCHALE_URL}data/cn/students.min.json"
-        ) as r:
+        async with c.get(f"{SCHALE_URL}data/cn/students.min.json") as r:
             return await r.json()
 
 
@@ -40,8 +38,9 @@ async def schale_get_stu_dict():
 
 async def schale_get_stu_info(stu):
     async with get_new_page(**PAGE_KWARGS) as page:  # type:Page
-        await page.goto(f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000,
-                        wait_until="networkidle")
+        await page.goto(
+            f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000, wait_until="networkidle"
+        )
 
         # 进度条拉最大
         await page.add_script_tag(content="utilStuSetAllProgressMax();")
@@ -107,7 +106,7 @@ async def draw_fav_li(lvl):
 
         async with ClientSession() as s:
             async with s.get(
-                    f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
+                f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
             ) as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
@@ -134,7 +133,6 @@ async def draw_fav_li(lvl):
 
     ret_io = BytesIO()
     img.save(ret_io, "PNG")
-    return MessageSegment.text(
-        f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
+    return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
         ret_io
     )
