@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import datetime
 from pathlib import Path
@@ -7,13 +8,14 @@ from aiohttp import ClientSession
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Page
 
+from .const import EXTRA_L2D_LI
 from .util import format_timestamp
 
 
 async def game_kee_request(url, **kwargs):
     async with ClientSession() as s:
         async with s.get(
-            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
+                url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
         ) as r:
             ret = await r.json()
             if ret["code"] != 0:
@@ -62,7 +64,7 @@ async def get_game_kee_page(url):
         # 删掉header
         await page.add_script_tag(
             content='document.getElementsByClassName("wiki-header")'
-            ".forEach((v)=>{v.remove()})"
+                    ".forEach((v)=>{v.remove()})"
         )
 
         # 展开折叠的语音
@@ -105,3 +107,27 @@ async def get_calender_page(ret):
         return await (
             await page.query_selector('xpath=//div[@id="calendar-box"]')
         ).screenshot()
+
+
+async def grab_l2d(cid):
+    r: dict = await game_kee_request(
+        f"https://ba.gamekee.com/v1/content/detail/{cid}"
+    )
+    r: str = r["content"]
+
+    i = r.find('<div class="input-wrapper">官方介绍</div>')
+    i = r.find('class="slide-item" data-index="2"', i)
+    ii = r.find('data-index="3"', i)
+
+    r: str = r[i:ii]
+
+    img = re.findall('data-real="([^"]*)"', r)
+
+    return [f"https:{x}" for x in img]
+
+
+async def get_l2d(stu_name):
+    if r := EXTRA_L2D_LI.get(stu_name):
+        return r
+
+    return await grab_l2d((await get_stu_cid_li()).get(stu_name))

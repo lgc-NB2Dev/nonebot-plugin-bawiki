@@ -8,14 +8,18 @@ from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
-from playwright.async_api import Page, ViewportSize
+from playwright.async_api import Page, ProxySettings, ViewportSize
 
+from .config import config
 from .const import SCHALE_DB_DIFFERENT, SCHALE_URL
 
 
 async def schale_get_stu_data():
     async with ClientSession() as c:
-        async with c.get(f"{SCHALE_URL}data/cn/students.min.json") as r:
+        async with c.get(
+                f"{SCHALE_URL}data/cn/students.min.json",
+                proxy=config.proxy
+        ) as r:
             return await r.json()
 
 
@@ -31,13 +35,22 @@ async def schale_get_stu_dict():
     return data
 
 
+async def schale_get_new_page(*args, **kwargs):
+    return get_new_page(
+        is_mobile=True,
+        *args,
+        viewport=ViewportSize(width=767, height=800),
+        proxy=ProxySettings(server=config.proxy) if config.proxy else None,
+        **kwargs
+    )
+
+
 async def schale_get_stu_info(stu):
-    async with get_new_page(
-        is_mobile=True, viewport=ViewportSize(width=767, height=800)
-    ) as page:  # type:Page
+    async with schale_get_new_page() as page:  # type:Page
         await page.goto(
-            f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000, wait_until="networkidle"
+            f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000
         )
+        await page.wait_for_selector("loading-cover", state="hidden")
 
         # 进度条拉最大
         await page.add_script_tag(content="utilStuSetAllProgressMax();")
@@ -46,9 +59,7 @@ async def schale_get_stu_info(stu):
 
 
 async def schale_get_calender(server=1):
-    async with get_new_page(
-        is_mobile=True, viewport=ViewportSize(width=767, height=800)
-    ) as page:  # type:Page
+    async with schale_get_new_page() as page:  # type:Page
         await page.goto(
             SCHALE_URL,
             timeout=60 * 1000,
@@ -59,7 +70,7 @@ async def schale_get_calender(server=1):
         await page.add_script_tag(
             content=f"regionID={server};" "loadModule('home');"  # 改服  # 防止进入之前的模块
         )
-        await page.wait_for_load_state("networkidle")
+        await page.wait_for_selector("loading-cover", state="hidden")
 
         return await (
             # 当时活动标题的上级节点
@@ -105,7 +116,8 @@ async def draw_fav_li(lvl):
 
         async with ClientSession() as s:
             async with s.get(
-                f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png"
+                    f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
+                    proxy=config.proxy
             ) as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
@@ -132,6 +144,7 @@ async def draw_fav_li(lvl):
 
     ret_io = BytesIO()
     img.save(ret_io, "PNG")
-    return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
-        ret_io
+    return (
+            MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") +
+            MessageSegment.image(ret_io)
     )
