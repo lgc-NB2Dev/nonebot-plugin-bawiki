@@ -4,8 +4,14 @@ from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
 from .const import ORIGIN_SCHALE_URL
-from .data_gamekee import (game_kee_page_url, get_calender, get_calender_page,
-                           get_game_kee_page, get_l2d, get_stu_cid_li)
+from .data_gamekee import (
+    game_kee_page_url,
+    get_calender,
+    get_calender_page,
+    get_game_kee_page,
+    get_l2d,
+    get_stu_cid_li,
+)
 from .data_schaledb import (
     draw_fav_li,
     schale_get_calender,
@@ -96,8 +102,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(
-        f"请稍等，正在截取SchaleDB页面～\n" f"{ORIGIN_SCHALE_URL}?chara={stu_name}")
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{ORIGIN_SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -201,8 +206,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(
-            f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         if p := await get_l2d(arg):
             im += [MessageSegment.image(x) for x in p]
         else:

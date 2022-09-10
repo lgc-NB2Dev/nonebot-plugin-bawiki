@@ -122,7 +122,7 @@ SCHALE_DB_DIFFERENT = {
     "智惠": "巴",
 }
 
-EXTRA_L2D_LI: dict[str,list[str]] = {}
+EXTRA_L2D_LI: dict[str, list[str]] = {}
 
 ORIGIN_SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
 SCHALE_URL = "http://schale.lgc2333.top/"

@@ -17,8 +17,7 @@ from .const import SCHALE_DB_DIFFERENT, SCHALE_URL
 async def schale_get_stu_data():
     async with ClientSession() as c:
         async with c.get(
-                f"{SCHALE_URL}data/cn/students.min.json",
-                proxy=config.proxy
+            f"{SCHALE_URL}data/cn/students.min.json", proxy=config.proxy
         ) as r:
             return await r.json()
 
@@ -41,15 +40,13 @@ async def schale_get_new_page(*args, **kwargs):
         *args,
         viewport=ViewportSize(width=767, height=800),
         proxy=ProxySettings(server=config.proxy) if config.proxy else None,
-        **kwargs
+        **kwargs,
     )
 
 
 async def schale_get_stu_info(stu):
     async with schale_get_new_page() as page:  # type:Page
-        await page.goto(
-            f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000
-        )
+        await page.goto(f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000)
         await page.wait_for_selector("loading-cover", state="hidden")
 
         # 进度条拉最大
@@ -116,8 +113,8 @@ async def draw_fav_li(lvl):
 
         async with ClientSession() as s:
             async with s.get(
-                    f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
-                    proxy=config.proxy
+                f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
+                proxy=config.proxy,
             ) as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
@@ -144,7 +141,6 @@ async def draw_fav_li(lvl):
 
     ret_io = BytesIO()
     img.save(ret_io, "PNG")
-    return (
-            MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") +
-            MessageSegment.image(ret_io)
+    return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
+        ret_io
     )
