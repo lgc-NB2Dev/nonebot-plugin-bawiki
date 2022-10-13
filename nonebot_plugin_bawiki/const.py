@@ -133,6 +133,6 @@ SCHALE_URL = "http://schale.lgc2333.top/"
 SUFFIX_ALIAS = {"泳装": ["水"], "兔女郎": ["兔"], "正月": ["春"], "骑行": ["单车"], "幼女": ["幼", "铜"]}
 
 RES_PATH = Path(__file__).parent / "res"
-RES_FONT = RES_PATH / "SourceHanSansSC-Bold-2.otf"
+# RES_FONT = RES_PATH / "SourceHanSansSC-Bold-2.otf"
 RES_CALENDER_BANNER = RES_PATH / "calender_banner.png"
-# RES_SCHALE_BG = RES_PATH / "schale_bg.jpg"
+RES_SCHALE_BG = RES_PATH / "schale_bg.jpg"

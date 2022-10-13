@@ -8,9 +8,10 @@ from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
+from nonebot_plugin_imageutils import BuildImage
 from playwright.async_api import Page, ViewportSize
 
-from .const import SCHALE_DB_DIFFERENT, SCHALE_URL
+from .const import RES_SCHALE_BG, SCHALE_DB_DIFFERENT, SCHALE_URL
 
 PAGE_KWARGS = {
     "is_mobile": True,
@@ -87,7 +88,6 @@ async def draw_fav_li(lvl):
     icon_w = 182
     icon_h = pic_h + txt_h
     line_max_icon = 6
-    txt_y_offset = -4
 
     if (l := len(stu_li)) <= line_max_icon:
         line = 1
@@ -96,29 +96,26 @@ async def draw_fav_li(lvl):
         line = math.ceil(l / line_max_icon)
         length = line_max_icon
 
-    img = Image.new("RGBA", (icon_w * length, icon_h * line), (255, 255, 255))
-    font = ImageFont.truetype(
-        str((Path(__file__).parent / "res" / "SourceHanSansSC-Bold-2.otf")), 25
+    img = BuildImage.open(RES_SCHALE_BG).resize(
+        (icon_w * length, icon_h * line + 5), keep_ratio=True
     )
 
     async def draw_stu(name_, dev_name_, line_, index_):
-        img_card = Image.new("RGBA", (icon_w, icon_h), (255, 255, 255))
-
+        left = index_ * icon_w
+        top = line_ * icon_h + 5
         async with ClientSession() as s:
             async with s.get(
                 f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
             ) as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
-        img_card.paste(icon_img, (0, 0), icon_img)
-
-        font_w, font_h = font.getsize(name_)
-        draw_x = 0 if font_w >= icon_w else round((icon_w - font_w) / 2)
-        draw_y = round((txt_h - font_h) / 2) + pic_h + txt_y_offset
-        draw = ImageDraw.Draw(img_card)
-        draw.text((draw_x, draw_y), name_, (0, 0, 0), font)
-
-        img.paste(img_card, (index_ * icon_w, line_ * icon_h))
+        img.paste(icon_img, (left, top), icon_img)
+        img.draw_text(
+            (left, top + pic_h, left + icon_w, top + icon_h),
+            name_,
+            max_fontsize=25,
+            min_fontsize=1,
+        )
 
     task_li = []
     l = 0
@@ -131,8 +128,6 @@ async def draw_fav_li(lvl):
         i += 1
     await asyncio.gather(*task_li)
 
-    ret_io = BytesIO()
-    img.save(ret_io, "PNG")
     return MessageSegment.text(f"羁绊等级 {lvl} 时解锁L2D的学生有以下这些：") + MessageSegment.image(
-        ret_io
+        img.save("png")
     )
