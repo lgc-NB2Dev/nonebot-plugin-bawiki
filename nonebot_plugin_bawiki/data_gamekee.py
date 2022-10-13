@@ -1,15 +1,17 @@
+import asyncio
 import re
 import time
 from datetime import datetime
-from pathlib import Path
+from io import BytesIO
+from typing import List
 
-import jinja2
 from aiohttp import ClientSession
+from nonebot import logger
 from nonebot_plugin_htmlrender import get_new_page
+from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page
 
-from .const import EXTRA_L2D_LI
-from .util import format_timestamp
+from .const import EXTRA_L2D_LI, RES_CALENDER_BANNER
 
 
 async def game_kee_request(url, **kwargs):
@@ -31,7 +33,7 @@ async def get_calender():
             li: list = i["list"]
 
             now = time.time()
-            li = [x for x in li if (x["end_at"] >= now >= x["begin_at"])]
+            li = [x for x in li if (now < x["end_at"])]
 
             li.sort(key=lambda x: x["end_at"])
             li.sort(key=lambda x: x["importance"], reverse=True)
@@ -81,32 +83,107 @@ async def get_game_kee_page(url):
 
 
 async def get_calender_page(ret):
-    for i in ret:
-        if pic := i["picture"]:
-            if (not pic.startswith("https:")) and (not pic.startswith("http:")):
-                i["picture"] = f"https:{pic}"
+    now = datetime.now()
 
-        begin = i["begin_at"]
-        end = i["end_at"]
-        i["date"] = f"{format_timestamp(begin)} ~ {format_timestamp(end)}"
+    async def draw(it: dict):
+        _p = None
+        if _p := it.get("picture"):
+            try:
+                async with ClientSession() as _s:
+                    async with _s.get(f"https:{_p}") as _r:
+                        _p = await _r.read()
+                _p = BuildImage.open(BytesIO(_p)).resize_width(1290)
+            except:
+                logger.exception("下载日程表图片失败")
 
-        time_remain = datetime.fromtimestamp(end) - datetime.now()
+        begin = datetime.fromtimestamp(it["begin_at"])
+        end = datetime.fromtimestamp(it["end_at"])
+        started = begin <= now
+        time_remain = (end if started else begin) - now
+
         mm, ss = divmod(time_remain.seconds, 60)
         hh, mm = divmod(mm, 60)
-        i["dd"] = time_remain.days or 0
-        i["hh"] = hh
-        i["mm"] = mm
-        i["ss"] = ss
+        dd = time_remain.days or 0
 
-    html = jinja2.Template(
-        (Path(__file__).parent / "res" / "calender.html.jinja").read_text("utf-8")
-    ).render(info=ret)
+        title_p = text2image(
+            f'[b]{it["title"]}[/b]', "#ffffff00", max_width=1290, fontsize=65
+        )
+        time_p = text2image(
+            f"{begin} ~ {end}", "#ffffff00", max_width=1290, fontsize=40
+        )
+        desc_p = (
+            text2image(
+                desc.replace("<br>", ""),
+                "#ffffff00",
+                max_width=1290,
+                fontsize=40,
+            )
+            if (desc := it["description"])
+            else None
+        )
+        remain_p = text2image(
+            f"剩余 [color=#fc6475]{dd}[/color] 天 [color=#fc6475]{hh}[/color] 时 "
+            f"[color=#fc6475]{mm}[/color] 分 [color=#fc6475]{ss}[/color] 秒"
+            f'{"结束" if started else "开始"}',
+            "#ffffff00",
+            max_width=1290,
+            fontsize=50,
+        )
 
-    async with get_new_page() as page:  # type:Page
-        await page.set_content(html)
-        return await (
-            await page.query_selector('xpath=//div[@id="calendar-box"]')
-        ).screenshot()
+        h = (
+            100
+            + (title_p.height + 25)
+            + (time_p.height + 25)
+            + (_p.height + 25 if _p else 0)
+            + (desc_p.height + 25 if desc_p else 0)
+            + remain_p.height
+        )
+        img = BuildImage.new("RGBA", (1400, h), (255, 255, 255, 70)).draw_rectangle(
+            (0, 0, 10, h), "#fc6475" if it["importance"] else "#4acf75"
+        )
+
+        if not started:
+            img.draw_rectangle((1250, 0, 1400, 60), "gray")
+            img.draw_text((1250, 0, 1400, 60), "未开始", 50, fill="white")
+
+        ii = 50
+        img.paste(title_p, (60, ii), True)
+        ii += title_p.height + 25
+        img.paste(time_p, (60, ii), True)
+        ii += time_p.height + 25
+        if _p:
+            img.paste(_p, (60, ii), True)
+            ii += _p.height + 25
+        if desc_p:
+            img.paste(desc_p, (60, ii), True)
+            ii += desc_p.height + 25
+        img.paste(remain_p, (60, ii), True)
+
+        return img
+
+    pics: List[BuildImage] = await asyncio.gather(  # type: ignore
+        *[draw(x) for x in ret]
+    )
+    bg = (
+        BuildImage.new("RGBA", (1500, 200 + sum([x.height + 50 for x in pics])))
+        .gradient_color((138, 213, 244), (251, 226, 229))
+        .paste(BuildImage.open(RES_CALENDER_BANNER).resize((1500, 150)))
+        .draw_text(
+            (50, 0, 1480, 150),
+            "活动日程",
+            100,
+            weight="bold",
+            fill="#ffffff",
+            halign="left",
+        )
+    )
+
+    index = 200
+    for p in pics:
+        bg.paste(p, (50, index), True)
+        index += p.height + 50
+
+    return bg.save_jpg()
 
 
 async def grab_l2d(cid):

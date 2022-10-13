@@ -43,12 +43,12 @@ async def game_kee_calender(matcher: Matcher):
     if not ret:
         return await matcher.finish("没有获取到数据")
 
-    await matcher.send("正在渲染页面，请稍等")
+    await matcher.send("正在绘制图片，请稍等")
     try:
         pic = await get_calender_page(ret)
     except:
-        logger.exception("渲染或截取页面出错")
-        return await matcher.finish("渲染或截取页面出错，请检查后台输出")
+        logger.exception("绘制日程表图片出错")
+        return await matcher.finish("绘制日程表图片出错，请检查后台输出")
 
     await matcher.finish(MessageSegment.image(pic))
 

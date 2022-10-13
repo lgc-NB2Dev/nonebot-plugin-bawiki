@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Dict, List
+
 STU_ALIAS = {
     # 真诚感谢所有帮忙贡献学生别名的朋友！！
     "星野": ["ホシノ", "小鸟游星野", "大叔", "粉毛"],
@@ -122,9 +125,14 @@ SCHALE_DB_DIFFERENT = {
     "智惠": "巴",
 }
 
-EXTRA_L2D_LI: dict[str, list[str]] = {}
+EXTRA_L2D_LI: Dict[str, List[str]] = {}
 
 ORIGIN_SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
 SCHALE_URL = "http://schale.lgc2333.top/"
 
 SUFFIX_ALIAS = {"泳装": ["水"], "兔女郎": ["兔"], "正月": ["春"], "骑行": ["单车"], "幼女": ["幼", "铜"]}
+
+RES_PATH = Path(__file__).parent / "res"
+RES_FONT = RES_PATH / "SourceHanSansSC-Bold-2.otf"
+RES_CALENDER_BANNER = RES_PATH / "calender_banner.png"
+# RES_SCHALE_BG = RES_PATH / "schale_bg.jpg"
