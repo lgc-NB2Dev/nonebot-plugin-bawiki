@@ -112,23 +112,32 @@ async def schale_get_calender(server=1):
     if r := find_event(c_event):
         g = r[0]
         t = format_time(*(r[1:]))
-        im.append(f"当前活动\n{t}\n{localization['EventName'][str(g['event'])]}")
+        ev = g["event"]
+        ev_name = ""
+        if ev >= 10000:
+            ev_name = " 复刻"
+            ev -= 10000
+        ev_name = localization["EventName"][str(ev)] + ev_name
+        im.append(f"当前活动\n{t}\n{ev_name}")
 
     if r := find_event(c_raid):
         ri = r[0]
         t = format_time(*(r[1:]))
 
-        tp = "TimeAttack" if ri["raid"] >= 1000 else "Raid"
+        tp = "TimeAttack" if (time_atk := (ri["raid"] >= 1000)) else "Raid"
         raids = {x["Id"]: x for x in raids[tp]}
         c_ri = raids[ri["raid"]]
 
-        detail = c_ri["NameCn"]
-        if at := ri["terrain"]:
-            detail += f' | {localization["AdaptationType"][at]}战'
-        detail += (
-            f' | {localization["ArmorType"][c_ri["ArmorType"]]} | '
-            f'Insane难度攻击类型：{localization["BulletType"][c_ri["BulletTypeInsane"]]}'
+        detail = (
+            localization["TimeAttackStage"][c_ri["DungeonType"]]
+            if time_atk
+            else (c_ri["NameCn"] or c_ri["NameJp"])
         )
+        atk_t = c_ri["Terrain"] if time_atk else ri.get("terrain")
+        detail += f' | {localization["AdaptationType"][atk_t]}战'
+        detail += f' | {localization["ArmorType"][c_ri["ArmorType"]]}'
+        if not time_atk:
+            detail += f' | Insane难度攻击类型：{localization["BulletType"][c_ri["BulletTypeInsane"]]}'
         im.append(f"{localization['StageType'][tp]}\n{t}\n{detail}")
 
     now_t = time.mktime(now.date().timetuple())
