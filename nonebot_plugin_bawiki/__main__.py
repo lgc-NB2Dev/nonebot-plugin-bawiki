@@ -25,8 +25,7 @@ async def schale_calender(matcher: Matcher, server=1):
     await matcher.send(f"请稍等，正在截取SchaleDB首页日程表～\n" f"{SCHALE_URL}")
 
     try:
-        # img = MessageSegment.image(await schale_get_calender(server))
-        img = await schale_get_calender(server)
+        img = MessageSegment.image(await schale_get_calender(server))
     except:
         logger.exception("截取schale db页面出错 home")
         return await matcher.finish("截取页面出错，请检查后台输出")

@@ -1,15 +1,15 @@
 import asyncio
 import math
 import time
-from datetime import date, datetime
+from datetime import datetime
 from io import BytesIO
 
-from PIL import Image
+from PIL import Image, ImageFilter
 from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
-from nonebot_plugin_imageutils import BuildImage
+from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page, ViewportSize
 
 from .config import config
@@ -22,10 +22,10 @@ PAGE_KWARGS = {
 }
 
 
-async def schale_get(suffix):
+async def schale_get(suffix, raw=False):
     async with ClientSession() as c:
         async with c.get(f"{SCHALE_URL}{suffix}", proxy=config.proxy) as r:
-            return await r.json()
+            return (await r.read()) if raw else (await r.json())
 
 
 async def schale_get_stu_data():
@@ -80,10 +80,9 @@ async def schale_get_calender(server=1):
     students = {x["Id"]: x for x in students}
 
     region = common["regions"][server]
-    c_gacha = region["current_gacha"]
-    c_event = region["current_events"]
-    c_raid = region["current_raid"]
     now = datetime.now()
+
+    pic_bg = BuildImage.new("RGBA", (1400, 640), (255, 255, 255, 70))
 
     def find_event(ev):
         for _e in ev:
@@ -95,79 +94,205 @@ async def schale_get_calender(server=1):
 
     def format_time(_start, _end, _remain):
         dd, hh, mm, ss = parse_time_delta(_remain)
-        return f"{_start} ~ {_end} | 剩余 {dd}天 {hh:0>2d}:{mm:0>2d}:{ss:0>2d}"
-
-    im = []
-    if r := find_event(c_gacha):
-        g = r[0]
-        t = format_time(*(r[1:]))
-        gacha_stu = "\n".join(
-            [
-                f'{x["Name"]}({"★" * x["StarGrade"]})'
-                for x in [students[x] for x in g["characters"]]
-            ]
+        return (
+            f"{_start} ~ {_end} | "
+            f"剩余 [b][color=#fc6475]{dd}天 {hh:0>2d}:{mm:0>2d}:{ss:0>2d}[color=#fc6475][/b]"
         )
-        im.append(f"当前卡池\n{t}\n{gacha_stu}")
 
-    if r := find_event(c_event):
-        g = r[0]
-        t = format_time(*(r[1:]))
-        ev = g["event"]
-        ev_name = ""
-        if ev >= 10000:
-            ev_name = " 复刻"
-            ev -= 10000
-        ev_name = localization["EventName"][str(ev)] + ev_name
-        im.append(f"当前活动\n{t}\n{ev_name}")
-
-    if r := find_event(c_raid):
-        ri = r[0]
-        t = format_time(*(r[1:]))
-
-        tp = "TimeAttack" if (time_atk := (ri["raid"] >= 1000)) else "Raid"
-        raids = {x["Id"]: x for x in raids[tp]}
-        c_ri = raids[ri["raid"]]
-
-        detail = (
-            localization["TimeAttackStage"][c_ri["DungeonType"]]
-            if time_atk
-            else (c_ri["NameCn"] or c_ri["NameJp"])
+    async def draw_gacha():
+        pic = pic_bg.copy().draw_text(
+            (25, 25, 1375, 150), "特选招募", weight="bold", max_fontsize=80
         )
-        atk_t = c_ri["Terrain"] if time_atk else ri.get("terrain")
-        detail += f' | {localization["AdaptationType"][atk_t]}战'
-        detail += f' | {localization["ArmorType"][c_ri["ArmorType"]]}'
-        if not time_atk:
-            detail += f' | Insane难度攻击类型：{localization["BulletType"][c_ri["BulletTypeInsane"]]}'
-        im.append(f"{localization['StageType'][tp]}\n{t}\n{detail}")
+        c_gacha = region["current_gacha"]
+        if r := find_event(c_gacha):
+            g = r[0]
+            t = format_time(*(r[1:]))
+            pic = pic.paste(
+                ti := text2image(
+                    t, (255, 255, 255, 0), fontsize=45, max_width=1350, align="center"
+                ),
+                (int((1400 - ti.width) / 2), 150),
+                True,
+            )
+            stu = [students[x] for x in g["characters"]]
 
-    now_t = time.mktime(now.date().timetuple())
-    now_w = now.weekday()
-    this_week_t = now_t - now_w * 86400
-    next_week_t = now_t + (7 - now_w) * 86400
-    next_next_week_t = next_week_t + 7 * 86400
+            async def process_avatar(s):
+                return (
+                    BuildImage.open(
+                        BytesIO(
+                            await schale_get(
+                                f'images/student/collection/{s["CollectionTexture"]}.webp',
+                                raw=True,
+                            )
+                        )
+                    )
+                    .resize((300, 340))
+                    .paste(
+                        BuildImage.new("RGBA", (300, 65), (255, 255, 255, 120)),
+                        (0, 275),
+                        True,
+                    )
+                    .convert("RGB")
+                    .circle_corner(25)
+                    .draw_text((0, 275, 300, 340), s["PersonalName"], max_fontsize=50)
+                )
 
-    birth_this_week = []
-    birth_next_week = []
-    for s in [x for x in students.values() if x["IsReleased"][server]]:
-        birth = time.mktime(time.strptime(f'{now.year}/{s["BirthDay"]}', "%Y/%m/%d"))
-        if this_week_t <= birth < next_week_t:
-            birth_this_week.append(s)
-        elif next_week_t <= birth <= next_next_week_t:
-            birth_next_week.append(s)
+            avatars = await asyncio.gather(*[process_avatar(x) for x in stu])
+            ava_len = len(avatars)
+            x_index = int((1400 - (300 + 25) * ava_len + 25) / 2)
 
-    sort_key = lambda x: x["BirthDay"].split("/")
-    pattern = "- {PersonalName} {Birthday}"
-    if birth_this_week:
-        birth_this_week.sort(key=sort_key)
-        s = "\n".join([pattern.format(**x) for x in birth_this_week])
-        im.append(f"以下学生将在本周迎来生日：\n{s}")
+            for p in avatars:
+                pic = pic.paste(p, (x_index, 250), True)
+                x_index += p.width + 25
 
-    if birth_next_week:
-        birth_next_week.sort(key=sort_key)
-        s = "\n".join([pattern.format(**x) for x in birth_next_week])
-        im.append(f"以下学生将在下周迎来生日：\n{s}")
+            return pic
 
-    return "\n============\n".join(im)
+        return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
+
+    async def draw_event():
+        pic = pic_bg.copy().draw_text(
+            (25, 25, 1375, 150), "当前活动", weight="bold", max_fontsize=80
+        )
+        c_event = region["current_events"]
+        if r := find_event(c_event):
+            g = r[0]
+            t = format_time(*(r[1:]))
+            pic = pic.paste(
+                ti := text2image(
+                    t, (255, 255, 255, 0), fontsize=45, max_width=1350, align="center"
+                ),
+                (int((1400 - ti.width) / 2), 150),
+                True,
+            )
+            ev = g["event"]
+            ev_name = ""
+            if ev >= 10000:
+                ev_name = " (复刻)"
+                ev %= 10000
+            ev_name = localization["EventName"][str(ev)] + ev_name
+
+            ev_bg, ev_img = await asyncio.gather(
+                schale_get(f"images/campaign/Campaign_Event_{ev}_Normal.png", True),
+                schale_get(
+                    f"images/eventlogo/Event_{ev}_{'Tw' if server else 'Jp'}.png", True
+                ),
+            )
+
+            ev_bg = (
+                BuildImage.open(BytesIO(ev_bg))
+                .convert("RGBA")
+                .resize_height(340)
+                .filter(ImageFilter.GaussianBlur(3))
+            )
+            ev_bg = (
+                ev_bg.paste(
+                    BuildImage.open(BytesIO(ev_img))
+                    .convert("RGBA")
+                    .resize(
+                        (ev_bg.width, ev_bg.height - 65),
+                        keep_ratio=True,
+                        inside=True,
+                        bg_color=(255, 255, 255, 0),
+                    ),
+                    alpha=True,
+                )
+                .paste(
+                    BuildImage.new("RGBA", (ev_bg.width, 65), (255, 255, 255, 120)),
+                    (0, ev_bg.height - 65),
+                    True,
+                )
+                .convert("RGB")
+                .circle_corner(25)
+                .draw_text(
+                    (0, ev_bg.height - 65, ev_bg.width, ev_bg.height), ev_name, 50
+                )
+            )
+            return pic.paste(ev_bg, (int((pic.width - ev_bg.width) / 2), 250), True)
+
+        return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
+
+    async def draw_raid():
+        pic = pic_bg.copy()
+        c_raid = region["current_raid"]
+        if r := find_event(c_raid):
+            ri = r[0]
+            t = format_time(*(r[1:]))
+            pic = pic.paste(
+                ti := text2image(
+                    t, (255, 255, 255, 0), fontsize=45, max_width=1350, align="center"
+                ),
+                (int((1400 - ti.width) / 2), 150),
+                True,
+            )
+
+            tp = "TimeAttack" if (time_atk := (ri["raid"] >= 1000)) else "Raid"
+            raid = {x["Id"]: x for x in raids[tp]}
+            c_ri = raid[ri["raid"]]
+            pic = pic.draw_text(
+                (25, 25, 1375, 150),
+                localization["StageType"][tp],
+                weight="bold",
+                max_fontsize=80,
+            )
+
+            detail = (
+                localization["TimeAttackStage"][c_ri["DungeonType"]]
+                if time_atk
+                else (c_ri["NameCn"] or c_ri["NameJp"])
+            )
+            atk_t = c_ri["Terrain"] if time_atk else ri.get("terrain")
+            detail += f' | {localization["AdaptationType"][atk_t]}战'
+            detail += f' | {localization["ArmorType"][c_ri["ArmorType"]]}'
+            if not time_atk:
+                detail += f' | Insane难度攻击类型：{localization["BulletType"][c_ri["BulletTypeInsane"]]}'
+
+        return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
+
+    async def draw_birth():
+        pic = pic_bg.copy().draw_text(
+            (25, 25, 1375, 150), "学生生日", weight="bold", max_fontsize=80
+        )
+        now_t = time.mktime(now.date().timetuple())
+        now_w = now.weekday()
+        this_week_t = now_t - now_w * 86400
+        next_week_t = now_t + (7 - now_w) * 86400
+        next_next_week_t = next_week_t + 7 * 86400
+
+        birth_this_week = []
+        birth_next_week = []
+        for s in [x for x in students.values() if x["IsReleased"][server]]:
+            birth = time.mktime(
+                time.strptime(f'{now.year}/{s["BirthDay"]}', "%Y/%m/%d")
+            )
+            if this_week_t <= birth < next_week_t:
+                birth_this_week.append(s)
+            elif next_week_t <= birth <= next_next_week_t:
+                birth_next_week.append(s)
+
+        sort_key = lambda x: x["BirthDay"].split("/")
+        pattern = "- {PersonalName} {Birthday}"
+        if birth_this_week:
+            birth_this_week.sort(key=sort_key)
+            s = "\n".join([pattern.format(**x) for x in birth_this_week])
+
+        if birth_next_week:
+            birth_next_week.sort(key=sort_key)
+            s = "\n".join([pattern.format(**x) for x in birth_next_week])
+
+        return pic.draw_text((25, 200, 1375, 615), "没有学生近期生日", max_fontsize=60)
+
+    img = await asyncio.gather(draw_gacha(), draw_event(), draw_raid(), draw_birth())
+    bg = (
+        BuildImage.open(RES_SCHALE_BG)
+        .convert("RGBA")
+        .resize((1500, sum([x.height + 25 for x in img]) + 75), keep_ratio=True)
+    )
+
+    h_index = 50
+    for im in img:
+        bg.paste(im, (50, h_index), True)
+        h_index += im.height + 25
+    return bg.convert("RGB").save("png")
 
 
 async def draw_fav_li(lvl):
