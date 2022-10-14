@@ -127,8 +127,8 @@ SCHALE_DB_DIFFERENT = {
 
 EXTRA_L2D_LI: Dict[str, List[str]] = {}
 
-ORIGIN_SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
-SCHALE_URL = "http://schale.lgc2333.top/"
+SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
+MIRROR_SCHALE_URL = "http://schale.lgc2333.top/"
 
 SUFFIX_ALIAS = {"泳装": ["水"], "兔女郎": ["兔"], "正月": ["春"], "骑行": ["单车"], "幼女": ["幼", "铜"]}
 

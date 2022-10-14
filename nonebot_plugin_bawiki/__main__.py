@@ -3,7 +3,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
-from .const import ORIGIN_SCHALE_URL
+from .const import SCHALE_URL
 from .data_gamekee import (
     game_kee_page_url,
     get_calender,
@@ -22,10 +22,11 @@ from .util import recover_stu_alia
 
 
 async def schale_calender(matcher: Matcher, server=1):
-    await matcher.send(f"请稍等，正在截取SchaleDB首页日程表～\n" f"{ORIGIN_SCHALE_URL}")
+    await matcher.send(f"请稍等，正在截取SchaleDB首页日程表～\n" f"{SCHALE_URL}")
 
     try:
-        img = MessageSegment.image(await schale_get_calender(server))
+        # img = MessageSegment.image(await schale_get_calender(server))
+        img = await schale_get_calender(server)
     except:
         logger.exception("截取schale db页面出错 home")
         return await matcher.finish("截取页面出错，请检查后台输出")
@@ -102,7 +103,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{ORIGIN_SCHALE_URL}?chara={stu_name}")
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))

@@ -1,9 +1,10 @@
 import asyncio
 import math
+import time
+from datetime import date, datetime
 from io import BytesIO
-from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
@@ -11,7 +12,9 @@ from nonebot_plugin_htmlrender import get_new_page
 from nonebot_plugin_imageutils import BuildImage
 from playwright.async_api import Page, ViewportSize
 
-from .const import RES_SCHALE_BG, SCHALE_DB_DIFFERENT, SCHALE_URL
+from .config import config
+from .const import MIRROR_SCHALE_URL, RES_SCHALE_BG, SCHALE_DB_DIFFERENT, SCHALE_URL
+from .util import parse_time_delta
 
 PAGE_KWARGS = {
     "is_mobile": True,
@@ -19,10 +22,26 @@ PAGE_KWARGS = {
 }
 
 
-async def schale_get_stu_data():
+async def schale_get(suffix):
     async with ClientSession() as c:
-        async with c.get(f"{SCHALE_URL}data/cn/students.min.json") as r:
+        async with c.get(f"{SCHALE_URL}{suffix}", proxy=config.proxy) as r:
             return await r.json()
+
+
+async def schale_get_stu_data():
+    return await schale_get("data/cn/students.min.json")
+
+
+async def schale_get_common():
+    return await schale_get("data/common.min.json")
+
+
+async def schale_get_localization():
+    return await schale_get("data/cn/localization.min.json")
+
+
+async def schale_get_raids():
+    return await schale_get("data/raids.min.json")
 
 
 async def schale_get_stu_dict():
@@ -40,7 +59,9 @@ async def schale_get_stu_dict():
 async def schale_get_stu_info(stu):
     async with get_new_page(**PAGE_KWARGS) as page:  # type:Page
         await page.goto(
-            f"{SCHALE_URL}?chara={stu}", timeout=60 * 1000, wait_until="networkidle"
+            f"{MIRROR_SCHALE_URL}?chara={stu}",
+            timeout=60 * 1000,
+            wait_until="networkidle",
         )
 
         # 进度条拉最大
@@ -50,23 +71,94 @@ async def schale_get_stu_info(stu):
 
 
 async def schale_get_calender(server=1):
-    async with get_new_page(**PAGE_KWARGS) as page:  # type:Page
-        await page.goto(
-            SCHALE_URL,
-            timeout=60 * 1000,
-            wait_until="domcontentloaded"
-            # html加载完成需要立马改服 commit事件太早
-        )
+    students, common, localization, raids = await asyncio.gather(
+        schale_get_stu_data(),
+        schale_get_common(),
+        schale_get_localization(),
+        schale_get_raids(),
+    )
+    students = {x["Id"]: x for x in students}
 
-        await page.add_script_tag(
-            content=f"regionID={server};" "loadModule('home');"  # 改服  # 防止进入之前的模块
-        )
-        await page.wait_for_load_state("networkidle")
+    region = common["regions"][server]
+    c_gacha = region["current_gacha"]
+    c_event = region["current_events"]
+    c_raid = region["current_raid"]
+    now = datetime.now()
 
-        return await (
-            # 当时活动标题的上级节点
-            await page.query_selector('xpath=//*[@id="ba-home-server-info"]/..')
-        ).screenshot()
+    def find_event(ev):
+        for _e in ev:
+            _start = datetime.fromtimestamp(_e["start"])
+            _end = datetime.fromtimestamp(_e["end"])
+            if _start <= now < _end:
+                _remain = _end - now
+                return _e, _start, _end, _remain
+
+    def format_time(_start, _end, _remain):
+        dd, hh, mm, ss = parse_time_delta(_remain)
+        return f"{_start} ~ {_end} | 剩余 {dd}天 {hh:0>2d}:{mm:0>2d}:{ss:0>2d}"
+
+    im = []
+    if r := find_event(c_gacha):
+        g = r[0]
+        t = format_time(*(r[1:]))
+        gacha_stu = "\n".join(
+            [
+                f'{x["Name"]}({"★" * x["StarGrade"]})'
+                for x in [students[x] for x in g["characters"]]
+            ]
+        )
+        im.append(f"当前卡池\n{t}\n{gacha_stu}")
+
+    if r := find_event(c_event):
+        g = r[0]
+        t = format_time(*(r[1:]))
+        im.append(f"当前活动\n{t}\n{localization['EventName'][str(g['event'])]}")
+
+    if r := find_event(c_raid):
+        ri = r[0]
+        t = format_time(*(r[1:]))
+
+        tp = "TimeAttack" if ri["raid"] >= 1000 else "Raid"
+        raids = {x["Id"]: x for x in raids[tp]}
+        c_ri = raids[ri["raid"]]
+
+        detail = c_ri["NameCn"]
+        if at := ri["terrain"]:
+            detail += f' | {localization["AdaptationType"][at]}战'
+        detail += (
+            f' | {localization["ArmorType"][c_ri["ArmorType"]]} | '
+            f'Insane难度攻击类型：{localization["BulletType"][c_ri["BulletTypeInsane"]]}'
+        )
+        im.append(f"{localization['StageType'][tp]}\n{t}\n{detail}")
+
+    now_t = time.mktime(now.date().timetuple())
+    now_w = now.weekday()
+    this_week_t = now_t - now_w * 86400
+    next_week_t = now_t + (7 - now_w) * 86400
+    next_next_week_t = next_week_t + 7 * 86400
+
+    birth_this_week = []
+    birth_next_week = []
+    for s in [x for x in students.values() if x["IsReleased"][server]]:
+        birth = time.mktime(time.strptime(f'{now.year}/{s["BirthDay"]}', "%Y/%m/%d"))
+        if this_week_t <= birth < next_week_t:
+            birth_this_week.append(s)
+        elif next_week_t <= birth <= next_next_week_t:
+            birth_next_week.append(s)
+
+    sort_key = lambda x: x["BirthDay"].split("/")
+    pattern = "- {PersonalName} {Birthday}"
+    if birth_this_week:
+        birth_this_week.sort(key=sort_key)
+        s = "\n".join([pattern.format(**x) for x in birth_this_week])
+        im.append(f"以下学生将在本周迎来生日：\n{s}")
+
+    if birth_next_week:
+        birth_next_week.sort(key=sort_key)
+        s = "\n".join([pattern.format(**x) for x in birth_next_week])
+        im.append(f"以下学生将在下周迎来生日：\n{s}")
+
+    return "\n============\n".join(im)
 
 
 async def draw_fav_li(lvl):
@@ -106,6 +198,7 @@ async def draw_fav_li(lvl):
         async with ClientSession() as s:
             async with s.get(
                 f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
+                proxy=config.proxy,
             ) as r:
                 ret = await r.read()
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")

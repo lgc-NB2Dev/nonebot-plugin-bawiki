@@ -41,3 +41,10 @@ def recover_alia(origin: str, alia_dict: dict[str, list[str]]):
 
 def recover_stu_alia(a):
     return recover_alia(a, STU_ALIAS)
+
+
+def parse_time_delta(t: datetime.timedelta):
+    mm, ss = divmod(t.seconds, 60)
+    hh, mm = divmod(mm, 60)
+    dd = t.days or 0
+    return dd, hh, mm, ss

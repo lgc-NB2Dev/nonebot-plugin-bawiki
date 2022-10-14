@@ -12,6 +12,7 @@ from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page
 
 from .const import EXTRA_L2D_LI, RES_CALENDER_BANNER
+from .util import parse_time_delta
 
 
 async def game_kee_request(url, **kwargs):
@@ -92,7 +93,7 @@ async def get_calender_page(ret):
                 async with ClientSession() as _s:
                     async with _s.get(f"https:{_p}") as _r:
                         _p = await _r.read()
-                _p = BuildImage.open(BytesIO(_p)).resize_width(1290)
+                _p = BuildImage.open(BytesIO(_p)).resize_width(1290).circle_corner(15)
             except:
                 logger.exception("下载日程表图片失败")
 
@@ -100,10 +101,7 @@ async def get_calender_page(ret):
         end = datetime.fromtimestamp(it["end_at"])
         started = begin <= now
         time_remain = (end if started else begin) - now
-
-        mm, ss = divmod(time_remain.seconds, 60)
-        hh, mm = divmod(mm, 60)
-        dd = time_remain.days or 0
+        dd, hh, mm, ss = parse_time_delta(time_remain)
 
         title_p = text2image(
             f'[b]{it["title"]}[/b]', "#ffffff00", max_width=1290, fontsize=65
@@ -158,6 +156,7 @@ async def get_calender_page(ret):
             img.paste(desc_p, (60, ii), True)
             ii += desc_p.height + 25
         img.paste(remain_p, (60, ii), True)
+        # img = img.circle_corner(15)
 
         return img
 
