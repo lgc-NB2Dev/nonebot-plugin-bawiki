@@ -21,7 +21,7 @@ def recover_alia(origin: str, alia_dict: dict[str, list[str]]):
     for k, li in alia_dict.items():
         if (p := k.find("（")) != -1:
             prefixes = [k[:p]] + li
-            suffixes = [k[p + 1: -1]]
+            suffixes = [k[p + 1 : -1]]
 
             if a := SUFFIX_ALIAS.get(suffixes[0]):
                 suffixes.extend(a)
