@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 from io import BytesIO
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
@@ -14,7 +14,7 @@ from playwright.async_api import Page, ViewportSize
 
 from .config import config
 from .const import MIRROR_SCHALE_URL, RES_SCHALE_BG, SCHALE_DB_DIFFERENT, SCHALE_URL
-from .util import parse_time_delta
+from .util import img_invert_rgba, parse_time_delta
 
 PAGE_KWARGS = {
     "is_mobile": True,
@@ -213,8 +213,7 @@ async def schale_get_calender(server=1):
 
     async def draw_raid():
         pic = pic_bg.copy()
-        c_raid = region["current_raid"]
-        if r := find_event(c_raid):
+        if r := find_event(region["current_raid"]):
             ri = r[0]
             t = format_time(*(r[1:]))
             pic = pic.paste(
@@ -235,12 +234,117 @@ async def schale_get_calender(server=1):
                 max_fontsize=80,
             )
 
-            detail = (
-                localization["TimeAttackStage"][c_ri["DungeonType"]]
-                if time_atk
-                else (c_ri["NameCn"] or c_ri["NameJp"])
+            if time_atk:
+                tk_bg = {
+                    "Shooting": "TimeAttack_SlotBG_02",
+                    "Defense": "TimeAttack_SlotBG_01",
+                    "Destruction": "TimeAttack_SlotBG_03",
+                }
+                bg_url = f'images/timeattack/{tk_bg[c_ri["DungeonType"]]}'
+                fg_url = f'images/enemy/{c_ri["Icon"]}.png'
+            else:
+                bg_url = f'images/raid/Boss_Portrait_{c_ri["PathName"]}_LobbyBG'
+                if len(c_ri["Terrain"]) > 1 and ri["terrain"] == c_ri["Terrain"][1]:
+                    bg_url += ri["terrain"]
+                fg_url = f'images/raid/Boss_Portrait_{c_ri["PathName"]}_Lobby.png'
+            bg_url += ".png"
+            terrain = c_ri["Terrain"] if time_atk else ri["terrain"]
+
+            color_map = {
+                "LightArmor": (167, 12, 25),
+                "Explosion": (167, 12, 25),
+                "HeavyArmor": (178, 109, 31),
+                "Pierce": (178, 109, 31),
+                "Unarmed": (33, 111, 156),
+                "Mystic": (33, 111, 156),
+                "Normal": (115, 115, 115),
+            }
+            atk_color = color_map[
+                c_ri["BulletType" if time_atk else "BulletTypeInsane"]
+            ]
+            def_color = color_map[c_ri["ArmorType"]]
+
+            c_bg, c_fg, icon_def, icon_atk, icon_tr = await asyncio.gather(
+                *[
+                    schale_get(bg_url, True),
+                    schale_get(fg_url, True),
+                    schale_get("images/ui/Type_Defense_s.png", True),
+                    schale_get("images/ui/Type_Attack_s.png", True),
+                    schale_get(f"images/ui/Terrain_{terrain}.png", True),
+                ]
             )
-            atk_t = c_ri["Terrain"] if time_atk else ri.get("terrain")
+
+            icon_def = (
+                BuildImage.new("RGBA", (64, 64), def_color)
+                .paste(
+                    BuildImage.open(BytesIO(icon_def))
+                    .convert("RGBA")
+                    .resize_height(48),
+                    (8, 8),
+                    True,
+                )
+                .circle()
+            )
+            icon_atk = (
+                BuildImage.new("RGBA", (64, 64), atk_color)
+                .paste(
+                    BuildImage.open(BytesIO(icon_atk))
+                    .convert("RGBA")
+                    .resize_height(48),
+                    (8, 8),
+                    True,
+                )
+                .circle()
+            )
+            icon_tr = (
+                BuildImage.new("RGBA", (64, 64), "#ffffff")
+                .paste(
+                    img_invert_rgba(Image.open(BytesIO(icon_tr)).convert("RGBA")),
+                    (-2, -2),
+                    True,
+                )
+                .circle()
+            )
+
+            c_bg = (
+                BuildImage.open(BytesIO(c_bg))
+                .convert("RGBA")
+                .resize_height(340)
+                .filter(ImageFilter.GaussianBlur(3))
+            )
+            c_fg = (
+                BuildImage.open(BytesIO(c_fg))
+                .convert("RGBA")
+                .resize_height(c_bg.height)
+            )
+            c_bg = (
+                c_bg.paste(
+                    c_fg,
+                    (int((c_bg.width - c_fg.width) / 2), 0),
+                    True,
+                )
+                .paste(
+                    BuildImage.new("RGBA", (c_bg.width, 65), (255, 255, 255, 120)),
+                    (0, c_bg.height - 65),
+                    True,
+                )
+                .paste(icon_atk, (10, 10), True)
+                .paste(icon_def, (10, 79), True)
+                .paste(icon_tr, (10, 147), True)
+                .convert("RGB")
+                .circle_corner(25)
+                .draw_text(
+                    (0, c_bg.height - 65, c_bg.width, c_bg.height),
+                    (
+                        localization["TimeAttackStage"][c_ri["DungeonType"]]
+                        if time_atk
+                        else (c_ri["NameCn"] or c_ri["NameJp"])
+                    ),
+                    50,
+                )
+            )
+            return pic.paste(c_bg, (int((pic.width - c_bg.width) / 2), 250), True)
+
             detail += f' | {localization["AdaptationType"][atk_t]}战'
             detail += f' | {localization["ArmorType"][c_ri["ArmorType"]]}'
             if not time_atk:
