@@ -169,7 +169,7 @@ async def get_calender_page(ret):
         .paste(BuildImage.open(RES_CALENDER_BANNER).resize((1500, 150)))
         .draw_text(
             (50, 0, 1480, 150),
-            "活动日程",
+            "GameKee丨活动日程",
             100,
             weight="bold",
             fill="#ffffff",

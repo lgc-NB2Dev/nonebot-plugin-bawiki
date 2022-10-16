@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 from io import BytesIO
 
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image, ImageFilter
 from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
@@ -13,7 +13,13 @@ from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page, ViewportSize
 
 from .config import config
-from .const import MIRROR_SCHALE_URL, RES_SCHALE_BG, SCHALE_DB_DIFFERENT, SCHALE_URL
+from .const import (
+    MIRROR_SCHALE_URL,
+    RES_CALENDER_BANNER,
+    RES_SCHALE_BG,
+    SCHALE_DB_DIFFERENT,
+    SCHALE_URL,
+)
 from .util import img_invert_rgba, parse_time_delta
 
 PAGE_KWARGS = {
@@ -134,7 +140,7 @@ async def schale_get_calender(server=1):
                     )
                     .convert("RGB")
                     .circle_corner(25)
-                    .draw_text((0, 275, 300, 340), s["PersonalName"], max_fontsize=50)
+                    .draw_text((0, 275, 300, 340), s["Name"], max_fontsize=50)
                 )
 
             avatars = await asyncio.gather(*[process_avatar(x) for x in stu])
@@ -345,11 +351,6 @@ async def schale_get_calender(server=1):
             )
             return pic.paste(c_bg, (int((pic.width - c_bg.width) / 2), 250), True)
 
-            detail += f' | {localization["AdaptationType"][atk_t]}战'
-            detail += f' | {localization["ArmorType"][c_ri["ArmorType"]]}'
-            if not time_atk:
-                detail += f' | Insane难度攻击类型：{localization["BulletType"][c_ri["BulletTypeInsane"]]}'
-
         return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
 
     async def draw_birth():
@@ -374,28 +375,83 @@ async def schale_get_calender(server=1):
                 birth_next_week.append(s)
 
         sort_key = lambda x: x["BirthDay"].split("/")
-        pattern = "- {PersonalName} {Birthday}"
+        p_h = 0
         if birth_this_week:
             birth_this_week.sort(key=sort_key)
-            s = "\n".join([pattern.format(**x) for x in birth_this_week])
+            p_h += 180
 
         if birth_next_week:
             birth_next_week.sort(key=sort_key)
-            s = "\n".join([pattern.format(**x) for x in birth_next_week])
+            p_h += 180
+            if birth_this_week:
+                p_h += 10
+
+        if p_h:
+            stu_pics = [
+                BuildImage.open(BytesIO(x)).convert("RGBA").resize_height(180).circle()
+                for x in await asyncio.gather(
+                    *[
+                        schale_get(
+                            f'images/student/icon/{x["CollectionTexture"]}.png', True
+                        )
+                        for x in birth_this_week + birth_next_week
+                    ]
+                )
+            ]
+            y_index = int((415 - p_h) / 2) + 125
+            if birth_this_week:
+                x_index = (
+                    int((1400 - (len(birth_this_week) * (180 + 10) - 10)) / 2) + 75
+                )
+                pic = pic.draw_text(
+                    (x_index - 165, y_index, x_index, y_index + 180), "本周", 50
+                )
+                for s in birth_this_week:
+                    pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
+                        (x_index, y_index + 180, x_index + 180, y_index + 220),
+                        s["BirthDay"],
+                    )
+                    x_index += 180 + 10
+
+            if birth_next_week:
+                if birth_this_week:
+                    y_index += 220 + 10
+                x_index = (
+                    int((1400 - (len(birth_next_week) * (180 + 10) - 10)) / 2) + 75
+                )
+                pic = pic.draw_text(
+                    (x_index - 165, y_index, x_index, y_index + 180), "下周", 50
+                )
+                for s in birth_next_week:
+                    pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
+                        (x_index, y_index + 180, x_index + 180, y_index + 220),
+                        s["BirthDay"],
+                    )
+                    x_index += 180 + 10
+
+            return pic
 
         return pic.draw_text((25, 200, 1375, 615), "没有学生近期生日", max_fontsize=60)
 
     img = await asyncio.gather(draw_gacha(), draw_event(), draw_raid(), draw_birth())
     bg = (
-        BuildImage.open(RES_SCHALE_BG)
-        .convert("RGBA")
-        .resize((1500, sum([x.height + 25 for x in img]) + 75), keep_ratio=True)
+        BuildImage.new("RGBA", (1500, 200 + sum([x.height + 50 for x in img])))
+        .gradient_color((138, 213, 244), (251, 226, 229))
+        .paste(BuildImage.open(RES_CALENDER_BANNER).resize((1500, 150)))
+        .draw_text(
+            (50, 0, 1480, 150),
+            f"SchaleDB丨活动日程丨{localization['ServerName'][str(server)]}",
+            100,
+            weight="bold",
+            fill="#ffffff",
+            halign="left",
+        )
     )
 
-    h_index = 50
+    h_index = 200
     for im in img:
         bg.paste(im, (50, h_index), True)
-        h_index += im.height + 25
+        h_index += im.height + 50
     return bg.convert("RGB").save("png")
 
 
