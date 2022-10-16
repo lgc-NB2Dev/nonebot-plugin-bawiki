@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-bawiki"
-version = "0.5.0b2"
+version = "0.5.0b3"
 description = "A nonebot2 plugin for Blue Archive."
 authors = ["student_2333 <lgc2333@126.com>"]
 license = "MIT"
