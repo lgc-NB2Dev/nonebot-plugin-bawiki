@@ -1,5 +1,7 @@
+import asyncio
+
 from nonebot import logger, on_command
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
@@ -21,36 +23,17 @@ from .data_schaledb import (
 from .util import recover_stu_alia
 
 
-async def schale_calender(matcher: Matcher, server=1):
-    await matcher.send(f"请稍等，正在截取SchaleDB首页日程表～\n" f"{SCHALE_URL}")
-
-    try:
-        img = MessageSegment.image(await schale_get_calender(server))
-    except:
-        logger.exception("截取schale db页面出错 home")
-        return await matcher.finish("截取页面出错，请检查后台输出")
-
-    await matcher.finish(img)
+async def schale_calender(server):
+    return MessageSegment.image(await schale_get_calender(server))
 
 
-async def game_kee_calender(matcher: Matcher):
-    try:
-        ret = await get_calender()
-    except:
-        logger.exception("获取日程表出错")
-        return await matcher.finish("获取日程表出错，请检查后台输出")
-
+async def game_kee_calender():
+    ret = await get_calender()
     if not ret:
-        return await matcher.finish("没有获取到数据")
+        return "没有获取到GameKee日程表数据"
 
-    await matcher.send("正在绘制图片，请稍等")
-    try:
-        pic = await get_calender_page(ret)
-    except:
-        logger.exception("绘制日程表图片出错")
-        return await matcher.finish("绘制日程表图片出错，请检查后台输出")
-
-    await matcher.finish(MessageSegment.image(pic))
+    pic = await get_calender_page(ret)
+    return MessageSegment.image(pic)
 
 
 handler_calender = on_command("ba日程表")
@@ -59,12 +42,26 @@ handler_calender = on_command("ba日程表")
 @handler_calender.handle()
 async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg: str = arg.extract_plain_text()
-    if "国际服" in arg:
-        await schale_calender(matcher)
-    elif "schaledb" in arg.lower():
-        await schale_calender(matcher, 0)
-    else:
-        await game_kee_calender(matcher)
+
+    await matcher.send("正在绘制图片，请稍等")
+    try:
+        if "schale" in arg.lower():
+            await asyncio.gather(
+                *[
+                    matcher.send(x)
+                    for x in (
+                        await asyncio.gather(*[schale_calender(x) for x in [0, 1]])
+                    )
+                ]
+            )
+            await matcher.finish()
+        else:
+            await matcher.finish(await game_kee_calender())
+    except ActionFailed:
+        raise
+    except:
+        logger.exception("绘制日程表图片出错")
+        return await matcher.finish("绘制日程表图片出错，请检查后台输出")
 
 
 async def send_wiki_page(sid, matcher: Matcher):
