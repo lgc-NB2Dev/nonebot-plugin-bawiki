@@ -2,6 +2,7 @@ import asyncio
 
 from nonebot import logger, on_command
 from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
+from nonebot.exception import FinishedException
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
@@ -17,6 +18,10 @@ from .data_gamekee import (
 from .data_schaledb import (
     draw_fav_li,
     schale_get_calender,
+    schale_get_common,
+    schale_get_localization,
+    schale_get_raids,
+    schale_get_stu_data,
     schale_get_stu_dict,
     schale_get_stu_info,
 )
@@ -24,7 +29,19 @@ from .util import recover_stu_alia
 
 
 async def schale_calender(server):
-    return MessageSegment.image(await schale_get_calender(server))
+    return MessageSegment.image(
+        await schale_get_calender(
+            server,
+            *(
+                await asyncio.gather(
+                    schale_get_stu_data(),
+                    schale_get_common(),
+                    schale_get_localization(),
+                    schale_get_raids(),
+                )
+            ),
+        )
+    )
 
 
 async def game_kee_calender():
@@ -57,7 +74,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
             await matcher.finish()
         else:
             await matcher.finish(await game_kee_calender())
-    except ActionFailed:
+    except (FinishedException, ActionFailed):
         raise
     except:
         logger.exception("绘制日程表图片出错")

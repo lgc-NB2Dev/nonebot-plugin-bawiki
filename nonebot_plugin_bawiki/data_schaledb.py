@@ -76,13 +76,7 @@ async def schale_get_stu_info(stu):
         return await page.screenshot(full_page=True)
 
 
-async def schale_get_calender(server=1):
-    students, common, localization, raids = await asyncio.gather(
-        schale_get_stu_data(),
-        schale_get_common(),
-        schale_get_localization(),
-        schale_get_raids(),
-    )
+async def schale_get_calender(server, students, common, localization, raids):
     students = {x["Id"]: x for x in students}
 
     region = common["regions"][server]
