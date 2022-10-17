@@ -1,0 +1,3 @@
+[submodule "bawiki-data"]
+	path = bawiki-data
+	url = https://github.com/lgc2333/bawiki-data
