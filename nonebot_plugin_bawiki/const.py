@@ -130,6 +130,8 @@ EXTRA_L2D_LI: Dict[str, List[str]] = {}
 SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
 MIRROR_SCHALE_URL = "http://schale.lgc2333.top/"
 
+BAWIKI_DB_URL = "https://bawiki.lgc2333.top/"
+
 SUFFIX_ALIAS = {"泳装": ["水"], "兔女郎": ["兔"], "正月": ["春"], "骑行": ["单车"], "幼女": ["幼", "铜"]}
 
 RES_PATH = Path(__file__).parent / "res"

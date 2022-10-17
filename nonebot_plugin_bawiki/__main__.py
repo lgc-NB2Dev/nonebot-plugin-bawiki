@@ -7,6 +7,7 @@ from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg
 
 from .const import SCHALE_URL
+from .data_bawiki import db_wiki_stu
 from .data_gamekee import (
     game_kee_page_url,
     get_calender,
@@ -116,7 +117,8 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
+    await matcher.send(
+        f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -125,6 +127,24 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("截取页面出错，请检查后台输出")
 
     await matcher.finish(img)
+
+
+wiki_stu = on_command("ba学生评价", aliases={"ba角评"})
+
+
+@wiki_stu.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip()
+    if not arg:
+        return await matcher.finish("请提供学生名称")
+
+    try:
+        im = (await db_wiki_stu(recover_stu_alia(arg)))
+    except:
+        logger.exception(f"获取角评出错")
+        return await matcher.finish("获取角评出错，请检查后台输出")
+
+    await matcher.finish(im)
 
 
 stu_wiki = on_command("ba学生wiki", aliases={"ba学生Wiki", "ba学生WIKI"})
@@ -220,7 +240,8 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(
+            f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         if p := await get_l2d(arg):
             im += [MessageSegment.image(x) for x in p]
         else:
