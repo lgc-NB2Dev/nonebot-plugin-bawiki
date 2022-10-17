@@ -117,8 +117,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(
-        f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -139,7 +138,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("请提供学生名称")
 
     try:
-        im = (await db_wiki_stu(recover_stu_alia(arg)))
+        im = await db_wiki_stu(recover_stu_alia(arg))
     except:
         logger.exception(f"获取角评出错")
         return await matcher.finish("获取角评出错，请检查后台输出")
@@ -240,8 +239,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(
-            f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         if p := await get_l2d(arg):
             im += [MessageSegment.image(x) for x in p]
         else:

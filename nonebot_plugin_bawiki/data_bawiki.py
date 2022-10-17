@@ -16,7 +16,7 @@ async def db_get_wiki_data() -> dict:
 
 
 async def db_wiki_stu(name):
-    wiki = (await db_get_wiki_data())['student']
+    wiki = (await db_get_wiki_data())["student"]
     if not (url := wiki.get(name)):
-        return '没有找到该角色的角评，可能是学生名称错误或者插件还未收录该角色角评'
+        return "没有找到该角色的角评，可能是学生名称错误或者插件还未收录该角色角评"
     return MessageSegment.image(await db_get(url, True))
