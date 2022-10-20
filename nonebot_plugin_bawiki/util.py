@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from PIL import Image, ImageOps
 from aiohttp import ClientSession
@@ -50,7 +50,7 @@ def img_invert_rgba(im: Image.Image):
 
 async def async_req(
     url, is_json=True, raw=False, method="GET", **kwargs
-) -> str | bytes | dict | list:
+) -> Union[str, bytes, dict, list]:
     async with ClientSession() as c:
         async with c.request(method, url, **kwargs, proxy=config.proxy) as r:
             ret = (await r.read()) if raw else (await r.text())
