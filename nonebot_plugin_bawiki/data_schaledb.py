@@ -3,6 +3,7 @@ import math
 import time
 from datetime import datetime
 from io import BytesIO
+from typing import Any, Dict, List
 
 from PIL import Image, ImageFilter
 from aiohttp import ClientSession
@@ -17,10 +18,9 @@ from .const import (
     MIRROR_SCHALE_URL,
     RES_CALENDER_BANNER,
     RES_SCHALE_BG,
-    SCHALE_DB_DIFFERENT,
     SCHALE_URL,
 )
-from .util import img_invert_rgba, parse_time_delta
+from .util import async_req, img_invert_rgba, parse_time_delta
 
 PAGE_KWARGS = {
     "is_mobile": True,
@@ -29,37 +29,27 @@ PAGE_KWARGS = {
 
 
 async def schale_get(suffix, raw=False):
-    async with ClientSession() as c:
-        async with c.get(f"{SCHALE_URL}{suffix}", proxy=config.proxy) as r:
-            return (await r.read()) if raw else (await r.json())
+    return await async_req(f"{SCHALE_URL}{suffix}", raw=raw)
 
 
-async def schale_get_stu_data():
+async def schale_get_stu_data() -> List[Dict[str, Any]]:
     return await schale_get("data/cn/students.min.json")
 
 
-async def schale_get_common():
+async def schale_get_common() -> Dict[str, Any]:
     return await schale_get("data/common.min.json")
 
 
-async def schale_get_localization():
+async def schale_get_localization() -> Dict[str, Any]:
     return await schale_get("data/cn/localization.min.json")
 
 
-async def schale_get_raids():
+async def schale_get_raids() -> Dict[str, Any]:
     return await schale_get("data/raids.min.json")
 
 
-async def schale_get_stu_dict():
-    ret = await schale_get_stu_data()
-    data = {x["Name"].replace("(", "（").replace(")", "）"): x for x in ret}
-
-    for schale, gamekee in SCHALE_DB_DIFFERENT.items():
-        if schale in data:
-            data[gamekee] = data[schale]
-            del data[schale]
-
-    return data
+async def schale_get_stu_dict(key="Name"):
+    return {x[key]: x for x in await schale_get_stu_data()}
 
 
 async def schale_get_stu_info(stu):
@@ -74,6 +64,22 @@ async def schale_get_stu_info(stu):
         await page.add_script_tag(content="utilStuSetAllProgressMax();")
 
         return await page.screenshot(full_page=True)
+
+
+async def schale_calender(server):
+    return MessageSegment.image(
+        await schale_get_calender(
+            server,
+            *(
+                await asyncio.gather(
+                    schale_get_stu_data(),
+                    schale_get_common(),
+                    schale_get_localization(),
+                    schale_get_raids(),
+                )
+            ),
+        )
+    )
 
 
 async def schale_get_calender(server, students, common, localization, raids):

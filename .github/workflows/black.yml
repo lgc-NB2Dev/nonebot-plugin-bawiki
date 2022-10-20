@@ -19,12 +19,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install black
     - name: Run
-      run: |
-        black $(git ls-files '*.py')
+      run: black .
     - name: Push
       run: |
         git config --global user.email ${{ secrets.EMAIL }}
         git config --global user.name ${{ secrets.NAME }}
-        git add .
-        git commit -m "style: use black to format code"
+        git commit -m "style: use black to format code" --allow-empty -a
         git push

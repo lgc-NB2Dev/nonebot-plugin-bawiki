@@ -3,31 +3,29 @@ import re
 import time
 from datetime import datetime
 from io import BytesIO
-from typing import List
+from typing import Any, Dict, List, Union
 
 from aiohttp import ClientSession
 from nonebot import logger
+from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
 from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page
 
-from .const import EXTRA_L2D_LI, RES_CALENDER_BANNER
-from .util import parse_time_delta
+from .const import RES_CALENDER_BANNER
+from .data_bawiki import db_get_extra_l2d_list
+from .util import async_req, parse_time_delta
 
 
-async def game_kee_request(url, **kwargs):
-    async with ClientSession() as s:
-        async with s.get(
-            url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs
-        ) as r:
-            ret = await r.json()
-            if ret["code"] != 0:
-                raise ConnectionError(ret["msg"])
-            return ret["data"]
+async def game_kee_request(url, **kwargs) -> Union[List | Dict[str, Any]]:
+    ret = await async_req(url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs)
+    if ret["code"] != 0:
+        raise ConnectionError(ret["msg"])
+    return ret["data"]
 
 
 async def get_calender():
-    ret = await game_kee_request("https://ba.gamekee.com/v1/wiki/index")
+    ret: List = await game_kee_request("https://ba.gamekee.com/v1/wiki/index")
 
     for i in ret:
         if i["module"]["id"] == 12:
@@ -81,6 +79,15 @@ async def get_game_kee_page(url):
         return await (
             await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
         ).screenshot()
+
+
+async def game_kee_calender():
+    ret = await get_calender()
+    if not ret:
+        return "没有获取到GameKee日程表数据"
+
+    pic = await get_calender_page(ret)
+    return MessageSegment.image(pic)
 
 
 async def get_calender_page(ret):
@@ -201,7 +208,7 @@ async def grab_l2d(cid):
 
 
 async def get_l2d(stu_name):
-    if r := EXTRA_L2D_LI.get(stu_name):
+    if r := (await db_get_extra_l2d_list()).get(stu_name):
         return r
 
     return await grab_l2d((await get_stu_cid_li()).get(stu_name))

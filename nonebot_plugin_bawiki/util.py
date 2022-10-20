@@ -1,48 +1,34 @@
 import datetime
+import json
+from typing import Dict, List
 
 from PIL import Image, ImageOps
+from aiohttp import ClientSession
 
-from .const import STU_ALIAS, SUFFIX_ALIAS
+from .config import config
 
 
 def format_timestamp(t):
     return datetime.datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def recover_alia(origin: str, alia_dict: dict[str, list[str]]):
-    origin = origin.lower().strip()
+def recover_alia(origin: str, alia_dict: Dict[str, List[str]]):
+    origin = replace_brackets(origin.lower()).strip()
 
     # 精确匹配
     for k, li in alia_dict.items():
         if origin in li or origin == k:
             return k
 
-    # 匹配括号别名
-    for k, li in alia_dict.items():
-        if (p := k.find("（")) != -1:
-            prefixes = [k[:p]] + li
-            suffixes = [k[p + 1 : -1]]
-
-            if a := SUFFIX_ALIAS.get(suffixes[0]):
-                suffixes.extend(a)
-
-            for s in suffixes:
-                for p in prefixes:
-                    if f"{p}{s}" == origin or f"{s}{p}" == origin:
-                        return k
-
     # 没找到，模糊匹配
+    origin_ = origin.replace(" ", "")
     for k, li in alia_dict.items():
-        li = [k] + li
+        li = [x.replace(" ", "") for x in ([k] + li)]
         for v in li:
-            if (v in origin) or (origin in v):
+            if origin_ in v:
                 return k
 
     return origin
-
-
-def recover_stu_alia(a):
-    return recover_alia(a, STU_ALIAS)
 
 
 def parse_time_delta(t: datetime.timedelta):
@@ -60,3 +46,18 @@ def img_invert_rgba(im: Image.Image):
     r2, g2, b2 = inverted_image.split()
     final_transparent_image = Image.merge("RGBA", (r2, g2, b2, a))
     return final_transparent_image
+
+
+async def async_req(
+    url, is_json=True, raw=False, method="GET", **kwargs
+) -> str | bytes | dict | list:
+    async with ClientSession() as c:
+        async with c.request(method, url, **kwargs, proxy=config.proxy) as r:
+            ret = (await r.read()) if raw else (await r.text())
+            if is_json:
+                ret = json.loads(ret)
+            return ret
+
+
+def replace_brackets(original: str):
+    return original.replace("（", "(").replace("）", "(")
