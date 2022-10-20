@@ -37,7 +37,7 @@ async def recover_stu_alia(a, game_kee=False) -> str:
     ret = recover_alia(a, await db_get_stu_alias())
 
     if game_kee:
-        ret = schale_to_gamekee(ret)
+        ret = await schale_to_gamekee(ret)
 
     return ret
 

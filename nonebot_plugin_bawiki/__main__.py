@@ -104,10 +104,10 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.finish(img)
 
 
-wiki_stu = on_command("ba学生评价", aliases={"ba角评"})
+stu_rank = on_command("ba学生评价", aliases={"ba角评"})
 
 
-@wiki_stu.handle()
+@stu_rank.handle()
 async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg = arg.extract_plain_text().strip()
     if not arg:

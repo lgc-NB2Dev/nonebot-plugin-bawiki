@@ -54,7 +54,7 @@ async def async_req(
     async with ClientSession() as c:
         async with c.request(method, url, **kwargs, proxy=config.proxy) as r:
             ret = (await r.read()) if raw else (await r.text())
-            if is_json:
+            if is_json and (not raw):
                 ret = json.loads(ret)
             return ret
 
