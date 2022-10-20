@@ -17,7 +17,7 @@ from .data_bawiki import db_get_extra_l2d_list
 from .util import async_req, parse_time_delta
 
 
-async def game_kee_request(url, **kwargs) -> Union[List | Dict[str, Any]]:
+async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
     ret = await async_req(url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs)
     if ret["code"] != 0:
         raise ConnectionError(ret["msg"])
