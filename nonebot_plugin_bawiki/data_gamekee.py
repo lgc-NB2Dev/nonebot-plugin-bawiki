@@ -5,7 +5,6 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List, Union
 
-from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
@@ -13,12 +12,13 @@ from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page
 
 from .const import RES_CALENDER_BANNER
-from .data_bawiki import db_get_extra_l2d_list
 from .util import async_req, parse_time_delta
 
 
 async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
-    ret = await async_req(url, headers={"game-id": "0", "game-alias": "ba"}, **kwargs)
+    ret = await async_req(
+        url, headers={"game-id": "0", "game-alias": "ba"}, proxy=None, **kwargs
+    )
     if ret["code"] != 0:
         raise ConnectionError(ret["msg"])
     return ret["data"]
@@ -97,10 +97,11 @@ async def get_calender_page(ret):
         _p = None
         if _p := it.get("picture"):
             try:
-                async with ClientSession() as _s:
-                    async with _s.get(f"https:{_p}") as _r:
-                        _p = await _r.read()
-                _p = BuildImage.open(BytesIO(_p)).resize_width(1290).circle_corner(15)
+                _p = (
+                    BuildImage.open(BytesIO(await async_req(f"https:{_p}", raw=True)))
+                    .resize_width(1290)
+                    .circle_corner(15)
+                )
             except:
                 logger.exception("下载日程表图片失败")
 
@@ -205,10 +206,3 @@ async def grab_l2d(cid):
     img = re.findall('data-real="([^"]*)"', r)
 
     return [f"https:{x}" for x in img]
-
-
-async def get_l2d(stu_name):
-    if r := (await db_get_extra_l2d_list()).get(stu_name):
-        return r
-
-    return await grab_l2d((await get_stu_cid_li()).get(stu_name))

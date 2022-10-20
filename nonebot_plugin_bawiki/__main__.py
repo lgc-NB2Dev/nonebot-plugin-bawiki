@@ -1,26 +1,56 @@
 import asyncio
+from argparse import Namespace
 
-from nonebot import logger, on_command
+from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
-from nonebot.exception import FinishedException
+from nonebot.exception import FinishedException, ParserExit
 from nonebot.internal.matcher import Matcher
-from nonebot.params import CommandArg
+from nonebot.params import CommandArg, ShellCommandArgs
+from nonebot.permission import SUPERUSER
+from nonebot.rule import ArgumentParser
+from nonebot_plugin_apscheduler import scheduler
 
-from .const import SCHALE_URL
-from .data_bawiki import db_wiki_stu, recover_stu_alia, schale_to_gamekee
+from .const import BAWIKI_DB_URL, SCHALE_URL
+from .data_bawiki import (
+    db_get_extra_l2d_list,
+    db_get_raid_alias,
+    db_get_terrain_alias,
+    db_wiki_raid,
+    db_wiki_stu,
+    recover_stu_alia,
+    schale_to_gamekee,
+)
 from .data_gamekee import (
     game_kee_calender,
     game_kee_page_url,
     get_game_kee_page,
-    get_l2d,
     get_stu_cid_li,
+    grab_l2d,
 )
 from .data_schaledb import (
     draw_fav_li,
+    find_current_event,
     schale_calender,
+    schale_get_common,
     schale_get_stu_dict,
     schale_get_stu_info,
 )
+from .util import async_req, clear_req_cache, recover_alia
+
+
+@scheduler.scheduled_job("interval", hours=3)
+async def _():
+    clear_req_cache()
+
+
+h_clear_cache = on_command("ba清空缓存", aliases={"ba清除缓存"}, permission=SUPERUSER)
+
+
+@h_clear_cache.handle()
+async def _(matcher: Matcher):
+    clear_req_cache()
+    await matcher.finish("缓存已清空～")
+
 
 handler_calender = on_command("ba日程表")
 
@@ -151,6 +181,12 @@ fav = on_command("ba好感度", aliases={"ba羁绊", "bal2d", "baL2D", "balive2d
 
 @fav.handle()
 async def _(matcher: Matcher, arg: Message = CommandArg()):
+    async def get_l2d(stu_name):
+        if r := (await db_get_extra_l2d_list()).get(stu_name):
+            return f"{BAWIKI_DB_URL}{r}"
+
+        return await grab_l2d((await get_stu_cid_li()).get(stu_name))
+
     arg = arg.extract_plain_text().strip()
     if not arg:
         return await matcher.finish("请提供学生名称或所需的羁绊等级")
@@ -186,7 +222,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
         im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         if p := await get_l2d(await schale_to_gamekee(arg)):
-            im += [MessageSegment.image(x) for x in p]
+            im += [MessageSegment.image(await async_req(x, raw=True)) for x in p]
         else:
             im += (
                 "没找到该学生的L2D看板\n"
@@ -197,3 +233,91 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish(im)
 
     return await matcher.finish("未找到学生")
+
+
+raid_wiki_parser = ArgumentParser("ba总力战")
+raid_wiki_parser.add_argument(
+    "name", nargs="?", default=None, help="总力战Boss名称，不指定默认取当前服务器总力战Boss"
+)
+raid_wiki_parser.add_argument(
+    "-s",
+    "--server",
+    nargs="*",
+    help="服务器名称，`j`或`日`代表日服，`g`或`国`代表国际服，可指定多个，默认全选",
+    default=["j", "g"],
+)
+raid_wiki_parser.add_argument("-t", "--terrain", help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
+raid_wiki_parser.add_argument(
+    "-w", "--wiki", action="store_true", help="发送该总力战Boss的技能机制而不是配队推荐"
+)
+
+raid_wiki = on_shell_command("ba总力战", parser=raid_wiki_parser)
+
+
+@raid_wiki.handle()
+async def _(matcher: Matcher, foo: ParserExit = ShellCommandArgs()):
+    im = ""
+    if foo.status != 0:
+        im = "参数错误\n"
+    await matcher.finish(f"{im}{foo.message}")
+
+
+@raid_wiki.handle()
+async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
+    if not args.server:
+        await matcher.finish(f"请指定server参数")
+
+    server = set()
+    for s in args.server:
+        if ("日" in s) or ("j" in s):
+            server.add(0)
+        elif ("国" in s) or ("g" in s):
+            server.add(1)
+    server = list(server)
+    server.sort()
+
+    tasks = []
+    if not args.name:
+        try:
+            common = await schale_get_common()
+            for s in server:
+                raid = common["regions"][s]["current_raid"]
+                if (r := find_current_event(raid)[0]) and (raid := r["raid"]) < 1000:
+                    tasks.append(db_wiki_raid(raid, [s], args.wiki, r.get("terrain")))
+        except:
+            logger.exception(f"获取当前总力战失败")
+            return await matcher.finish(f"获取当前总力战失败")
+
+        if not tasks:
+            return await matcher.finish(f"目前服务器没有正在进行的总力战，请手动指定")
+    else:
+        tasks.append(
+            db_wiki_raid(
+                recover_alia(args.name, await db_get_raid_alias()),
+                server,
+                args.wiki,
+                (
+                    recover_alia(args.terrain, await db_get_terrain_alias())
+                    if args.terrain
+                    else None
+                ),
+            )
+        )
+
+    try:
+        ret = await asyncio.gather(*tasks)
+    except:
+        logger.exception("获取总力战wiki失败")
+        return await matcher.finish(f"获取图片失败，请检查后台输出")
+
+    im = Message()
+    for i, v in enumerate(ret):
+        if (is_str := isinstance(v, str)) and (not i == 0):
+            im += "\n"
+
+        if is_str:
+            im += v
+        else:
+            im.extend([MessageSegment.image(x) for x in v])
+
+    await matcher.finish(im)

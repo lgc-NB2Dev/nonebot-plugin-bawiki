@@ -2,11 +2,16 @@ from nonebot.plugin import PluginMetadata
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.5.0b4"
+__version__ = "0.5.0b5"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
-    usage="见下表",
+    usage=(
+        "感谢各位sensei使用本插件！\n"
+        "插件有缓存机制，每3小时自动清空一次，如果插件遇到问题可以先手动清空缓存试一下捏\n"
+        "装载PicMenu插件即可查看插件详细菜单哦\n"
+        "祝玩得愉快～"
+    ),
     extra={
         "menu_data": [
             {
@@ -46,12 +51,12 @@ __plugin_meta__ = PluginMetadata(
                     "访问对应学生GameKee Wiki页面并截图，支持部分学生别名\n"
                     " \n"
                     "可以用这些指令触发：\n"
-                    "- <ft color=(238,120,0)>ba学生wiki</ft>"
-                    "- <ft color=(238,120,0)>ba学生Wiki</ft>"
+                    "- <ft color=(238,120,0)>ba学生wiki</ft>\n"
+                    "- <ft color=(238,120,0)>ba学生Wiki</ft>\n"
                     "- <ft color=(238,120,0)>ba学生WIKI</ft>\n"
                     " \n"
-                    "指令示例："
-                    "- <ft color=(238,120,0)>ba学生wiki 白子</ft>"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba学生wiki 白子</ft>\n"
                     "- <ft color=(238,120,0)>ba学生wiki xcw</ft>"
                 ),
             },
@@ -66,12 +71,12 @@ __plugin_meta__ = PluginMetadata(
                     "使用学生名称查询时支持部分学生别名\n"
                     " \n"
                     "可以用这些指令触发：\n"
-                    "- <ft color=(238,120,0)>ba羁绊</ft>"
-                    "- <ft color=(238,120,0)>ba好感度</ft>"
+                    "- <ft color=(238,120,0)>ba羁绊</ft>\n"
+                    "- <ft color=(238,120,0)>ba好感度</ft>\n"
                     "- <ft color=(238,120,0)>bal2d</ft>\n"
                     " \n"
                     "指令示例：\n"
-                    "- <ft color=(238,120,0)>ba羁绊 xcw</ft>"
+                    "- <ft color=(238,120,0)>ba羁绊 xcw</ft>\n"
                     "- <ft color=(238,120,0)>ba羁绊 9</ft>"
                 ),
             },
@@ -86,12 +91,47 @@ __plugin_meta__ = PluginMetadata(
                     "角评图作者 B站@夜猫咪喵喵猫\n"
                     " \n"
                     "可以用这些指令触发：\n"
-                    "- <ft color=(238,120,0)>ba学生评价</ft>"
-                    "- <ft color=(238,120,0)>ba角评</ft>"
+                    "- <ft color=(238,120,0)>ba学生评价</ft>\n"
+                    "- <ft color=(238,120,0)>ba角评</ft>\n"
                     " \n"
                     "指令示例：\n"
                     "- <ft color=(238,120,0)>ba学生评价 白子</ft>\n"
                     "- <ft color=(238,120,0)>ba角评 xcw</ft>"
+                ),
+            },
+            {
+                "func": "总力战一图流",
+                "trigger_method": "指令",
+                "trigger_condition": "ba总力战",
+                "brief_des": "查询总力战推荐配队/Boss机制",
+                "detail_des": (
+                    "发送当前或指定总力战Boss的配队/机制一图流攻略图\n"
+                    "支持部分Boss别名\n"
+                    "图片作者 B站@夜猫咪喵喵猫\n"
+                    " \n"
+                    "使用 <ft color=(238,120,0)>ba总力战 -h</ft> 查询指令用法\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba总力战</ft>（日服&国际服当前总力战Boss配队攻略）\n"
+                    "- <ft color=(238,120,0)>ba总力战 -s j</ft>（日服当前总力战Boss配队攻略）\n"
+                    "- <ft color=(238,120,0)>ba总力战 -s j -w</ft>（日服当前总力战Boss机制图）\n"
+                    "- <ft color=(238,120,0)>ba总力战 寿司</ft>（Kaiten FX Mk.0 配队攻略）\n"
+                    "- <ft color=(238,120,0)>ba总力战 寿司 -t 屋外</ft>（Kaiten FX Mk.0 屋外战配队攻略）\n"
+                ),
+            },
+            {
+                "func": "清空缓存",
+                "trigger_method": "超级用户 指令",
+                "trigger_condition": "ba清空缓存",
+                "brief_des": "清空插件请求缓存",
+                "detail_des": (
+                    "手动清空插件请求网络缓存下来的数据（正常3小时清空一次）\n"
+                    "如果插件出问题了，或者你想提前看到新内容，不妨试试清空一下插件缓存\n"
+                    "注：该指令只能由<ft color=(238,120,0)>超级用户</ft>触发\n"
+                    " \n"
+                    "可以用这些指令触发：\n"
+                    "- <ft color=(238,120,0)>ba清空缓存</ft>\n"
+                    "- <ft color=(238,120,0)>ba清除缓存</ft>"
                 ),
             },
         ],

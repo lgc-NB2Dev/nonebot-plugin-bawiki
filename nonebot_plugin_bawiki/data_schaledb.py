@@ -6,14 +6,12 @@ from io import BytesIO
 from typing import Any, Dict, List
 
 from PIL import Image, ImageFilter
-from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
 from nonebot_plugin_imageutils import BuildImage, text2image
 from playwright.async_api import Page, ViewportSize
 
-from .config import config
 from .const import (
     MIRROR_SCHALE_URL,
     RES_CALENDER_BANNER,
@@ -82,6 +80,17 @@ async def schale_calender(server):
     )
 
 
+def find_current_event(ev, now=None):
+    if not now:
+        now = datetime.now()
+    for _e in ev:
+        _start = datetime.fromtimestamp(_e["start"])
+        _end = datetime.fromtimestamp(_e["end"])
+        if _start <= now < _end:
+            _remain = _end - now
+            return _e, _start, _end, _remain
+
+
 async def schale_get_calender(server, students, common, localization, raids):
     students = {x["Id"]: x for x in students}
 
@@ -89,14 +98,6 @@ async def schale_get_calender(server, students, common, localization, raids):
     now = datetime.now()
 
     pic_bg = BuildImage.new("RGBA", (1400, 640), (255, 255, 255, 70))
-
-    def find_event(ev):
-        for _e in ev:
-            _start = datetime.fromtimestamp(_e["start"])
-            _end = datetime.fromtimestamp(_e["end"])
-            if _start <= now < _end:
-                _remain = _end - now
-                return _e, _start, _end, _remain
 
     def format_time(_start, _end, _remain):
         dd, hh, mm, ss = parse_time_delta(_remain)
@@ -110,7 +111,7 @@ async def schale_get_calender(server, students, common, localization, raids):
             (25, 25, 1375, 150), "特选招募", weight="bold", max_fontsize=80
         )
         c_gacha = region["current_gacha"]
-        if r := find_event(c_gacha):
+        if r := find_current_event(c_gacha):
             g = r[0]
             t = format_time(*(r[1:]))
             pic = pic.paste(
@@ -160,7 +161,7 @@ async def schale_get_calender(server, students, common, localization, raids):
             (25, 25, 1375, 150), "当前活动", weight="bold", max_fontsize=80
         )
         c_event = region["current_events"]
-        if r := find_event(c_event):
+        if r := find_current_event(c_event):
             g = r[0]
             t = format_time(*(r[1:]))
             pic = pic.paste(
@@ -219,7 +220,7 @@ async def schale_get_calender(server, students, common, localization, raids):
 
     async def draw_raid():
         pic = pic_bg.copy()
-        if r := find_event(region["current_raid"]):
+        if r := find_current_event(region["current_raid"]):
             ri = r[0]
             t = format_time(*(r[1:]))
             pic = pic.paste(
@@ -489,12 +490,10 @@ async def draw_fav_li(lvl):
     async def draw_stu(name_, dev_name_, line_, index_):
         left = index_ * icon_w
         top = line_ * icon_h + 5
-        async with ClientSession() as s:
-            async with s.get(
-                f"{SCHALE_URL}images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
-                proxy=config.proxy,
-            ) as r:
-                ret = await r.read()
+
+        ret = await schale_get(
+            f"images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png", True
+        )
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
         img.paste(icon_img, (left, top), icon_img)
         img.draw_text(

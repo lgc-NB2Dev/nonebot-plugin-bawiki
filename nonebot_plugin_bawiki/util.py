@@ -7,17 +7,20 @@ from aiohttp import ClientSession
 
 from .config import config
 
+req_cache = {}
+
 
 def format_timestamp(t):
     return datetime.datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def recover_alia(origin: str, alia_dict: Dict[str, List[str]]):
-    origin = replace_brackets(origin.lower()).strip()
+    origin = replace_brackets(origin).strip()
+    origin_ = origin.lower()
 
     # 精确匹配
     for k, li in alia_dict.items():
-        if origin in li or origin == k:
+        if origin_ in li or origin_ == k:
             return k
 
     # 没找到，模糊匹配
@@ -49,14 +52,28 @@ def img_invert_rgba(im: Image.Image):
 
 
 async def async_req(
-    url, is_json=True, raw=False, method="GET", **kwargs
+    url,
+    is_json=True,
+    raw=False,
+    ignore_cache=False,
+    proxy=config.proxy,
+    method="GET",
+    **kwargs,
 ) -> Union[str, bytes, dict, list]:
+    if (not ignore_cache) and (c := req_cache.get(url)):
+        return c
+
     async with ClientSession() as c:
-        async with c.request(method, url, **kwargs, proxy=config.proxy) as r:
+        async with c.request(method, url, **kwargs, proxy=proxy) as r:
             ret = (await r.read()) if raw else (await r.text())
             if is_json and (not raw):
                 ret = json.loads(ret)
+            req_cache[url] = ret
             return ret
+
+
+def clear_req_cache():
+    req_cache.clear()
 
 
 def replace_brackets(original: str):
