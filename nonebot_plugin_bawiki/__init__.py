@@ -80,7 +80,7 @@ __plugin_meta__ = PluginMetadata(
                 "trigger_method": "指令",
                 "trigger_condition": "ba角评",
                 "brief_des": "查询学生角评一图流",
-                "detail_des":(
+                "detail_des": (
                     "发送一张指定角色的评价图\n"
                     "支持部分学生别名\n"
                     "角评图作者 B站@夜猫咪喵喵猫\n"
@@ -92,8 +92,8 @@ __plugin_meta__ = PluginMetadata(
                     "指令示例：\n"
                     "- <ft color=(238,120,0)>ba学生评价 白子</ft>\n"
                     "- <ft color=(238,120,0)>ba角评 xcw</ft>"
-                )
-            }
+                ),
+            },
         ],
         "menu_template": "default",
     },
