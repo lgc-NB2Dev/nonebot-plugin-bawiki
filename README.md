@@ -28,19 +28,15 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 ## 💬 前言
 
-诚邀各位帮忙扩充别名词库以及更新插件内置数据源！
+诚邀各位帮忙更新插件数据源仓库！能帮这个小小插件贡献微薄之力，鄙人感激不尽！！
 
-本人在学校没有太多时间能够写代码，所以维护插件变成了一件比较困难的事  
-感谢各位的帮助！
+[点击跳转 bawiki-data](https://github.com/lgc2333/bawiki-data)
 
-[点击跳转学生别名字典](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L1)  
-[点击跳转学生 L2D 预览图列表](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/const.py#L125)
-
-修改后直接往本仓库提交 Pull Request 即可！
+修改后提交 Pull Request 即可！
 
 ## 📖 介绍
 
-一个碧蓝档案的 Wiki 插件，数据来源为 [GameKee](https://ba.gamekee.com/) 与 [SchaleDB](https://lonqie.github.io/SchaleDB/)  
+一个碧蓝档案的 Wiki 插件，主要数据来源为 [GameKee](https://ba.gamekee.com/) 与 [SchaleDB](https://lonqie.github.io/SchaleDB/)  
 插件灵感来源：[ba_calender](https://f.xiaolz.cn/forum.php?mod=viewthread&tid=145)
 
 ## 💿 安装
@@ -102,34 +98,33 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 ## ⚙️ 配置
 
-暂无
-
-<!--
 在 nonebot2 项目的`.env`文件中添加下表中的配置
 
-| 配置项  | 必填 | 默认值 |            说明            |
-| :-----: | :--: | :----: | :------------------------: |
-| `proxy` |  否  | `None` | 访问`SchaleDB`时使用的代理 |
--->
+| 配置项  | 必填 | 默认值 |                         说明                          |
+| :-----: | :--: | :----: | :---------------------------------------------------: |
+| `proxy` |  否  | `None` | 访问`SchaleDB`、`bawiki-data`的 json 数据时使用的代理 |
+
 ## 🎉 使用
 
 ### 指令表
 
 兼容 [nonebot-plugin-PicMenu](https://github.com/hamo-reid/nonebot_plugin_PicMenu)
 
-![menu](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/menu.png)
+见[这里](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py#L11)
 
 待更新
 
+<!--
 ### 效果图
 
 <details>
 <summary>长图，点击展开</summary>
 
-![example](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example.png)  
+![example](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example.png)
 ![example2](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example2.png)
 
 </details>
+-->
 
 ## 📞 联系
 
@@ -142,11 +137,11 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ### [RainNight0](https://github.com/RainNight0)
 
-- 日程表 html 模板提供
+- 日程表 html 模板提供（已弃用）
 
-### [黑枪灬王子](mailto:1109024495@qq.com)
+### `bawiki-data`数据源贡献列表
 
-- 学生别名提供
+- 见 [bawiki-data](http://github.com/lgc2333/bawiki-data)
 
 ## 💰 赞助
 
