@@ -147,8 +147,13 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     if not arg:
         return await matcher.finish("请提供学生名称")
 
+    if arg == "总览" or arg == "全部" or arg.lower() == "all":
+        arg = "all"
+    else:
+        arg = await recover_stu_alia(arg)
+
     try:
-        im = await db_wiki_stu(await recover_stu_alia(arg))
+        im = await db_wiki_stu(arg)
     except:
         logger.exception(f"获取角评出错")
         return await matcher.finish("获取角评出错，请检查后台输出")

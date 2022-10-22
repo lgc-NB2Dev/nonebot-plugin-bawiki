@@ -87,6 +87,8 @@ __plugin_meta__ = PluginMetadata(
                     "支持部分学生别名\n"
                     "角评图作者 B站@夜猫咪喵喵猫\n"
                     " \n"
+                    "可以使用 `all` / `总览` / `全部` 参数 查看全学生角评一图流\n"
+                    " \n"
                     "可以用这些指令触发：\n"
                     "- <ft color=(238,120,0)>ba学生评价</ft>\n"
                     "- <ft color=(238,120,0)>ba角评</ft>\n"
@@ -94,6 +96,7 @@ __plugin_meta__ = PluginMetadata(
                     "指令示例：\n"
                     "- <ft color=(238,120,0)>ba学生评价 白子</ft>\n"
                     "- <ft color=(238,120,0)>ba角评 xcw</ft>"
+                    "- <ft color=(238,120,0)>ba角评 总览</ft>"
                 ),
             },
             {
