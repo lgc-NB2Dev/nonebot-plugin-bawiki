@@ -2,7 +2,7 @@ from nonebot.plugin import PluginMetadata
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.5.0b5"
+__version__ = "0.5.0b6"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
@@ -13,6 +13,7 @@ __plugin_meta__ = PluginMetadata(
         "祝玩得愉快～"
     ),
     extra={
+        "menu_template": "default",
         "menu_data": [
             {
                 "func": "日程表",
@@ -50,11 +51,6 @@ __plugin_meta__ = PluginMetadata(
                 "detail_des": (
                     "访问对应学生GameKee Wiki页面并截图，支持部分学生别名\n"
                     " \n"
-                    "可以用这些指令触发：\n"
-                    "- <ft color=(238,120,0)>ba学生wiki</ft>\n"
-                    "- <ft color=(238,120,0)>ba学生Wiki</ft>\n"
-                    "- <ft color=(238,120,0)>ba学生WIKI</ft>\n"
-                    " \n"
                     "指令示例：\n"
                     "- <ft color=(238,120,0)>ba学生wiki 白子</ft>\n"
                     "- <ft color=(238,120,0)>ba学生wiki xcw</ft>"
@@ -74,6 +70,7 @@ __plugin_meta__ = PluginMetadata(
                     "- <ft color=(238,120,0)>ba羁绊</ft>\n"
                     "- <ft color=(238,120,0)>ba好感度</ft>\n"
                     "- <ft color=(238,120,0)>bal2d</ft>\n"
+                    "- <ft color=(238,120,0)>balive2d</ft>\n"
                     " \n"
                     "指令示例：\n"
                     "- <ft color=(238,120,0)>ba羁绊 xcw</ft>\n"
@@ -120,6 +117,67 @@ __plugin_meta__ = PluginMetadata(
                 ),
             },
             {
+                "func": "活动一图流",
+                "trigger_method": "指令",
+                "trigger_condition": "ba活动",
+                "brief_des": "查询活动攻略图",
+                "detail_des": (
+                    "发送当前或指定活动一图流攻略图，可能会附带活动特殊机制等\n"
+                    "图片作者 B站@夜猫咪喵喵猫\n"
+                    " \n"
+                    "指令默认发送日服和国际服当前的活动攻略\n"
+                    "指令后面跟`日`或`j`开头的文本代表查询日服当前活动攻略，带以`国`或`g`开头的文本同理\n"
+                    "跟其他文本则代表指定活动名称\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba活动</ft>\n"
+                    "- <ft color=(238,120,0)>ba活动 日</ft>\n"
+                    "- <ft color=(238,120,0)>ba活动 温泉浴场</ft>"
+                ),
+            },
+            {
+                "func": "综合战术考试一图流",
+                "trigger_method": "指令",
+                "trigger_condition": "ba综合战术考试",
+                "brief_des": "查询综合战术考试攻略图",
+                "detail_des": (
+                    "发送当前或指定综合战术考试一图流攻略图\n"
+                    "图片作者 B站@夜猫咪喵喵猫\n"
+                    " \n"
+                    "指令默认发送日服和国际服当前的综合战术考试攻略\n"
+                    "指令后面跟`日`或`j`开头的文本代表查询日服当前综合战术考试攻略，带以`国`或`g`开头的文本同理\n"
+                    "跟整数则代表指定第几个综合战术考试\n"
+                    " \n"
+                    "p.s. 综合战术考试 和 合同火力演习 其实是一个东西，国际服叫前者，日服叫后者～\n"
+                    " \n"
+                    "可以用这些指令触发：\n"
+                    "- <ft color=(238,120,0)>ba综合战术考试</ft>\n"
+                    "- <ft color=(238,120,0)>ba合同火力演习</ft>\n"
+                    "- <ft color=(238,120,0)>ba战术考试</ft>\n"
+                    "- <ft color=(238,120,0)>ba火力演习</ft>\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba综合战术考试</ft>\n"
+                    "- <ft color=(238,120,0)>ba综合战术考试 日</ft>\n"
+                    "- <ft color=(238,120,0)>ba综合战术考试 8</ft>"
+                ),
+            },
+            {
+                "func": "制造一图流",
+                "trigger_method": "指令",
+                "trigger_condition": "ba制造",
+                "brief_des": "查询制造功能机制图",
+                "detail_des": (
+                    "发送游戏内制造功能的一图流介绍\n"
+                    "图片作者 B站@夜猫咪喵喵猫\n"
+                    " \n"
+                    "可以用这些指令触发：\n"
+                    "- <ft color=(238,120,0)>ba制造</ft>\n"
+                    "- <ft color=(238,120,0)>ba制作</ft>\n"
+                    "- <ft color=(238,120,0)>ba合成</ft>\n"
+                )
+            },
+            {
                 "func": "清空缓存",
                 "trigger_method": "超级用户 指令",
                 "trigger_condition": "ba清空缓存",
@@ -135,6 +193,5 @@ __plugin_meta__ = PluginMetadata(
                 ),
             },
         ],
-        "menu_template": "default",
     },
 )

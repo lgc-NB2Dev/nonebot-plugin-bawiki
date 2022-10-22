@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 
 from PIL import Image, ImageOps
 from aiohttp import ClientSession
+from nonebot.adapters.onebot.v11 import Message
 
 from .config import config
 
@@ -78,3 +79,11 @@ def clear_req_cache():
 
 def replace_brackets(original: str):
     return original.replace("（", "(").replace("）", "(")
+
+def splice_msg(msgs):
+    im = Message()
+    for i, v in enumerate(msgs):
+        if isinstance(v, str) and (not i == 0):
+            v = f"\n{v}"
+        im += v
+    return im
