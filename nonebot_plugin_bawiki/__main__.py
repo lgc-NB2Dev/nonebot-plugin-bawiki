@@ -12,12 +12,16 @@ from nonebot_plugin_apscheduler import scheduler
 
 from .const import BAWIKI_DB_URL, SCHALE_URL
 from .data_bawiki import (
-    db_get_event_alias, db_get_extra_l2d_list,
+    db_get_event_alias,
+    db_get_extra_l2d_list,
     db_get_raid_alias,
     db_get_terrain_alias,
-    db_wiki_craft, db_wiki_event, db_wiki_raid,
+    db_wiki_craft,
+    db_wiki_event,
+    db_wiki_raid,
     db_wiki_stu,
-    db_wiki_time_atk, recover_stu_alia,
+    db_wiki_time_atk,
+    recover_stu_alia,
     schale_to_gamekee,
 )
 from .data_gamekee import (
@@ -123,8 +127,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(
-        f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -177,8 +180,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await send_wiki_page(sid, matcher)
 
 
-fav = on_command("ba好感度",
-                 aliases={"ba羁绊", "bal2d", "baL2D", "balive2d", "baLive2D"})
+fav = on_command("ba好感度", aliases={"ba羁绊", "bal2d", "baL2D", "balive2d", "baLive2D"})
 
 
 @fav.handle()
@@ -222,8 +224,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(
-            f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         if p := await get_l2d(await schale_to_gamekee(arg)):
             im += [MessageSegment.image(await async_req(x, raw=True)) for x in p]
         else:
@@ -249,8 +250,7 @@ raid_wiki_parser.add_argument(
     help="服务器名称，`j`或`日`代表日服，`g`或`国`代表国际服，可指定多个，默认全选",
     default=["j", "g"],
 )
-raid_wiki_parser.add_argument("-t", "--terrain",
-                              help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
+raid_wiki_parser.add_argument("-t", "--terrain", help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
 raid_wiki_parser.add_argument(
     "-w", "--wiki", action="store_true", help="发送该总力战Boss的技能机制而不是配队推荐"
 )
@@ -288,7 +288,8 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
                 raid = common["regions"][s]["current_raid"]
                 if (r := find_current_event(raid)) and (raid := r[0]["raid"]) < 1000:
                     tasks.append(
-                        db_wiki_raid(raid, [s], args.wiki, r[0].get("terrain")))
+                        db_wiki_raid(raid, [s], args.wiki, r[0].get("terrain"))
+                    )
         except:
             logger.exception(f"获取当前总力战失败")
             return await matcher.finish(f"获取当前总力战失败")
@@ -318,7 +319,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
     await matcher.finish(splice_msg(ret))
 
 
-event_wiki = on_command('ba活动')
+event_wiki = on_command("ba活动")
 
 
 @event_wiki.handle()
@@ -326,9 +327,9 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg = arg.extract_plain_text().lower().strip()
 
     server = []
-    if arg.startswith('日') or arg.startswith('j') or (not arg):
+    if arg.startswith("日") or arg.startswith("j") or (not arg):
         server.append(0)
-    if arg.startswith('国') or arg.startswith('g') or (not arg):
+    if arg.startswith("国") or arg.startswith("g") or (not arg):
         server.append(1)
 
     events = []
@@ -336,32 +337,29 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         try:
             common = await schale_get_common()
             for s in server:
-                ev = common['regions'][s]['current_events']
+                ev = common["regions"][s]["current_events"]
                 if e := find_current_event(ev):
-                    events.append((e[0]['event']) % 10000)
+                    events.append((e[0]["event"]) % 10000)
         except:
             logger.exception(f"获取当前活动失败")
             return await matcher.finish(f"获取当前活动失败")
 
         if not events:
-            await  matcher.finish('当前服务器没有正在进行的活动')
+            await matcher.finish("当前服务器没有正在进行的活动")
 
     else:
         events.append(recover_alia(arg, await db_get_event_alias()))
 
     try:
-        ret = await asyncio.gather(*[
-            db_wiki_event(x) for x in events
-        ])
+        ret = await asyncio.gather(*[db_wiki_event(x) for x in events])
     except:
-        logger.exception('获取活动wiki出错')
-        return await matcher.finish('获取图片出错，请检查后台输出')
+        logger.exception("获取活动wiki出错")
+        return await matcher.finish("获取图片出错，请检查后台输出")
 
     await matcher.finish(splice_msg(ret))
 
 
-time_atk_wiki = on_command('ba综合战术考试',
-                           aliases={'ba合同火力演习', 'ba战术考试', 'ba火力演习'})
+time_atk_wiki = on_command("ba综合战术考试", aliases={"ba合同火力演习", "ba战术考试", "ba火力演习"})
 
 
 @time_atk_wiki.handle()
@@ -369,9 +367,9 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg = arg.extract_plain_text().lower().strip()
 
     server = []
-    if arg.startswith('日') or arg.startswith('j') or (not arg):
+    if arg.startswith("日") or arg.startswith("j") or (not arg):
         server.append(0)
-    if arg.startswith('国') or arg.startswith('g') or (not arg):
+    if arg.startswith("国") or arg.startswith("g") or (not arg):
         server.append(1)
 
     events = []
@@ -387,25 +385,23 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
             return await matcher.finish(f"获取当前综合战术考试失败")
 
         if not events:
-            await  matcher.finish('当前服务器没有正在进行的综合战术考试')
+            await matcher.finish("当前服务器没有正在进行的综合战术考试")
 
     else:
         if not str(arg).isdigit():
-            await matcher.finish('综合战术考试ID需为整数，从1开始，代表第1个综合战术考试')
+            await matcher.finish("综合战术考试ID需为整数，从1开始，代表第1个综合战术考试")
         events.append(int(arg) - 1)
 
     try:
-        ret = await asyncio.gather(*[
-            db_wiki_time_atk(x) for x in events
-        ])
+        ret = await asyncio.gather(*[db_wiki_time_atk(x) for x in events])
     except:
-        logger.exception('获取综合战术考试wiki出错')
-        return await matcher.finish('获取图片出错，请检查后台输出')
+        logger.exception("获取综合战术考试wiki出错")
+        return await matcher.finish("获取图片出错，请检查后台输出")
 
     await matcher.finish(splice_msg(ret))
 
 
-craft_wiki = on_command('ba制造',aliases={'ba合成','ba制作'})
+craft_wiki = on_command("ba制造", aliases={"ba合成", "ba制作"})
 
 
 @craft_wiki.handle()
@@ -413,7 +409,7 @@ async def _(matcher: Matcher):
     try:
         im = await db_wiki_craft()
     except:
-        logger.exception('获取合成wiki图片错误')
-        return await matcher.finish('获取图片失败，请检查后台输出')
+        logger.exception("获取合成wiki图片错误")
+        return await matcher.finish("获取图片失败，请检查后台输出")
 
     await matcher.finish(im)

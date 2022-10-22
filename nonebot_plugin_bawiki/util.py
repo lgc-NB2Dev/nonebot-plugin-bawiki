@@ -80,6 +80,7 @@ def clear_req_cache():
 def replace_brackets(original: str):
     return original.replace("（", "(").replace("）", "(")
 
+
 def splice_msg(msgs):
     im = Message()
     for i, v in enumerate(msgs):

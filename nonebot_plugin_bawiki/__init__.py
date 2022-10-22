@@ -175,7 +175,7 @@ __plugin_meta__ = PluginMetadata(
                     "- <ft color=(238,120,0)>ba制造</ft>\n"
                     "- <ft color=(238,120,0)>ba制作</ft>\n"
                     "- <ft color=(238,120,0)>ba合成</ft>\n"
-                )
+                ),
             },
             {
                 "func": "清空缓存",
