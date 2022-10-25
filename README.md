@@ -157,6 +157,19 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.5.0
+
+- 新数据源 [bawiki-data](http://github.com/lgc2333/bawiki-data)
+- 新指令`ba角评`；`ba总力战`；`ba活动`；`ba综合战术考试`；`ba制造`；`ba国际服千里眼`；`ba清空缓存`
+- 将`bal2d`指令改为`ba羁绊`别名
+- 将`ba日程表`指令从网页截图改为 Pillow 画图；并修改了指令的参数解析方式
+- 更改了`ba羁绊`指令的画图方式及底图
+- 更改学生别名的匹配方式
+- 学生别名等常量现在从 [bawiki-data](http://github.com/lgc2333/bawiki-data) 在线获取
+- 新增请求接口的缓存机制，每3小时清空一次缓存
+- 新增`PROXY`配置项
+- 更改三级菜单排版
+
 ### 0.4.2
 
 - `ba羁绊` `baL2D` 的 L2D 预览图改为实时从 GameKee 抓取
