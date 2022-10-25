@@ -252,7 +252,7 @@ async def schale_get_calender(server, students, common, localization, raids):
             else:
                 bg_url = f'images/raid/Boss_Portrait_{c_ri["PathName"]}_LobbyBG'
                 if len(c_ri["Terrain"]) > 1 and ri["terrain"] == c_ri["Terrain"][1]:
-                    bg_url += ri["terrain"]
+                    bg_url += f'_{ri["terrain"]}'
                 fg_url = f'images/raid/Boss_Portrait_{c_ri["PathName"]}_Lobby.png'
             bg_url += ".png"
             terrain = c_ri["Terrain"] if time_atk else ri["terrain"]
