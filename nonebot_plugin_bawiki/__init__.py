@@ -2,7 +2,7 @@ from nonebot.plugin import PluginMetadata
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.5.0b6"
+__version__ = "0.5.0b7"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
