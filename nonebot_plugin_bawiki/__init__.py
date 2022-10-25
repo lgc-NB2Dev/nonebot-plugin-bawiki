@@ -2,7 +2,7 @@ from nonebot.plugin import PluginMetadata
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.5.0b7"
+__version__ = "0.5.0"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
@@ -178,6 +178,37 @@ __plugin_meta__ = PluginMetadata(
                     "- <ft color=(238,120,0)>ba制造</ft>\n"
                     "- <ft color=(238,120,0)>ba制作</ft>\n"
                     "- <ft color=(238,120,0)>ba合成</ft>\n"
+                ),
+            },
+            {
+                "func": "国际服千里眼",
+                "trigger_method": "指令",
+                "trigger_condition": "ba千里眼",
+                "brief_des": "查询国际服未来的卡池与活动",
+                "detail_des": (
+                    "发送当前或指定日期的国际服未来卡池与活动列表\n"
+                    "图片作者 B站@夜猫咪喵喵猫\n"
+                    " \n"
+                    "参数可以指定起始日期以及列表个数，但同时指定时请将日期放在列表个数前面，以空格分隔\n"
+                    "参数中含有`全`或`a`时会发送整张前瞻图\n"
+                    " \n"
+                    "日期格式可以为（Y代表4位数年，m代表月，d代表日）：\n"
+                    "- <ft color=(238,120,0)>Y/m/d</ft>；<ft color=(238,120,0)>m/d</ft>\n"
+                    "- <ft color=(238,120,0)>Y-m-d</ft>；<ft color=(238,120,0)>m-d</ft>\n"
+                    "- <ft color=(238,120,0)>Y年m月d日</ft>；<ft color=(238,120,0)>m月d日</ft>\n"
+                    " \n"
+                    "可以用这些指令触发：\n"
+                    "- <ft color=(238,120,0)>ba国际服千里眼</ft>\n"
+                    "- <ft color=(238,120,0)>ba千里眼</ft>\n"
+                    "- <ft color=(238,120,0)>ba国际服前瞻</ft>\n"
+                    "- <ft color=(238,120,0)>ba前瞻</ft>\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba千里眼</ft>\n"
+                    "- <ft color=(238,120,0)>ba千里眼 all</ft>\n"
+                    "- <ft color=(238,120,0)>ba千里眼 3</ft>\n"
+                    "- <ft color=(238,120,0)>ba千里眼 11/15</ft>\n"
+                    "- <ft color=(238,120,0)>ba千里眼 11/15 3</ft>"
                 ),
             },
             {

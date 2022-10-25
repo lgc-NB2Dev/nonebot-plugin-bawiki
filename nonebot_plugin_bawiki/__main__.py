@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from argparse import Namespace
 
 from nonebot import logger, on_command, on_shell_command
@@ -16,6 +17,7 @@ from .data_bawiki import (
     db_get_extra_l2d_list,
     db_get_raid_alias,
     db_get_terrain_alias,
+    db_global_future,
     db_wiki_craft,
     db_wiki_event,
     db_wiki_raid,
@@ -127,8 +129,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(
-        f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
+    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n" f"{SCHALE_URL}?chara={stu_name}")
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
@@ -186,8 +187,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await send_wiki_page(sid, matcher)
 
 
-fav = on_command("ba好感度",
-                 aliases={"ba羁绊", "bal2d", "baL2D", "balive2d", "baLive2D"})
+fav = on_command("ba好感度", aliases={"ba羁绊", "bal2d", "baL2D", "balive2d", "baLive2D"})
 
 
 @fav.handle()
@@ -231,8 +231,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             return await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(
-            f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
         if p := await get_l2d(await schale_to_gamekee(arg)):
             im += [MessageSegment.image(await async_req(x, raw=True)) for x in p]
         else:
@@ -258,8 +257,7 @@ raid_wiki_parser.add_argument(
     help="服务器名称，`j`或`日`代表日服，`g`或`国`代表国际服，可指定多个，默认全选",
     default=["j", "g"],
 )
-raid_wiki_parser.add_argument("-t", "--terrain",
-                              help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
+raid_wiki_parser.add_argument("-t", "--terrain", help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
 raid_wiki_parser.add_argument(
     "-w", "--wiki", action="store_true", help="发送该总力战Boss的技能机制而不是配队推荐"
 )
@@ -368,8 +366,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.finish(splice_msg(ret))
 
 
-time_atk_wiki = on_command("ba综合战术考试",
-                           aliases={"ba合同火力演习", "ba战术考试", "ba火力演习"})
+time_atk_wiki = on_command("ba综合战术考试", aliases={"ba合同火力演习", "ba战术考试", "ba火力演习"})
 
 
 @time_atk_wiki.handle()
@@ -423,3 +420,45 @@ async def _(matcher: Matcher):
         return await matcher.finish("获取图片失败，请检查后台输出")
 
     await matcher.finish(im)
+
+
+global_future = on_command("ba国际服千里眼", aliases={"ba千里眼", "ba国际服前瞻", "ba前瞻"})
+
+
+@global_future.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    args = arg.extract_plain_text().strip()
+    if "全" in args or "a" in args:
+        await matcher.finish(await db_global_future(all_img=True))
+
+    args = args.split()
+    num = 1
+    date = None
+    if (args_len := len(args)) == 1:
+        if args[0].isdigit():
+            num = args[0]
+        else:
+            date = args[0]
+    elif args_len > 1:
+        date = args[0].strip()
+        num = args[-1].strip()
+
+    if date:
+        parsed_date = None
+        for f in ["%Y/%m/%d", "%Y-%m-%d", "%Y年%m月%d日", "%m/%d", "%m-%d", "%m月%d日"]:
+            try:
+                parsed_date = datetime.datetime.strptime(date.replace(" ", ""), f)
+                break
+            except ValueError:
+                pass
+        if not parsed_date:
+            await matcher.finish("日期格式不正确！")
+        date = parsed_date
+        if date.year == 1900:
+            date = date.replace(year=datetime.datetime.now().year)
+
+    if isinstance(num, str):
+        if (not num.isdigit()) or (num := int(num)) < 1:
+            await matcher.finish("前瞻项目数量格式不正确！")
+
+    await matcher.finish(await db_global_future(date, num))

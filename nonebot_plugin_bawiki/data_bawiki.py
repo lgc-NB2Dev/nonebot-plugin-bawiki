@@ -1,8 +1,11 @@
 import asyncio
+import datetime
 import math
+from io import BytesIO
 from typing import Any, Dict, List
 
 from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot_plugin_imageutils import BuildImage
 
 from .const import BAWIKI_DB_URL
 from .util import async_req, recover_alia
@@ -125,3 +128,45 @@ async def db_wiki_craft():
         MessageSegment.image(x)
         for x in await asyncio.gather(*[db_get(y, True) for y in wiki])
     ]
+
+
+async def db_global_future(date: datetime.datetime = None, num=1, all_img=False):
+    data = (await db_get_wiki_data())["global_future"]
+    img = await db_get(data["img"], True)
+
+    if all_img:
+        return MessageSegment.image(img)
+
+    compare_date = date or datetime.datetime.now()
+    index = None
+    for i, v in enumerate(parts := data["parts"]):
+        start, end = [datetime.datetime.strptime(x, "%Y/%m/%d") for x in v["date"]]
+        if start <= compare_date < end:
+            index = i
+
+    if not index:
+        return "没有找到符合日期的部分"
+
+    if not date:
+        index += 1
+
+    sliced_parts = parts[index : index + num]
+
+    if (pl := len(sliced_parts)) < num:
+        return f"抱歉，目前后面还没有这么长的前瞻列表……（目前后面还有 {pl} 个）"
+
+    banner_start, banner_end = data["banner"]
+    pos_start = sliced_parts[0]["part"][0]
+    pos_end = sliced_parts[-1]["part"][1]
+
+    img = BuildImage.open(BytesIO(img))
+    width = img.width
+    banner = img.crop((0, banner_start, width, banner_end))
+    content = img.crop((0, pos_start, width, pos_end))
+
+    bg = (
+        BuildImage.new("RGB", (width, banner.height + content.height))
+        .paste(banner)
+        .paste(content, (0, banner.height))
+    )
+    return MessageSegment.image(bg.save("PNG"))
