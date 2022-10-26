@@ -20,6 +20,7 @@ from .data_bawiki import (
     db_global_future,
     db_wiki_craft,
     db_wiki_event,
+    db_wiki_furniture,
     db_wiki_raid,
     db_wiki_stu,
     db_wiki_time_atk,
@@ -455,10 +456,29 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
             await matcher.finish("日期格式不正确！")
         date = parsed_date
         if date.year == 1900:
-            date = date.replace(year=datetime.datetime.now().year)
+            now = datetime.datetime.now().replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            date = date.replace(year=now.year)
+            if date < now:
+                date = date.replace(year=now.year + 1)
 
     if isinstance(num, str):
         if (not num.isdigit()) or (num := int(num)) < 1:
             await matcher.finish("前瞻项目数量格式不正确！")
 
     await matcher.finish(await db_global_future(date, num))
+
+
+furniture_wiki = on_command("ba互动家具")
+
+
+@furniture_wiki.handle()
+async def _(matcher: Matcher):
+    try:
+        im = await db_wiki_furniture()
+    except:
+        logger.exception("获取互动家具wiki图片错误")
+        return await matcher.finish("获取图片失败，请检查后台输出")
+
+    await matcher.finish(im)

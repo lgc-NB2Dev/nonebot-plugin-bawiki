@@ -2,7 +2,7 @@ from nonebot.plugin import PluginMetadata
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
@@ -210,6 +210,13 @@ __plugin_meta__ = PluginMetadata(
                     "- <ft color=(238,120,0)>ba千里眼 11/15</ft>\n"
                     "- <ft color=(238,120,0)>ba千里眼 11/15 3</ft>"
                 ),
+            },
+            {
+                "func": "互动家具总览",
+                "trigger_method": "指令",
+                "trigger_condition": "ba互动家具",
+                "brief_des": "查询互动家具总览图",
+                "detail_des": "发送咖啡厅内所有互动家具以及对应学生的总览图\n图片作者 B站@夜猫咪喵喵猫",
             },
             {
                 "func": "清空缓存",

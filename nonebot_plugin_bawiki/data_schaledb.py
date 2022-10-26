@@ -154,8 +154,6 @@ async def schale_get_calender(server, students, common, localization, raids):
 
             return pic
 
-        return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
-
     async def draw_event():
         pic = pic_bg.copy().draw_text(
             (25, 25, 1375, 150), "当前活动", weight="bold", max_fontsize=80
@@ -215,8 +213,6 @@ async def schale_get_calender(server, students, common, localization, raids):
                 )
             )
             return pic.paste(ev_bg, (int((pic.width - ev_bg.width) / 2), 250), True)
-
-        return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
 
     async def draw_raid():
         pic = pic_bg.copy()
@@ -352,8 +348,6 @@ async def schale_get_calender(server, students, common, localization, raids):
             )
             return pic.paste(c_bg, (int((pic.width - c_bg.width) / 2), 250), True)
 
-        return pic.draw_text((25, 200, 1375, 615), "没有获取到数据", max_fontsize=60)
-
     async def draw_birth():
         pic = pic_bg.copy().draw_text(
             (25, 25, 1375, 150), "学生生日", weight="bold", max_fontsize=80
@@ -432,9 +426,12 @@ async def schale_get_calender(server, students, common, localization, raids):
 
             return pic
 
-        return pic.draw_text((25, 200, 1375, 615), "没有学生近期生日", max_fontsize=60)
-
     img = await asyncio.gather(draw_gacha(), draw_event(), draw_raid(), draw_birth())
+    img = [x for x in img if x]
+    if not img:
+        img.append(
+            pic_bg.copy().draw_text((0, 0, 1400, 640), "没有获取到任何数据", max_fontsize=60)
+        )
     bg = (
         BuildImage.new("RGBA", (1500, 200 + sum([x.height + 50 for x in img])))
         .gradient_color((138, 213, 244), (251, 226, 229))

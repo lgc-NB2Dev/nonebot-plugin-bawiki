@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import math
 from io import BytesIO
 from typing import Any, Dict, List
 
@@ -130,6 +129,14 @@ async def db_wiki_craft():
     ]
 
 
+async def db_wiki_furniture():
+    wiki = (await db_get_wiki_data())["furniture"]
+    return [
+        MessageSegment.image(x)
+        for x in await asyncio.gather(*[db_get(y, True) for y in wiki])
+    ]
+
+
 async def db_global_future(date: datetime.datetime = None, num=1, all_img=False):
     data = (await db_get_wiki_data())["global_future"]
     img = await db_get(data["img"], True)
@@ -138,17 +145,17 @@ async def db_global_future(date: datetime.datetime = None, num=1, all_img=False)
         return MessageSegment.image(img)
 
     compare_date = date or datetime.datetime.now()
-    index = None
+    index = -1
     for i, v in enumerate(parts := data["parts"]):
         start, end = [datetime.datetime.strptime(x, "%Y/%m/%d") for x in v["date"]]
         if start <= compare_date < end:
             index = i
 
-    if not index:
-        return "没有找到符合日期的部分"
-
     if not date:
         index += 1
+
+    if index == -1:
+        return "没有找到符合日期的部分"
 
     sliced_parts = parts[index : index + num]
 

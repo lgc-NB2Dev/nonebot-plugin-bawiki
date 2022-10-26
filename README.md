@@ -157,6 +157,13 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.5.1
+
+- 新指令`ba互动家具`
+- `ba国际服千里眼`指令的日期参数如果小于当前日期则会将日期向前推一年
+- `ba日程表`的 SchaleDB 源如果没获取到数据则不会绘画那一部分
+- `ba国际服千里眼`日期匹配 bug 修复
+
 ### 0.5.0
 
 - 新数据源 [bawiki-data](http://github.com/lgc2333/bawiki-data)
