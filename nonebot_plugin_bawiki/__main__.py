@@ -1,9 +1,14 @@
 import asyncio
 import datetime
+import random
 from argparse import Namespace
 
 from nonebot import logger, on_command, on_shell_command
-from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import (
+    ActionFailed,
+    Message,
+    MessageSegment,
+)
 from nonebot.exception import FinishedException, ParserExit
 from nonebot.internal.matcher import Matcher
 from nonebot.params import CommandArg, ShellCommandArgs
@@ -28,11 +33,13 @@ from .data_bawiki import (
     schale_to_gamekee,
 )
 from .data_gamekee import (
+    GameKeeVoice,
     game_kee_calender,
+    game_kee_get_page,
+    game_kee_get_stu_cid_li,
+    game_kee_get_voice,
+    game_kee_grab_l2d,
     game_kee_page_url,
-    get_game_kee_page,
-    get_stu_cid_li,
-    grab_l2d,
 )
 from .data_schaledb import (
     draw_fav_li,
@@ -100,7 +107,7 @@ async def send_wiki_page(sid, matcher: Matcher):
     await matcher.send(f"请稍等，正在截取Wiki页面……\n{url}")
 
     try:
-        img = await get_game_kee_page(url)
+        img = await game_kee_get_page(url)
     except:
         logger.exception(f"截取wiki页面出错 {url}")
         return await matcher.finish("截取页面出错，请检查后台输出")
@@ -174,7 +181,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         return await matcher.finish("请提供学生名称")
 
     try:
-        ret = await get_stu_cid_li()
+        ret = await game_kee_get_stu_cid_li()
     except:
         logger.exception("获取学生列表出错")
         return await matcher.finish("获取学生列表出错，请检查后台输出")
@@ -197,7 +204,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         if r := (await db_get_extra_l2d_list()).get(stu_name):
             return f"{BAWIKI_DB_URL}{r}"
 
-        return await grab_l2d((await get_stu_cid_li()).get(stu_name))
+        return await game_kee_grab_l2d((await game_kee_get_stu_cid_li()).get(stu_name))
 
     arg = arg.extract_plain_text().strip()
     if not arg:
@@ -482,3 +489,53 @@ async def _(matcher: Matcher):
         return await matcher.finish("获取图片失败，请检查后台输出")
 
     await matcher.finish(im)
+
+
+voice = on_command("ba语音")
+
+
+@voice.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip()
+    if not arg:
+        return await matcher.finish("请提供学生名称")
+
+    arg = arg.split(maxsplit=2)
+    name = arg[0].strip()
+    v_type = arg[1].strip().lower() if len(arg) == 2 else None
+
+    try:
+        ret = await game_kee_get_stu_cid_li()
+    except:
+        logger.exception("获取学生列表出错")
+        return await matcher.finish("获取学生列表出错，请检查后台输出")
+
+    if not ret:
+        return await matcher.finish("没有获取到学生列表数据")
+
+    try:
+        org_stu_name = await recover_stu_alia(name, True)
+        stu_name = await schale_to_gamekee(org_stu_name)
+    except:
+        logger.exception("还原学生别名失败")
+        return await matcher.finish("还原学生别名失败，请检查后台输出")
+
+    if not (sid := ret.get(stu_name)):
+        return await matcher.finish("未找到该学生")
+
+    voices = await game_kee_get_voice(sid)
+    if v_type:
+        voices = [x for x in voices if v_type in x.title]
+    if not voices:
+        await matcher.finish("没找到符合要求的语音捏")
+
+    v: GameKeeVoice = random.choice(voices)
+    v_data = await async_req(v.url, raw=True)
+
+    im = [f"学生 {org_stu_name} 语音 {v.title}\n-=-=-=-=-=-=-=-"]
+    if v.jp:
+        im.append(v.jp)
+    if v.cn:
+        im.append(v.cn)
+    await matcher.send("\n".join(im))
+    await matcher.send(MessageSegment.record(v_data))

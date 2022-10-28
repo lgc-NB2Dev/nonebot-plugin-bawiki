@@ -1,10 +1,12 @@
 import asyncio
 import re
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List, Union
 
+from bs4 import BeautifulSoup, ResultSet, Tag
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
@@ -24,7 +26,7 @@ async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
     return ret["data"]
 
 
-async def get_calender():
+async def game_kee_get_calender():
     ret: List = await game_kee_request("https://ba.gamekee.com/v1/wiki/index")
 
     for i in ret:
@@ -39,7 +41,7 @@ async def get_calender():
             return li
 
 
-async def get_stu_li():
+async def game_kee_get_stu_li():
     ret = await game_kee_request("https://ba.gamekee.com/v1/wiki/entry")
 
     for i in ret["entry_list"]:
@@ -50,15 +52,15 @@ async def get_stu_li():
                     return {x["name"]: x for x in ii["child"]}
 
 
-async def get_stu_cid_li():
-    return {x: y["content_id"] for x, y in (await get_stu_li()).items()}
+async def game_kee_get_stu_cid_li():
+    return {x: y["content_id"] for x, y in (await game_kee_get_stu_li()).items()}
 
 
 def game_kee_page_url(sid):
     return f"https://ba.gamekee.com/{sid}.html"
 
 
-async def get_game_kee_page(url):
+async def game_kee_get_page(url):
     async with get_new_page() as page:  # type:Page
         await page.goto(url, timeout=60 * 1000)
 
@@ -82,15 +84,15 @@ async def get_game_kee_page(url):
 
 
 async def game_kee_calender():
-    ret = await get_calender()
+    ret = await game_kee_get_calender()
     if not ret:
         return "没有获取到GameKee日程表数据"
 
-    pic = await get_calender_page(ret)
+    pic = await game_kee_get_calender_page(ret)
     return MessageSegment.image(pic)
 
 
-async def get_calender_page(ret):
+async def game_kee_get_calender_page(ret):
     now = datetime.now()
 
     async def draw(it: dict):
@@ -193,7 +195,7 @@ async def get_calender_page(ret):
     return bg.save_jpg()
 
 
-async def grab_l2d(cid):
+async def game_kee_grab_l2d(cid):
     r: dict = await game_kee_request(f"https://ba.gamekee.com/v1/content/detail/{cid}")
     r: str = r["content"]
 
@@ -206,3 +208,36 @@ async def grab_l2d(cid):
     img = re.findall('data-real="([^"]*)"', r)
 
     return [f"https:{x}" for x in img]
+
+
+@dataclass()
+class GameKeeVoice:
+    title: str
+    jp: str
+    cn: str
+    url: str
+
+
+async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
+    wiki_html = (
+        await game_kee_request(f"https://ba.gamekee.com/v1/content/detail/{cid}")
+    )["content"]
+    bs = BeautifulSoup(wiki_html, "lxml")
+    audios = bs.select(".mould-table>tbody>tr>td>div>div>audio")
+
+    parsed: List[GameKeeVoice] = []
+    for au in audios:
+        url: str = au["src"]
+        if not url.startswith("http"):
+            url = f"https:{url}"
+
+        tr1: Tag = au.parent.parent.parent.parent
+        tds: ResultSet[Tag] = tr1.find_all("td")
+        title = tds[0].text.strip()
+        jp = "\n".join(tds[2].stripped_strings)
+
+        tr2 = tr1.next_sibling
+        cn = "\n".join(tr2.stripped_strings)
+        parsed.append(GameKeeVoice(title, jp, cn, url))
+
+    return parsed

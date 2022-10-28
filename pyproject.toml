@@ -31,6 +31,8 @@ nonebot-plugin-htmlrender = "^0.2.0"
 Pillow = "^9.2.0"
 nonebot-plugin-imageutils = "^0.1.8"
 nonebot-plugin-apscheduler = "^0.2.0"
+beautifulsoup4 = "^4.11.1"
+lxml = "^4.9.1"
 
 [tool.poetry.dev-dependencies]
 
