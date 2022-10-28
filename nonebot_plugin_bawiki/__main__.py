@@ -526,7 +526,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     voices = await game_kee_get_voice(sid)
     if v_type:
-        voices = [x for x in voices if v_type in x.title]
+        voices = [x for x in voices if v_type in x.title.lower()]
     if not voices:
         await matcher.finish("没找到符合要求的语音捏")
 
