@@ -500,9 +500,10 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     if not arg:
         return await matcher.finish("请提供学生名称")
 
-    arg = arg.split(maxsplit=2)
-    name = arg[0].strip()
-    v_type = arg[1].strip().lower() if len(arg) == 2 else None
+    arg = arg.split()
+    arg_len = len(arg)
+    name = " ".join(arg[:-1]) if arg_len > 1 else arg[0]
+    v_type = arg[-1].strip().lower() if arg_len > 1 else None
 
     try:
         ret = await game_kee_get_stu_cid_li()
