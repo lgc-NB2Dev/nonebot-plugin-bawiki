@@ -403,7 +403,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
             await matcher.finish("当前服务器没有正在进行的综合战术考试")
 
     else:
-        if (not str(arg).isdigit()) or (arg := int(arg) < 1):
+        if (not str(arg).isdigit()) or ((arg := int(arg)) < 1):
             await matcher.finish("综合战术考试ID需为整数，从1开始，代表第1个综合战术考试")
         events.append(arg)
 

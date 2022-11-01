@@ -114,7 +114,6 @@ async def db_wiki_event(event_id):
 
 
 async def db_wiki_time_atk(raid_id):
-    raid_id = int(raid_id)
     if raid_id >= 1000:
         raid_id = int(raid_id / 1000)
     wiki = (await db_get_wiki_data())["time_atk"]
