@@ -212,6 +212,23 @@ __plugin_meta__ = PluginMetadata(
                 ),
             },
             {
+                "func": "学生语音",
+                "trigger_method": "指令",
+                "trigger_condition": "ba语音",
+                "brief_des": "发送学生语音",
+                "detail_des": (
+                    "从GameKee爬取学生语音并发送\n"
+                    "指定关键词时会从匹配结果中随机选择一个语音发送\n"
+                    " \n"
+                    "可以用这些指令触发：\n"
+                    "- <ft color=(238,120,0)>ba语音</ft>\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba语音 忧</ft>\n"
+                    "- <ft color=(238,120,0)>ba语音 美游 被cc</ft>"
+                ),
+            },
+            {
                 "func": "互动家具总览",
                 "trigger_method": "指令",
                 "trigger_condition": "ba互动家具",

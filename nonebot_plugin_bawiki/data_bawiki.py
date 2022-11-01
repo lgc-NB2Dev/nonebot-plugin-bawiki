@@ -114,8 +114,11 @@ async def db_wiki_event(event_id):
 
 
 async def db_wiki_time_atk(raid_id):
+    raid_id = int(raid_id)
+    if raid_id >= 1000:
+        raid_id = int(raid_id / 1000)
     wiki = (await db_get_wiki_data())["time_atk"]
-    if (raid_id := (int(raid_id) % 1000)) > (len(wiki) - 1):
+    if raid_id > (len(wiki) - 1):
         return f"没有找到该综合战术考试（目前共有{len(wiki)}个综合战术考试）"
 
     return MessageSegment.image(await db_get(wiki[raid_id], True))
