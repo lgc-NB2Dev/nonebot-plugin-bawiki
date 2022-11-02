@@ -7,6 +7,7 @@ from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import (
     ActionFailed,
     Message,
+    MessageEvent,
     MessageSegment,
 )
 from nonebot.exception import FinishedException, ParserExit
@@ -49,6 +50,7 @@ from .data_schaledb import (
     schale_get_stu_dict,
     schale_get_stu_info,
 )
+from .gacha import gacha
 from .util import async_req, clear_req_cache, recover_alia, splice_msg
 
 
@@ -540,3 +542,11 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
         im.append(v.cn)
     await matcher.send("\n".join(im))
     await matcher.send(MessageSegment.record(v_data))
+
+
+gacha_once = on_command("batest")
+
+
+@gacha_once.handle()
+async def _(matcher: Matcher, event: MessageEvent):
+    await matcher.finish(await gacha(event.get_user_id(), 10))

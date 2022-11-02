@@ -42,6 +42,14 @@ async def db_get_event_alias() -> Dict[str, List[str]]:
     return await db_get("data/event_alias.json")
 
 
+async def db_get_gacha_data() -> Dict[str, Any]:
+    return await db_get("data/gacha.json")
+
+
+async def db_get_emoji() -> Dict[str, Any]:
+    return await db_get("data/emoji.json")
+
+
 async def schale_to_gamekee(o: str) -> str:
     diff = await db_get_schale_to_gamekee()
     if o in diff:

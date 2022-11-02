@@ -1,12 +1,15 @@
 import datetime
 import json
-from typing import Dict, List, Union
+from copy import deepcopy
+from typing import Dict, Iterator, List, TypeVar, Union
 
 from PIL import Image, ImageOps
 from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Message
 
 from .config import config
+
+_T = TypeVar("_T")
 
 req_cache = {}
 
@@ -88,3 +91,16 @@ def splice_msg(msgs):
             v = f"\n{v}"
         im += v
     return im
+
+
+def split_list(li: Iterator[_T], length: int) -> List[List[_T]]:
+    latest = []
+    tmp = []
+    for n, i in enumerate(li):
+        tmp.append(i)
+        if (n + 1) % length == 0:
+            latest.append(deepcopy(tmp))
+            tmp.clear()
+    if tmp:
+        latest.append(deepcopy(tmp))
+    return latest
