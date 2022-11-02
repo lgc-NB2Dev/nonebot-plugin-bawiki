@@ -86,7 +86,7 @@ async def gen_stu_img(students: Iterable[GachaStudent]) -> Tuple[BuildImage]:
             )
             stu_img = BuildImage.open(BytesIO(stu_img))
         except:
-            logger.exception("学生数据获取失败")
+            logger.exception(f"学生数据获取失败 {s.id}")
             stu_img = IMG_GACHA_STU_ERR
             stu_star = 0
 
