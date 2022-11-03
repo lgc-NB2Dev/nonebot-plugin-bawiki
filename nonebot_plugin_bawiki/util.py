@@ -62,12 +62,13 @@ async def async_req(
     ignore_cache=False,
     proxy=config.proxy,
     method="GET",
+    session: ClientSession = None,
     **kwargs,
 ) -> Union[str, bytes, dict, list]:
     if (not ignore_cache) and (c := req_cache.get(url)):
         return c
 
-    async with ClientSession() as c:
+    async with (session or ClientSession()) as c:
         async with c.request(method, url, **kwargs, proxy=proxy) as r:
             ret = (await r.read()) if raw else (await r.text())
             if is_json and (not raw):

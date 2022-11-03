@@ -6,6 +6,7 @@ from io import BytesIO
 from typing import Dict, Iterable, List, Optional, Tuple, TypedDict
 
 import aiofiles
+from aiohttp import ClientSession
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_imageutils import BuildImage
@@ -74,21 +75,21 @@ async def get_gacha_data(qq: str) -> GachaData:
 async def gen_stu_img(students: Iterable[GachaStudent]) -> Tuple[BuildImage]:
     stu_li = await schale_get_stu_dict("Id")
 
-    async def gen_single(s: GachaStudent) -> BuildImage:
+    async def gen_single(stu: GachaStudent) -> BuildImage:
         bg = IMG_GACHA_CARD_BG.copy()
 
+        stu_star = 0
         try:
-            stu_j = stu_li[s.id]
+            stu_j = stu_li[stu.id]
             stu_star: int = stu_j["StarGrade"]
             stu_img = await schale_get(
-                f"images/student/collection/Student_Portrait_{stu_j['DevName']}_Collection.webp",
+                f"images/student/collection/{stu_j['CollectionTexture']}.webp",
                 True,
             )
             stu_img = BuildImage.open(BytesIO(stu_img))
         except:
-            logger.exception(f"学生数据获取失败 {s.id}")
+            logger.exception(f"学生数据获取失败 {stu.id}")
             stu_img = IMG_GACHA_STU_ERR
-            stu_star = 0
 
         card_img = BuildImage.new("RGBA", IMG_GACHA_CARD_MASK.size, (0, 0, 0, 0))
         card_img.image.paste(
@@ -106,12 +107,12 @@ async def gen_stu_img(students: Iterable[GachaStudent]) -> Tuple[BuildImage]:
         font_x_offset = 45
         font_y_offset = 2
 
-        if s.new:
+        if stu.new:
             bg = bg.paste(IMG_GACHA_NEW, (font_x_offset, font_y_offset), True)
             font_x_offset -= 2
             font_y_offset += 29
 
-        if s.pickup:
+        if stu.pickup:
             font_x_offset -= 4
             font_y_offset -= 4
             bg = bg.paste(IMG_GACHA_PICKUP, (font_x_offset, font_y_offset), True)
@@ -151,23 +152,26 @@ async def gen_gacha_img(
     return bg.save("PNG")
 
 
-async def gacha(qq: str, times: int, server: int = 0):
-    common = await schale_get_common()
-    c_gacha = common["regions"][server]["current_gacha"]
-    if not (ev := find_current_event(c_gacha)):
-        return "当前服务器没有正在进行的卡池"
-    chars = ev[0]["characters"]
+async def gacha(qq: str, times: int, gacha_data: dict, up_pool: List[int] = None):
+    # 屎山代码 别骂了别骂了
+    # 如果有大佬指点指点怎么优化或者愿意发个PR就真的太感激了
+
+    if not up_pool:
+        up_pool = []
 
     stu_li = await schale_get_stu_dict("Id")
     up_3_li, up_2_li = [
-        [x for x in chars if x in stu_li and stu_li[x]["StarGrade"] == y]
+        [x for x in up_pool if x in stu_li and stu_li[x]["StarGrade"] == y]
         for y in [3, 2]
     ]
-    gacha_data = await db_get_gacha_data()
 
-    star_3_base, star_2_base, star_1_base = [
-        gacha_data["base"][x] for x in ["3", "2", "1"]
-    ]
+    base_char: dict = gacha_data["base"]
+    for up in up_pool:
+        for li in base_char.values():  # type: List[int]
+            if up in li:
+                li.remove(up)
+
+    star_3_base, star_2_base, star_1_base = [base_char[x] for x in ["3", "2", "1"]]
     star_3_chance, star_2_chance, star_1_chance = [
         x["chance"] for x in [star_3_base, star_2_base, star_1_base]
     ]
@@ -183,6 +187,9 @@ async def gacha(qq: str, times: int, server: int = 0):
 
     gacha_data = await get_gacha_data(qq)
     gacha_result: List[GachaStudent] = []
+
+    picked_3star_up = False
+    last_count = gacha_data["total_count"]
     for i in range(1, times + 1):
         pool_and_weight = [
             (up_3_li, up_3_chance),
@@ -201,19 +208,20 @@ async def gacha(qq: str, times: int, server: int = 0):
         char = random.choice(random.choices(pool, weights=weight, k=1)[0])
 
         is_3star_pickup = char in up_3_li
-        is_pickup = is_3star_pickup or char in up_2_li
+        is_pickup = is_3star_pickup or (char in up_2_li)
         is_new = char not in gacha_data["collected"]
         gacha_result.append(GachaStudent(id=char, pickup=is_pickup, new=is_new))
 
         if is_new:
             gacha_data["collected"].append(char)
 
-        if is_3star_pickup:
+        if is_3star_pickup or ((not up_pool) and char in star_3_base["char"]):
             gacha_data["total_count"] = 0
+            picked_3star_up = True
         else:
             gacha_data["total_count"] += 1
+            if not picked_3star_up:
+                last_count += 1
 
     await set_gacha_data(qq, gacha_data)
-    return MessageSegment.image(
-        await gen_gacha_img(gacha_result, gacha_data["total_count"])
-    )
+    return MessageSegment.image(await gen_gacha_img(gacha_result, last_count))

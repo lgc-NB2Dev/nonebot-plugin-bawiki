@@ -1,7 +1,10 @@
 import asyncio
 import datetime
+import math
 import random
 from argparse import Namespace
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Union
 
 from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import (
@@ -21,7 +24,9 @@ from .const import BAWIKI_DB_URL, SCHALE_URL
 from .data_bawiki import (
     db_get_event_alias,
     db_get_extra_l2d_list,
+    db_get_gacha_data,
     db_get_raid_alias,
+    db_get_stu_alias,
     db_get_terrain_alias,
     db_global_future,
     db_wiki_craft,
@@ -54,6 +59,16 @@ from .gacha import gacha
 from .util import async_req, clear_req_cache, recover_alia, splice_msg
 
 
+@dataclass()
+class GachaPool:
+    name: str
+    pool: List[int]
+    index: Optional[int] = None
+
+
+gacha_pool_index: Dict[str, GachaPool] = {}
+
+
 @scheduler.scheduled_job("interval", hours=3)
 async def _():
     clear_req_cache()
@@ -83,7 +98,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
             if (not arg) or ("日" in arg) or ("j" in arg):
                 servers.append(0)
-            if (not arg) or ("国际服" in arg) or ("g" in arg):
+            if (not arg) or ("国" in arg) or ("g" in arg):
                 servers.append(1)
 
             await asyncio.gather(
@@ -544,9 +559,115 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     await matcher.send(MessageSegment.record(v_data))
 
 
-gacha_once = on_command("batest")
+def get_1st_pool(data: dict) -> Optional[GachaPool]:
+    if not data:
+        return
+
+    pool_data = data["current_pools"]
+    pool = pool_data[0]
+    pool_obj = GachaPool(name=pool["name"], pool=pool["pool"], index=0)
+    return pool_obj
+
+
+change_pool = on_command("ba切换卡池")
+
+
+@change_pool.handle()
+async def _(matcher: Matcher, event: MessageEvent, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip().lower()
+    qq = event.get_user_id()
+
+    if arg:
+        if "常驻" in arg:
+            current = GachaPool(name="常驻池", pool=[])
+        else:
+            pool = []
+            try:
+                stu_li = await schale_get_stu_dict()
+                stu_alias = await db_get_stu_alias()
+            except:
+                logger.exception("获取学生列表或别名失败")
+                return await matcher.finish("获取学生列表或别名失败，请检查后台输出")
+
+            for i in arg.split():
+                if not (stu := stu_li.get(recover_alia(i, stu_alias))):
+                    await matcher.finish(f"未找到学生 {i}")
+                if stu["StarGrade"] == 1:
+                    await matcher.finish("不能UP一星角色")
+                pool.append(stu)
+
+            current = GachaPool(
+                name=f"自定义卡池（{'、'.join([x['Name'] for x in pool])}）",
+                pool=[x["Id"] for x in pool],
+            )
+
+    else:
+        try:
+            gacha_data = await db_get_gacha_data()
+        except:
+            logger.exception("获取抽卡基本数据失败")
+            return await matcher.finish("获取抽卡基本数据失败，请检查后台输出")
+
+        pool_data = gacha_data["current_pools"]
+        if not pool_data:
+            await matcher.finish("当前没有可切换的卡池")
+
+        pool_obj = gacha_pool_index.get(qq) or get_1st_pool(gacha_data)
+        if not pool_obj:
+            await matcher.finish("当前没有UP池可供切换")
+
+        if (index := pool_obj.index) is not None:
+            index += 1
+            if len(pool_data) <= index:
+                index = 0
+        else:
+            index = 0
+
+        pool = pool_data[index]
+        current = GachaPool(name=pool["name"], pool=pool["pool"], index=index)
+
+    gacha_pool_index[qq] = current
+    await matcher.finish(f"已切换到卡池 {current.name}")
+
+
+gacha_once = on_command("ba抽卡")
 
 
 @gacha_once.handle()
-async def _(matcher: Matcher, event: MessageEvent):
-    await matcher.finish(await gacha(event.get_user_id(), 10))
+async def _(matcher: Matcher, event: MessageEvent, arg: Message = CommandArg()):
+    arg = arg.extract_plain_text().strip().lower()
+
+    gacha_times = 10
+    if arg:
+        if (not arg.isdigit()) or (not (1 <= (gacha_times := int(arg)) <= 90)):
+            await matcher.finish("请输入有效的抽卡次数，在1~90之间")
+
+    try:
+        gacha_data = await db_get_gacha_data()
+    except:
+        logger.exception("获取抽卡基本数据失败")
+        return await matcher.finish("获取抽卡基本数据失败，请检查后台输出")
+
+    pool_obj = gacha_pool_index.get(qq := event.get_user_id()) or get_1st_pool(
+        gacha_data
+    )
+    if not pool_obj:
+        await matcher.finish("目前没有UP池，请使用[ba切换卡池]指令来切换到常驻池或组建一个自定义UP池")
+
+    try:
+        img = []
+        for _ in range(math.ceil(gacha_times / 10)):
+            img.append(
+                await gacha(
+                    qq,
+                    10 if gacha_times >= 10 else gacha_times,
+                    gacha_data,
+                    pool_obj.pool,
+                )
+            )
+            gacha_times -= 10
+    except:
+        logger.exception("抽卡错误")
+        return await matcher.finish("抽卡出错了，请检查后台输出")
+
+    await matcher.finish(MessageSegment.at(qq) + f"当前抽取卡池：{pool_obj.name}" + img)

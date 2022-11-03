@@ -26,8 +26,8 @@ PAGE_KWARGS = {
 }
 
 
-async def schale_get(suffix, raw=False):
-    return await async_req(f"{SCHALE_URL}{suffix}", raw=raw)
+async def schale_get(suffix, raw=False, **kwargs):
+    return await async_req(f"{SCHALE_URL}{suffix}", raw=raw, **kwargs)
 
 
 async def schale_get_stu_data() -> List[Dict[str, Any]]:
