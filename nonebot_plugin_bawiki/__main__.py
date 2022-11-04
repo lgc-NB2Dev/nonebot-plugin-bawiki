@@ -4,8 +4,10 @@ import math
 import random
 from argparse import Namespace
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from io import BytesIO
+from typing import Dict, List, Optional
 
+from PIL import Image
 from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import (
     ActionFailed,
@@ -19,12 +21,17 @@ from nonebot.params import CommandArg, ShellCommandArgs
 from nonebot.permission import SUPERUSER
 from nonebot.rule import ArgumentParser
 from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_imageutils import BuildImage
 
 from .const import BAWIKI_DB_URL, SCHALE_URL
 from .data_bawiki import (
+    MangaDict,
+    db_get,
+    db_get_emoji,
     db_get_event_alias,
     db_get_extra_l2d_list,
     db_get_gacha_data,
+    db_get_manga,
     db_get_raid_alias,
     db_get_stu_alias,
     db_get_terrain_alias,
@@ -671,3 +678,42 @@ async def _(matcher: Matcher, event: MessageEvent, arg: Message = CommandArg()):
         return await matcher.finish("抽卡出错了，请检查后台输出")
 
     await matcher.finish(MessageSegment.at(qq) + f"当前抽取卡池：{pool_obj.name}" + img)
+
+
+random_emoji = on_command("ba表情")
+
+
+@random_emoji.handle()
+async def _(matcher: Matcher):
+    try:
+        emojis = await db_get_emoji()
+        emo = await db_get(random.choice(emojis), True)
+    except:
+        logger.exception("获取表情失败")
+        return await matcher.finish("获取表情失败，请检查后台输出")
+    await matcher.finish(MessageSegment.image(emo))
+
+
+random_manga = on_command("ba漫画")
+
+
+@random_manga.handle()
+async def _(matcher: Matcher):
+    async def get_pic(url):
+        p = await async_req(url, raw=True)
+        if url.endswith(".webp"):
+            p = BuildImage.open(BytesIO(p)).save_png()
+        return p
+
+    try:
+        manga: MangaDict = random.choice(await db_get_manga())
+        pics = await asyncio.gather(*[get_pic(x) for x in manga["pics"]])
+    except:
+        logger.exception("获取漫画失败")
+        return await matcher.finish("获取漫画失败，请检查后台输出")
+
+    await matcher.finish(
+        Message()
+        + f'{manga["title"]}\n-=-=-=-=-=-=-=-\n{manga["detail"]}'
+        + [MessageSegment.image(x) for x in pics]
+    )

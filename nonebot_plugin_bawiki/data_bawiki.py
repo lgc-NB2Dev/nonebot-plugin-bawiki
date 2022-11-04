@@ -1,13 +1,20 @@
 import asyncio
 import datetime
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TypedDict
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_imageutils import BuildImage
 
 from .const import BAWIKI_DB_URL
 from .util import async_req, recover_alia
+
+
+class MangaDict(TypedDict):
+    cid: int
+    title: str
+    detail: str
+    pics: list[str]
 
 
 async def db_get(suffix, raw=False):
@@ -46,8 +53,12 @@ async def db_get_gacha_data() -> Dict[str, Any]:
     return await db_get("data/gacha.json")
 
 
-async def db_get_emoji() -> Dict[str, Any]:
+async def db_get_emoji() -> List[str]:
     return await db_get("data/emoji.json")
+
+
+async def db_get_manga() -> List[MangaDict]:
+    return await db_get("data/manga.json")
 
 
 async def schale_to_gamekee(o: str) -> str:

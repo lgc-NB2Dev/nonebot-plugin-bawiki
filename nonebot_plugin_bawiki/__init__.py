@@ -2,7 +2,7 @@ from nonebot.plugin import PluginMetadata
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.5.2"
+__version__ = "0.6.0"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
@@ -234,6 +234,52 @@ __plugin_meta__ = PluginMetadata(
                 "trigger_condition": "ba互动家具",
                 "brief_des": "查询互动家具总览图",
                 "detail_des": "发送咖啡厅内所有互动家具以及对应学生的总览图\n图片作者 B站@夜猫咪喵喵猫",
+            },
+            {
+                "func": "模拟抽卡",
+                "trigger_method": "指令",
+                "trigger_condition": "ba抽卡",
+                "brief_des": "模拟抽卡",
+                "detail_des": (
+                    "模拟抽卡\n"
+                    "可以使用 <ft color=(238,120,0)>ba切换卡池</ft> 指令来切换卡池\n"
+                    "可以指定抽卡次数，需要在1~90之间，默认10\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba抽卡</ft>\n"
+                    "- <ft color=(238,120,0)>ba抽卡 20</ft>"
+                ),
+            },
+            {
+                "func": "切换卡池",
+                "trigger_method": "指令",
+                "trigger_condition": "ba切换卡池",
+                "brief_des": "设置模拟抽卡的UP池",
+                "detail_des": (
+                    "设置模拟抽卡功能的UP池角色\n"
+                    "默认从当前数据源UP池中轮流切换\n"
+                    "当参数为 <ft color=(238,120,0)>常驻</ft> 时，切换到常驻池（没有UP）\n"
+                    "可以自定义池子UP角色，支持2星与3星角色，参数中学生名称用空格分隔，支持部分学生别名\n"
+                    " \n"
+                    "指令示例：\n"
+                    "- <ft color=(238,120,0)>ba切换卡池</ft>\n"
+                    "- <ft color=(238,120,0)>ba切换卡池 常驻</ft>"
+                    "- <ft color=(238,120,0)>ba切换卡池 小桃 小绿</ft>"
+                ),
+            },
+            {
+                "func": "抽表情",
+                "trigger_method": "指令",
+                "trigger_condition": "ba表情",
+                "brief_des": "随机发送一个国际服社团聊天表情",
+                "detail_des": "随机发送一个国际服社团聊天表情\n来源：解包",
+            },
+            {
+                "func": "随机漫画",
+                "trigger_method": "指令",
+                "trigger_condition": "ba漫画",
+                "brief_des": "随机发送一话官推漫画",
+                "detail_des": "随机发送一话BA官推漫画\n来源：GameKee",
             },
             {
                 "func": "清空缓存",
