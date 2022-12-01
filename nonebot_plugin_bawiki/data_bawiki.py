@@ -14,7 +14,7 @@ class MangaDict(TypedDict):
     cid: int
     title: str
     detail: str
-    pics: list[str]
+    pics: List[str]
 
 
 async def db_get(suffix, raw=False):
