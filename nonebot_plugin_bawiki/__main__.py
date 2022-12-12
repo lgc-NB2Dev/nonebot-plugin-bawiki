@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Dict, List, Optional
 
-from PIL import Image
 from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import (
     ActionFailed,

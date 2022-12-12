@@ -14,10 +14,9 @@ from playwright.async_api import Page, ViewportSize
 
 from .const import (
     MIRROR_SCHALE_URL,
-    RES_CALENDER_BANNER,
-    RES_SCHALE_BG,
     SCHALE_URL,
 )
+from .resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
 from .util import async_req, img_invert_rgba, parse_time_delta
 
 PAGE_KWARGS = {
@@ -426,16 +425,20 @@ async def schale_get_calender(server, students, common, localization, raids):
 
             return pic
 
-    img = await asyncio.gather(draw_gacha(), draw_event(), draw_raid(), draw_birth())
-    img = [x for x in img if x]
+    img = await asyncio.gather(  # type: ignore
+        draw_gacha(), draw_event(), draw_raid(), draw_birth()
+    )
+    img: List[BuildImage] = [x for x in img if x]
     if not img:
         img.append(
             pic_bg.copy().draw_text((0, 0, 1400, 640), "没有获取到任何数据", max_fontsize=60)
         )
+
+    bg_w = 1500
+    bg_h = 200 + sum([x.height + 50 for x in img])
     bg = (
-        BuildImage.new("RGBA", (1500, 200 + sum([x.height + 50 for x in img])))
-        .gradient_color((138, 213, 244), (251, 226, 229))
-        .paste(BuildImage.open(RES_CALENDER_BANNER).resize((1500, 150)))
+        BuildImage.new("RGBA", (bg_w, bg_h))
+        .paste(RES_CALENDER_BANNER.copy().resize((1500, 150)))
         .draw_text(
             (50, 0, 1480, 150),
             f"SchaleDB丨活动日程丨{localization['ServerName'][str(server)]}",
@@ -444,11 +447,15 @@ async def schale_get_calender(server, students, common, localization, raids):
             fill="#ffffff",
             halign="left",
         )
+        .paste(
+            RES_GRADIENT_BG.copy().resize((1500, bg_h - 150), resample=Image.NEAREST),
+            (0, 150),
+        )
     )
 
     h_index = 200
     for im in img:
-        bg.paste(im, (50, h_index), True)
+        bg.paste(im.circle_corner(10), (50, h_index), True)
         h_index += im.height + 50
     return bg.convert("RGB").save("png")
 
@@ -480,8 +487,8 @@ async def draw_fav_li(lvl):
         line = math.ceil(l / line_max_icon)
         length = line_max_icon
 
-    img = BuildImage.open(RES_SCHALE_BG).resize(
-        (icon_w * length, icon_h * line + 5), keep_ratio=True
+    img = RES_GRADIENT_BG.copy().resize(
+        (icon_w * length, icon_h * line + 5), resample=Image.NEAREST
     )
 
     async def draw_stu(name_, dev_name_, line_, index_):
