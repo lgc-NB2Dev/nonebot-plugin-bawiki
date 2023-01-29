@@ -110,7 +110,7 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 兼容 [nonebot-plugin-PicMenu](https://github.com/hamo-reid/nonebot_plugin_PicMenu)
 
-见[这里](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py#L11)
+见[这里](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py#L17)
 
 待更新
 
@@ -156,6 +156,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.6.3
+
+- 使用 `require` 加载依赖插件
 
 ### 0.6.2
 

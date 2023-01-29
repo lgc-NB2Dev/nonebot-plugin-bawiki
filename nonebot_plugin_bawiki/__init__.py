@@ -1,8 +1,13 @@
+from nonebot import require
 from nonebot.plugin import PluginMetadata
+
+require("nonebot_plugin_apscheduler")
+require("nonebot_plugin_htmlrender")
+require("nonebot_plugin_imageutils")
 
 from .__main__ import *  # type:ignore
 
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
