@@ -208,7 +208,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                 .convert("RGB")
                 .circle_corner(25)
                 .draw_text(
-                    (0, ev_bg.height - 65, ev_bg.width, ev_bg.height), ev_name, 50
+                    (0, ev_bg.height - 65, ev_bg.width, ev_bg.height), ev_name, max_fontsize=50
                 )
             )
             return pic.paste(ev_bg, (int((pic.width - ev_bg.width) / 2), 250), True)
@@ -342,7 +342,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                         if time_atk
                         else (c_ri["NameCn"] or c_ri["NameJp"])
                     ),
-                    50,
+                    max_fontsize=50,
                 )
             )
             return pic.paste(c_bg, (int((pic.width - c_bg.width) / 2), 250), True)
@@ -398,7 +398,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     int((1400 - (len(birth_this_week) * (180 + 10) - 10)) / 2) + 75
                 )
                 pic = pic.draw_text(
-                    (x_index - 165, y_index, x_index, y_index + 180), "本周", 50
+                    (x_index - 165, y_index, x_index, y_index + 180), "本周", max_fontsize=50
                 )
                 for s in birth_this_week:
                     pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
@@ -414,7 +414,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     int((1400 - (len(birth_next_week) * (180 + 10) - 10)) / 2) + 75
                 )
                 pic = pic.draw_text(
-                    (x_index - 165, y_index, x_index, y_index + 180), "下周", 50
+                    (x_index - 165, y_index, x_index, y_index + 180), "下周", max_fontsize=50
                 )
                 for s in birth_next_week:
                     pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
@@ -442,7 +442,7 @@ async def schale_get_calender(server, students, common, localization, raids):
         .draw_text(
             (50, 0, 1480, 150),
             f"SchaleDB丨活动日程丨{localization['ServerName'][str(server)]}",
-            100,
+            max_fontsize=100,
             weight="bold",
             fill="#ffffff",
             halign="left",

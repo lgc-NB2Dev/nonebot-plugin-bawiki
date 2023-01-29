@@ -156,7 +156,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
 
         if not started:
             img.draw_rectangle((1250, 0, 1400, 60), "gray")
-            img.draw_text((1250, 0, 1400, 60), "未开始", 50, fill="white")
+            img.draw_text((1250, 0, 1400, 60), "未开始", max_fontsize=50, fill="white")
 
         ii = 50
         img.paste(title_p, (60, ii), True)
@@ -186,7 +186,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
         .draw_text(
             (50, 0, 1480, 150),
             "GameKee丨活动日程",
-            100,
+            max_fontsize=100,
             weight="bold",
             fill="#ffffff",
             halign="left",
