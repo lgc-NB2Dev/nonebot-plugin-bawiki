@@ -141,9 +141,17 @@ async def gen_gacha_img(
         y_offset += card_h + y_gap
 
     bg = bg.draw_text(
-        (1678, 841, 1888, 885), "距上个3★UP", max_fontsize=30, weight="bold", fill=(36, 90, 126)
+        (1678, 841, 1888, 885),
+        "距上个3★UP",
+        max_fontsize=30,
+        weight="bold",
+        fill=(36, 90, 126),
     ).draw_text(
-        (1643, 885, 1890, 935), str(count), max_fontsize=30, weight="bold", fill=(255, 255, 255)
+        (1643, 885, 1890, 935),
+        str(count),
+        max_fontsize=30,
+        weight="bold",
+        fill=(255, 255, 255),
     )
 
     return bg.save("PNG")

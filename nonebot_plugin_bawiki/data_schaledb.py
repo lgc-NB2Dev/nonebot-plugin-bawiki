@@ -208,7 +208,9 @@ async def schale_get_calender(server, students, common, localization, raids):
                 .convert("RGB")
                 .circle_corner(25)
                 .draw_text(
-                    (0, ev_bg.height - 65, ev_bg.width, ev_bg.height), ev_name, max_fontsize=50
+                    (0, ev_bg.height - 65, ev_bg.width, ev_bg.height),
+                    ev_name,
+                    max_fontsize=50,
                 )
             )
             return pic.paste(ev_bg, (int((pic.width - ev_bg.width) / 2), 250), True)
@@ -398,7 +400,9 @@ async def schale_get_calender(server, students, common, localization, raids):
                     int((1400 - (len(birth_this_week) * (180 + 10) - 10)) / 2) + 75
                 )
                 pic = pic.draw_text(
-                    (x_index - 165, y_index, x_index, y_index + 180), "本周", max_fontsize=50
+                    (x_index - 165, y_index, x_index, y_index + 180),
+                    "本周",
+                    max_fontsize=50,
                 )
                 for s in birth_this_week:
                     pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
@@ -414,7 +418,9 @@ async def schale_get_calender(server, students, common, localization, raids):
                     int((1400 - (len(birth_next_week) * (180 + 10) - 10)) / 2) + 75
                 )
                 pic = pic.draw_text(
-                    (x_index - 165, y_index, x_index, y_index + 180), "下周", max_fontsize=50
+                    (x_index - 165, y_index, x_index, y_index + 180),
+                    "下周",
+                    max_fontsize=50,
                 )
                 for s in birth_next_week:
                     pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
