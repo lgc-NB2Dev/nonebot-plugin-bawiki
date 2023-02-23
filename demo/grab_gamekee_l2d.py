@@ -25,7 +25,6 @@ async def get_stu_li():
     li = None
     for i in ret["entry_list"]:
         if i["id"] == 23941:
-
             for ii in i["child"]:
                 if ii["id"] == 49443:
                     li = ii["child"]

@@ -48,7 +48,6 @@ async def game_kee_get_stu_li():
 
     for i in ret["entry_list"]:
         if i["id"] == 23941:
-
             for ii in i["child"]:
                 if ii["id"] == 49443:
                     return {x["name"]: x for x in ii["child"]}
