@@ -1,6 +1,6 @@
 from pathlib import Path
 
-SCHALE_URL = "https://lonqie.github.io/SchaleDB/"
+SCHALE_URL = "https://schale.gg/"
 MIRROR_SCHALE_URL = "http://schale.lgc2333.top/"
 
 BAWIKI_DB_URL = "https://bawiki.lgc2333.top/"
