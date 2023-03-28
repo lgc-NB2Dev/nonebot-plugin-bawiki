@@ -233,9 +233,9 @@ class GameKeeVoice:
 
 
 async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
-    wiki_html = (await game_kee_request(f"{config.ba_gamekee_url}content/detail/{cid}"))[
-        "content"
-    ]
+    wiki_html = (
+        await game_kee_request(f"{config.ba_gamekee_url}content/detail/{cid}")
+    )["content"]
     bs = BeautifulSoup(wiki_html, "lxml")
     audios = bs.select(".mould-table>tbody>tr>td>div>div>audio")
 
