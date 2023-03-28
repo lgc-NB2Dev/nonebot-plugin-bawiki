@@ -3,9 +3,9 @@ from nonebot.plugin import PluginMetadata
 
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
-require("nonebot_plugin_imageutils")
+# require("pil_utils")
 
-from .__main__ import *  # type:ignore
+from .__main__ import *  # noqa: E402, F403
 
 __version__ = "0.6.5"
 __plugin_meta__ = PluginMetadata(

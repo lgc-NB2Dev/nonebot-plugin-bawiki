@@ -3,9 +3,9 @@ import json
 from copy import deepcopy
 from typing import Dict, Iterator, List, TypeVar, Union
 
-from PIL import Image, ImageOps
 from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Message
+from PIL import Image, ImageOps
 
 from .config import config
 

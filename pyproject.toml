@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-bawiki"
-version = "0.6.5"
+version = "0.7.0"
 description = "A nonebot2 plugin for Blue Archive."
 authors = ["student_2333 <lgc2333@126.com>"]
 license = "MIT"
@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Internet",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
-    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Wiki"
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Wiki",
 ]
 
 [tool.poetry.dependencies]
@@ -29,11 +29,11 @@ nonebot2 = ">=2.0.0-beta.5"
 nonebot-adapter-onebot = ">=2.1.1"
 nonebot-plugin-htmlrender = "^0.2.0.1"
 Pillow = "^9.2.0"
-nonebot-plugin-imageutils = "^0.1.13.4"
 nonebot-plugin-apscheduler = "^0.2.0"
 beautifulsoup4 = "^4.11.1"
 lxml = "^4.9.1"
 pillow = "^9.3.0"
+pil-utils = "^0.1.4"
 
 [tool.poetry.group.dev.dependencies]
 poetryup = "^0.12.5"
@@ -41,3 +41,6 @@ poetryup = "^0.12.5"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+ignore = ["E501", "E722"]

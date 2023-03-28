@@ -1,6 +1,12 @@
-from nonebot_plugin_imageutils import BuildImage
+from pathlib import Path
 
-from .const import RES_PATH
+from pil_utils import BuildImage
+
+RES_PATH = Path(__file__).parent / "res"
+
+DATA_PATH = Path.cwd() / "data" / "BAWiki"
+if not DATA_PATH.exists():
+    DATA_PATH.mkdir(parents=True)
 
 RES_CALENDER_BANNER = BuildImage.open(RES_PATH / "calender_banner.png")
 # RES_SCHALE_BG = BuildImage.open(RES_PATH / "schale_bg.jpg")

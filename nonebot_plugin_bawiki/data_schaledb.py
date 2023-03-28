@@ -5,17 +5,14 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List
 
-from PIL import Image, ImageFilter
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
-from nonebot_plugin_imageutils import BuildImage, text2image
-from playwright.async_api import Page, ViewportSize
+from PIL import Image, ImageFilter
+from pil_utils import BuildImage, text2image
+from playwright.async_api import ViewportSize
 
-from .const import (
-    MIRROR_SCHALE_URL,
-    SCHALE_URL,
-)
+from .config import config
 from .resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
 from .util import async_req, img_invert_rgba, parse_time_delta
 
@@ -26,23 +23,23 @@ PAGE_KWARGS = {
 
 
 async def schale_get(suffix, raw=False, **kwargs):
-    return await async_req(f"{SCHALE_URL}{suffix}", raw=raw, **kwargs)
+    return await async_req(f"{config.schale_url}{suffix}", raw=raw, **kwargs)
 
 
-async def schale_get_stu_data() -> List[Dict[str, Any]]:
-    return await schale_get("data/cn/students.min.json")
+async def schale_get_stu_data(loc: str = "cn") -> List[Dict[str, Any]]:
+    return await schale_get(f"data/{loc}/students.min.json")
 
 
 async def schale_get_common() -> Dict[str, Any]:
     return await schale_get("data/common.min.json")
 
 
-async def schale_get_localization() -> Dict[str, Any]:
-    return await schale_get("data/cn/localization.min.json")
+async def schale_get_localization(loc: str = "cn") -> Dict[str, Any]:
+    return await schale_get(f"data/{loc}/localization.min.json")
 
 
-async def schale_get_raids() -> Dict[str, Any]:
-    return await schale_get("data/raids.min.json")
+async def schale_get_raids(loc: str = "cn") -> Dict[str, Any]:
+    return await schale_get(f"data/{loc}/raids.min.json")
 
 
 async def schale_get_stu_dict(key="Name"):
@@ -52,7 +49,7 @@ async def schale_get_stu_dict(key="Name"):
 async def schale_get_stu_info(stu):
     async with get_new_page(**PAGE_KWARGS) as page:  # type:Page
         await page.goto(
-            f"{MIRROR_SCHALE_URL}?chara={stu}",
+            f"{config.schale_mirror_url}?chara={stu}",
             timeout=60 * 1000,
             wait_until="networkidle",
         )
@@ -342,7 +339,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     (
                         localization["TimeAttackStage"][c_ri["DungeonType"]]
                         if time_atk
-                        else (c_ri["NameCn"] or c_ri["NameJp"])
+                        else (c_ri["Name"])
                     ),
                     max_fontsize=50,
                 )
@@ -370,7 +367,7 @@ async def schale_get_calender(server, students, common, localization, raids):
             elif next_week_t <= birth <= next_next_week_t:
                 birth_next_week.append(s)
 
-        sort_key = lambda x: x["BirthDay"].split("/")
+        sort_key = lambda x: x["BirthDay"].split("/")  # noqa: E731
         p_h = 0
         if birth_this_week:
             birth_this_week.sort(key=sort_key)
@@ -486,11 +483,11 @@ async def draw_fav_li(lvl):
     icon_h = pic_h + txt_h
     line_max_icon = 6
 
-    if (l := len(stu_li)) <= line_max_icon:
+    if (li_len := len(stu_li)) <= line_max_icon:
         line = 1
-        length = l
+        length = li_len
     else:
-        line = math.ceil(l / line_max_icon)
+        line = math.ceil(li_len / line_max_icon)
         length = line_max_icon
 
     img = RES_GRADIENT_BG.copy().resize(
@@ -514,13 +511,13 @@ async def draw_fav_li(lvl):
         )
 
     task_li = []
-    l = 0
+    line = 0
     i = 0
     for stu in stu_li:
         if i == line_max_icon:
             i = 0
-            l += 1
-        task_li.append(draw_stu(stu["Name"], stu["DevName"], l, i))
+            line += 1
+        task_li.append(draw_stu(stu["Name"], stu["DevName"], line, i))
         i += 1
     await asyncio.gather(*task_li)
 

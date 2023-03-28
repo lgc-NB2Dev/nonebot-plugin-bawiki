@@ -8,14 +8,11 @@ from typing import Dict, Iterable, List, Optional, Tuple, TypedDict
 import aiofiles
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
-from nonebot_plugin_imageutils import BuildImage
+from pil_utils import BuildImage
 
-from .const import DATA_PATH
-from .data_schaledb import (
-    schale_get,
-    schale_get_stu_dict,
-)
+from .data_schaledb import schale_get, schale_get_stu_dict
 from .resource import (
+    DATA_PATH,
     RES_GACHA_BG,
     RES_GACHA_CARD_BG,
     RES_GACHA_CARD_MASK,

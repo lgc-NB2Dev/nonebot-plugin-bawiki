@@ -6,14 +6,14 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List, Union
 
-from PIL import Image
 from bs4 import BeautifulSoup, ResultSet, Tag
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot_plugin_htmlrender import get_new_page
-from nonebot_plugin_imageutils import BuildImage, text2image
-from playwright.async_api import Page
+from PIL import Image
+from pil_utils import BuildImage, text2image
 
+from .config import config
 from .resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
 from .util import async_req, parse_time_delta
 
@@ -28,7 +28,7 @@ async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
 
 
 async def game_kee_get_calender():
-    ret: List = await game_kee_request("https://ba.gamekee.com/v1/wiki/index")
+    ret: List = await game_kee_request(f"{config.gamekee_url}v1/wiki/index")
 
     for i in ret:
         if i["module"]["id"] == 12:
@@ -44,7 +44,7 @@ async def game_kee_get_calender():
 
 
 async def game_kee_get_stu_li():
-    ret = await game_kee_request("https://ba.gamekee.com/v1/wiki/entry")
+    ret = await game_kee_request(f"{config.gamekee_url}v1/wiki/entry")
 
     for i in ret["entry_list"]:
         if i["id"] == 23941:
@@ -58,7 +58,7 @@ async def game_kee_get_stu_cid_li():
 
 
 def game_kee_page_url(sid):
-    return f"https://ba.gamekee.com/{sid}.html"
+    return f"{config.gamekee_url}{sid}.html"
 
 
 async def game_kee_get_page(url):
@@ -78,6 +78,11 @@ async def game_kee_get_page(url):
                 await i.click()
             except:
                 pass
+
+        # 隐藏 header 和 footer
+        js_str = "(obj) => { obj.style.display = 'none' }"
+        await page.eval_on_selector(".wiki-header", js_str)
+        await page.eval_on_selector(".wiki-footer", js_str)
 
         return await (
             await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
@@ -205,7 +210,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
 
 
 async def game_kee_grab_l2d(cid):
-    r: dict = await game_kee_request(f"https://ba.gamekee.com/v1/content/detail/{cid}")
+    r: dict = await game_kee_request(f"{config.gamekee_url}content/detail/{cid}")
     r: str = r["content"]
 
     i = r.find('<div class="input-wrapper">官方介绍</div>')
@@ -228,9 +233,9 @@ class GameKeeVoice:
 
 
 async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
-    wiki_html = (
-        await game_kee_request(f"https://ba.gamekee.com/v1/content/detail/{cid}")
-    )["content"]
+    wiki_html = (await game_kee_request(f"{config.gamekee_url}content/detail/{cid}"))[
+        "content"
+    ]
     bs = BeautifulSoup(wiki_html, "lxml")
     audios = bs.select(".mould-table>tbody>tr>td>div>div>audio")
 
