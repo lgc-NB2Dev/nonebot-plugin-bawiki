@@ -18,7 +18,7 @@ class MangaDict(TypedDict):
 
 
 async def db_get(suffix, raw=False):
-    return await async_req(f"{config.bawiki_db_url}{suffix}", raw=raw)
+    return await async_req(f"{config.ba_bawiki_db_url}{suffix}", raw=raw)
 
 
 async def db_get_wiki_data() -> Dict[str, Any]:

@@ -226,7 +226,7 @@ fav = on_command("ba好感度", aliases={"ba羁绊", "bal2d", "baL2D", "balive2d
 async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     async def get_l2d(stu_name):
         if r := (await db_get_extra_l2d_list()).get(stu_name):
-            return f"{config.bawiki_db_url}{r}"
+            return f"{config.ba_bawiki_db_url}{r}"
 
         return await game_kee_grab_l2d((await game_kee_get_stu_cid_li()).get(stu_name))
 

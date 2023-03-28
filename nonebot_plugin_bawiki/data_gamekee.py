@@ -28,7 +28,7 @@ async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
 
 
 async def game_kee_get_calender():
-    ret: List = await game_kee_request(f"{config.gamekee_url}v1/wiki/index")
+    ret: List = await game_kee_request(f"{config.ba_gamekee_url}v1/wiki/index")
 
     for i in ret:
         if i["module"]["id"] == 12:
@@ -44,7 +44,7 @@ async def game_kee_get_calender():
 
 
 async def game_kee_get_stu_li():
-    ret = await game_kee_request(f"{config.gamekee_url}v1/wiki/entry")
+    ret = await game_kee_request(f"{config.ba_gamekee_url}v1/wiki/entry")
 
     for i in ret["entry_list"]:
         if i["id"] == 23941:
@@ -58,7 +58,7 @@ async def game_kee_get_stu_cid_li():
 
 
 def game_kee_page_url(sid):
-    return f"{config.gamekee_url}{sid}.html"
+    return f"{config.ba_gamekee_url}{sid}.html"
 
 
 async def game_kee_get_page(url):
@@ -210,7 +210,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
 
 
 async def game_kee_grab_l2d(cid):
-    r: dict = await game_kee_request(f"{config.gamekee_url}content/detail/{cid}")
+    r: dict = await game_kee_request(f"{config.ba_gamekee_url}content/detail/{cid}")
     r: str = r["content"]
 
     i = r.find('<div class="input-wrapper">官方介绍</div>')
@@ -233,7 +233,7 @@ class GameKeeVoice:
 
 
 async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
-    wiki_html = (await game_kee_request(f"{config.gamekee_url}content/detail/{cid}"))[
+    wiki_html = (await game_kee_request(f"{config.ba_gamekee_url}content/detail/{cid}"))[
         "content"
     ]
     bs = BeautifulSoup(wiki_html, "lxml")

@@ -41,11 +41,15 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 ## 💿 安装
 
+以下提到的方法 任选**其一** 即可
+
 <details open>
-<summary>【推荐】使用 nb-cli 安装</summary>
+<summary>[推荐] 使用 nb-cli 安装</summary>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
-    nb plugin install nonebot-plugin-bawiki
+```bash
+nb plugin install nonebot-plugin-example
+```
 
 </details>
 
@@ -56,43 +60,45 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 <details>
 <summary>pip</summary>
 
-    pip install nonebot-plugin-bawiki
+```bash
+pip install nonebot-plugin-example
+```
 
 </details>
 <details>
 <summary>pdm</summary>
 
-    pdm add nonebot-plugin-bawiki
+```bash
+pdm add nonebot-plugin-example
+```
 
 </details>
 <details>
 <summary>poetry</summary>
 
-    poetry add nonebot-plugin-bawiki
+```bash
+poetry add nonebot-plugin-example
+```
 
 </details>
 <details>
 <summary>conda</summary>
 
-    conda install nonebot-plugin-bawiki
+```bash
+conda install nonebot-plugin-example
+```
 
 </details>
 
-打开 nonebot2 项目的 `bot.py` 文件, 在其中写入
+打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分的 `plugins` 项里追加写入
 
-    nonebot.load_plugin('nonebot_plugin_bawiki')
-
-</details>
-
-<details>
-<summary>从 github 安装</summary>
-在 nonebot2 项目的插件目录下, 打开命令行, 输入以下命令克隆此储存库
-
-    git clone https://github.com/lgc2333/nonebot-plugin-bawiki.git
-
-打开 nonebot2 项目的 `bot.py` 文件, 在其中写入
-
-    nonebot.load_plugin('src.plugins.nonebot_plugin_bawiki')
+```toml
+[tool.nonebot]
+plugins = [
+    # ...
+    "nonebot_plugin_example"
+]
+```
 
 </details>
 
@@ -100,13 +106,13 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 在 nonebot2 项目的`.env`文件中添加下表中的配置
 
-|       配置项        | 必填 | 默认值 |                         说明                          |
-| :-----------------: | :--: | :----: | :---------------------------------------------------: |
-|       `PROXY`       |  否  | `None` | 访问`SchaleDB`、`bawiki-data`的 json 数据时使用的代理 |
-|    `GAMEKEE_URL`    |  否  |  ...   |                 GameKee 数据源的地址                  |
-|    `SCHALE_URL`     |  否  |  ...   |               SchaleDB Json 数据的地址                |
-| `SCHALE_MIRROR_URL` |  否  |  ...   |                SchaleDB 网页截图的地址                |
-|   `BAWIKI_DB_URL`   |  否  |  ...   |                  bawiki-data 的地址                   |
+|         配置项         | 必填 | 默认值 |                         说明                          |
+| :--------------------: | :--: | :----: | :---------------------------------------------------: |
+|       `BA_PROXY`       |  否  | `None` | 访问`SchaleDB`、`bawiki-data`的 json 数据时使用的代理 |
+|    `BA_GAMEKEE_URL`    |  否  |  ...   |                 GameKee 数据源的地址                  |
+|    `BA_SCHALE_URL`     |  否  |  ...   |               SchaleDB Json 数据的地址                |
+| `BA_SCHALE_MIRROR_URL` |  否  |  ...   |                SchaleDB 网页截图的地址                |
+|   `BA_BAWIKI_DB_URL`   |  否  |  ...   |                  bawiki-data 的地址                   |
 
 ## 🎉 使用
 
@@ -160,6 +166,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.7.1
+
+- 更改配置项名称
 
 ### 0.7.0
 

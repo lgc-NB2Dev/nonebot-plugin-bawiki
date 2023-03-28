@@ -5,11 +5,11 @@ from pydantic import BaseModel, validator
 
 
 class Cfg(BaseModel):
-    proxy: Optional[str] = None
-    gamekee_url = "https://ba.gamekee.com/"
-    schale_url = "https://schale.lgc.cyberczy.xyz/"
-    schale_mirror_url = "https://schale.lgc.cyberczy.xyz/"
-    bawiki_db_url = "https://bawiki.lgc.cyberczy.xyz/"
+    ba_proxy: Optional[str] = None
+    ba_gamekee_url = "https://ba.gamekee.com/"
+    ba_schale_url = "https://schale.lgc.cyberczy.xyz/"
+    ba_schale_mirror_url = "https://schale.lgc.cyberczy.xyz/"
+    ba_bawiki_db_url = "https://bawiki.lgc.cyberczy.xyz/"
 
     @validator("gamekee_url", allow_reuse=True)
     @validator("schale_url", allow_reuse=True)

@@ -60,7 +60,7 @@ async def async_req(
     is_json=True,
     raw=False,
     ignore_cache=False,
-    proxy=config.proxy,
+    proxy=config.ba_proxy,
     method="GET",
     session: ClientSession = None,
     **kwargs,

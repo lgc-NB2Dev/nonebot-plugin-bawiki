@@ -49,7 +49,7 @@ async def schale_get_stu_dict(key="Name"):
 async def schale_get_stu_info(stu):
     async with get_new_page(**PAGE_KWARGS) as page:  # type:Page
         await page.goto(
-            f"{config.schale_mirror_url}?chara={stu}",
+            f"{config.ba_schale_mirror_url}?chara={stu}",
             timeout=60 * 1000,
             wait_until="networkidle",
         )
