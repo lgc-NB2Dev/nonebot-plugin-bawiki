@@ -119,7 +119,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
             await matcher.finish()
         else:
             await matcher.finish(await game_kee_calender())
-    except (FinishedException, ActionFailed):
+    except (FinishedException, ActionFailed):  # type: ignore
         raise
     except:
         logger.exception("绘制日程表图片出错")

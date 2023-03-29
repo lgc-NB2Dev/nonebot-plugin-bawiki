@@ -23,7 +23,7 @@ PAGE_KWARGS = {
 
 
 async def schale_get(suffix, raw=False, **kwargs):
-    return await async_req(f"{config.schale_url}{suffix}", raw=raw, **kwargs)
+    return await async_req(f"{config.ba_schale_url}{suffix}", raw=raw, **kwargs)
 
 
 async def schale_get_stu_data(loc: str = "cn") -> List[Dict[str, Any]]:

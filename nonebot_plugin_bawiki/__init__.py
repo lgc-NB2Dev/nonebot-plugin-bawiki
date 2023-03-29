@@ -3,11 +3,10 @@ from nonebot.plugin import PluginMetadata
 
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
-# require("pil_utils")
 
 from .__main__ import *  # noqa: E402, F403
 
-__version__ = "0.7.2"
+__version__ = "0.7.3"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
