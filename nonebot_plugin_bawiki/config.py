@@ -11,10 +11,10 @@ class Cfg(BaseModel):
     ba_schale_mirror_url = "https://schale.lgc.cyberczy.xyz/"
     ba_bawiki_db_url = "https://bawiki.lgc.cyberczy.xyz/"
 
-    @validator("gamekee_url", allow_reuse=True, check_fields=False)
-    @validator("schale_url", allow_reuse=True, check_fields=False)
-    @validator("schale_mirror_url", allow_reuse=True, check_fields=False)
-    @validator("bawiki_db_url", allow_reuse=True, check_fields=False)
+    @validator("ba_gamekee_url", allow_reuse=True)
+    @validator("ba_schale_url", allow_reuse=True)
+    @validator("ba_schale_mirror_url", allow_reuse=True)
+    @validator("ba_bawiki_db_url", allow_reuse=True)
     def _(cls, val: str):
         if not (
             (val.startswith("https://") or val.startswith("http://"))
