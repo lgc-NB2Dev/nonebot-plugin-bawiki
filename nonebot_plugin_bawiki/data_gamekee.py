@@ -210,7 +210,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
 
 
 async def game_kee_grab_l2d(cid):
-    r: dict = await game_kee_request(f"{config.ba_gamekee_url}content/detail/{cid}")
+    r: dict = await game_kee_request(f"{config.ba_gamekee_url}v1/content/detail/{cid}")
     r: str = r["content"]
 
     i = r.find('<div class="input-wrapper">官方介绍</div>')
@@ -234,7 +234,7 @@ class GameKeeVoice:
 
 async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
     wiki_html = (
-        await game_kee_request(f"{config.ba_gamekee_url}content/detail/{cid}")
+        await game_kee_request(f"{config.ba_gamekee_url}v1/content/detail/{cid}")
     )["content"]
     bs = BeautifulSoup(wiki_html, "lxml")
     audios = bs.select(".mould-table>tbody>tr>td>div>div>audio")
