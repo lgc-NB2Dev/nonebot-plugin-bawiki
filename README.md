@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD036 MD041 -->
 
 <div align="center">
-  <a href="https://v2.nonebot.dev/store"><img src="https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/nonebot-plugin-bawiki.png" width="200" height="200" alt="BAWiki"></a>
+  <a href="https://v2.nonebot.dev/store"><img src="https://media.githubusercontent.com/media/lgc-NB2Dev/readme/main/bawiki/nonebot-plugin-bawiki.png" width="200" height="200" alt="BAWiki"></a>
 </div>
 
 <div align="center">
@@ -123,18 +123,6 @@ plugins = [
 见[这里](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py#L17)
 
 待更新
-
-<!--
-### 效果图
-
-<details>
-<summary>长图，点击展开</summary>
-
-![example](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example.png)
-![example2](https://raw.githubusercontent.com/lgc2333/nonebot-plugin-bawiki/master/readme/example2.png)
-
-</details>
--->
 
 ## 📞 联系
 
