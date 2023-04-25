@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 from io import BytesIO
-from typing import Any, Dict, List, Optional, TypedDict, cast
+from typing import Any, Dict, List, Literal, Optional, TypedDict, cast, overload
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
@@ -17,7 +17,17 @@ class MangaDict(TypedDict):
     pics: List[str]
 
 
-async def db_get(suffix, raw=False):
+@overload
+async def db_get(suffix: str, raw: Literal[False] = False) -> Any:
+    ...
+
+
+@overload
+async def db_get(suffix: str, raw: Literal[True] = True) -> bytes:
+    ...
+
+
+async def db_get(suffix: str, raw=False):
     return await async_req(f"{config.ba_bawiki_db_url}{suffix}", raw=raw)  # type: ignore
 
 

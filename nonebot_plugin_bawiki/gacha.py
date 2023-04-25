@@ -11,6 +11,7 @@ from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
 
+from .config import config
 from .data_schaledb import schale_get, schale_get_stu_dict
 from .resource import (
     DATA_PATH,
@@ -53,7 +54,7 @@ def get_gacha_cool_down(
     now = time.time()
 
     if last := COOL_DOWN_DICT.get(key):
-        remain = round(now - last)
+        remain = config.ba_gacha_cool_down - round(now - last)
         return remain if remain >= 0 else 0
 
     return 0
