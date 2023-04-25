@@ -9,6 +9,7 @@ from pydantic import BaseModel, validator
 
 class Cfg(BaseModel):
     ba_proxy: Optional[str] = None
+    ba_gacha_cool_down: int = 0
 
     ba_gamekee_url = "https://ba.gamekee.com/"
     ba_schale_url = "https://schale.lgc.cyberczy.xyz/"

@@ -48,7 +48,7 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
 ```bash
-nb plugin install nonebot-plugin-example
+nb plugin install nonebot-plugin-bawiki
 ```
 
 </details>
@@ -61,7 +61,7 @@ nb plugin install nonebot-plugin-example
 <summary>pip</summary>
 
 ```bash
-pip install nonebot-plugin-example
+pip install nonebot-plugin-bawiki
 ```
 
 </details>
@@ -69,7 +69,7 @@ pip install nonebot-plugin-example
 <summary>pdm</summary>
 
 ```bash
-pdm add nonebot-plugin-example
+pdm add nonebot-plugin-bawiki
 ```
 
 </details>
@@ -77,7 +77,7 @@ pdm add nonebot-plugin-example
 <summary>poetry</summary>
 
 ```bash
-poetry add nonebot-plugin-example
+poetry add nonebot-plugin-bawiki
 ```
 
 </details>
@@ -85,7 +85,7 @@ poetry add nonebot-plugin-example
 <summary>conda</summary>
 
 ```bash
-conda install nonebot-plugin-example
+conda install nonebot-plugin-bawiki
 ```
 
 </details>
@@ -96,7 +96,7 @@ conda install nonebot-plugin-example
 [tool.nonebot]
 plugins = [
     # ...
-    "nonebot_plugin_example"
+    "nonebot_plugin_bawiki"
 ]
 ```
 
@@ -106,13 +106,14 @@ plugins = [
 
 在 nonebot2 项目的`.env`文件中添加下表中的配置
 
-|         配置项         | 必填 | 默认值 |                         说明                          |
-| :--------------------: | :--: | :----: | :---------------------------------------------------: |
-|       `BA_PROXY`       |  否  | `None` | 访问`SchaleDB`、`bawiki-data`的 json 数据时使用的代理 |
-|    `BA_GAMEKEE_URL`    |  否  |  ...   |                 GameKee 数据源的地址                  |
-|    `BA_SCHALE_URL`     |  否  |  ...   |               SchaleDB Json 数据的地址                |
-| `BA_SCHALE_MIRROR_URL` |  否  |  ...   |                SchaleDB 网页截图的地址                |
-|   `BA_BAWIKI_DB_URL`   |  否  |  ...   |                  bawiki-data 的地址                   |
+|         配置项         | 必填 | 默认值 |                          说明                           |
+| :--------------------: | :--: | :----: | :-----------------------------------------------------: |
+|       `BA_PROXY`       |  否  | `None` | 访问 `SchaleDB`、`bawiki-data` 的 json 数据时使用的代理 |
+|  `BA_GACHA_COOL_DOWN`  |  否  |  `0`   |               每群每人的抽卡冷却，单位秒                |
+|    `BA_GAMEKEE_URL`    |  否  |  ...   |                  GameKee 数据源的地址                   |
+|    `BA_SCHALE_URL`     |  否  |  ...   |                SchaleDB Json 数据的地址                 |
+| `BA_SCHALE_MIRROR_URL` |  否  |  ...   |                 SchaleDB 网页截图的地址                 |
+|   `BA_BAWIKI_DB_URL`   |  否  |  ...   |                   bawiki-data 的地址                    |
 
 ## 🎉 使用
 
@@ -120,9 +121,9 @@ plugins = [
 
 兼容 [nonebot-plugin-PicMenu](https://github.com/hamo-reid/nonebot_plugin_PicMenu)
 
-见[这里](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py#L17)
+**现在 BAWiki 会自动帮你把 PicMenu 的字体设为系统已安装的字体，再也不需要麻烦的手动配置了，好耶~**
 
-待更新
+如果你不想用 PicMenu 的话，那么请看 [\_\_init\_\_.py](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py)
 
 ## 📞 联系
 
@@ -137,7 +138,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 - 日程表 html 模板提供（已弃用）
 
-### `bawiki-data`数据源贡献列表
+### `bawiki-data` 数据源贡献列表
 
 - 见 [bawiki-data](http://github.com/lgc2333/bawiki-data)
 
@@ -155,11 +156,12 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
-### 0.7.3
+### 0.7.5
 
-- 修复 bug
+- 插件可以自动帮你配置 PicMenu 的字体了
+- 给抽卡新增了冷却
 
-### 0.7.2
+### 0.7.2 ~ 0.7.4
 
 - 修复 bug
 

@@ -1,9 +1,10 @@
 import asyncio
 import json
 import random
+import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Dict, Iterable, List, Optional, TypedDict, cast
+from typing import Dict, Iterable, List, Optional, TypedDict, Union, cast
 
 import aiofiles
 from nonebot import logger
@@ -28,12 +29,13 @@ if not GACHA_DATA_PATH.exists():
     GACHA_DATA_PATH.write_text("{}")
 
 
+DEFAULT_GACHA_DATA: "GachaData" = {"collected": [], "total_count": 0}
+COOL_DOWN_DICT: Dict[str, float] = {}
+
+
 class GachaData(TypedDict):
     collected: List[int]
     total_count: int
-
-
-DEFAULT_GACHA_DATA: GachaData = {"collected": [], "total_count": 0}
 
 
 @dataclass()
@@ -41,6 +43,25 @@ class GachaStudent:
     id: int  # noqa: A003
     new: bool = False
     pickup: bool = False
+
+
+def get_gacha_cool_down(
+    user: Union[str, int],
+    group: Optional[Union[str, int]] = None,
+) -> int:
+    key = f"{group}.{user}" if group else f"{user}"
+    now = time.time()
+
+    if last := COOL_DOWN_DICT.get(key):
+        remain = round(now - last)
+        return remain if remain >= 0 else 0
+
+    return 0
+
+
+def set_gacha_cool_down(user: Union[str, int], group: Optional[Union[str, int]] = None):
+    key = f"{group}.{user}" if group else f"{user}"
+    COOL_DOWN_DICT[key] = time.time()
 
 
 async def set_gacha_data(qq: str, data: GachaData):

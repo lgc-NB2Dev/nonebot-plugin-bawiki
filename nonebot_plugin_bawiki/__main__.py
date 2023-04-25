@@ -10,6 +10,7 @@ from typing import Dict, List, Optional
 from nonebot import on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import (
     ActionFailed,
+    GroupMessageEvent,
     Message,
     MessageEvent,
     MessageSegment,
@@ -62,7 +63,7 @@ from .data_schaledb import (
     schale_get_stu_dict,
     schale_get_stu_info,
 )
-from .gacha import gacha
+from .gacha import gacha, get_gacha_cool_down, set_gacha_cool_down
 from .util import async_req, clear_req_cache, recover_alia, splice_msg
 
 
@@ -402,7 +403,6 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         await matcher.finish("获取图片出错，请检查后台输出")
 
     await matcher.finish(splice_msg(ret))
-    return
 
 
 time_atk_wiki = on_command("ba综合战术考试", aliases={"ba合同火力演习", "ba战术考试", "ba火力演习"})
@@ -445,7 +445,6 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         await matcher.finish("获取图片出错，请检查后台输出")
 
     await matcher.finish(splice_msg(ret))
-    return
 
 
 craft_wiki = on_command("ba制造", aliases={"ba合成", "ba制作"})
@@ -574,7 +573,6 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         im.append(v.cn)
     await matcher.send("\n".join(im))
     await matcher.send(MessageSegment.record(v_data))
-    return
 
 
 def get_1st_pool(data: dict) -> Optional[GachaPool]:
@@ -645,7 +643,6 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
 
     gacha_pool_index[qq] = current
     await matcher.finish(f"已切换到卡池 {current.name}")
-    return
 
 
 gacha_once = on_command("ba抽卡")
@@ -653,6 +650,14 @@ gacha_once = on_command("ba抽卡")
 
 @gacha_once.handle()
 async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg()):
+    user_id = event.user_id
+    group_id = event.group_id if isinstance(event, GroupMessageEvent) else None
+
+    if cool_down := get_gacha_cool_down(user_id, group_id):
+        await matcher.finish(f"你先别急，先等 {cool_down} 秒再来抽吧qwq")
+
+    set_gacha_cool_down(user_id, group_id)
+
     arg = cmd_arg.extract_plain_text().strip().lower()
 
     gacha_times = 10
@@ -688,7 +693,6 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
         await matcher.finish("抽卡出错了，请检查后台输出")
 
     await matcher.finish(MessageSegment.at(qq) + f"当前抽取卡池：{pool_obj.name}" + img)
-    return
 
 
 random_emoji = on_command("ba表情")
@@ -703,7 +707,6 @@ async def _(matcher: Matcher):
         logger.exception("获取表情失败")
         await matcher.finish("获取表情失败，请检查后台输出")
     await matcher.finish(MessageSegment.image(emo))
-    return
 
 
 random_manga = on_command("ba漫画")
@@ -729,4 +732,3 @@ async def _(matcher: Matcher):
         + f'{manga["title"]}\n-=-=-=-=-=-=-=-\n{manga["detail"]}'
         + [MessageSegment.image(x) for x in pics],
     )
-    return
