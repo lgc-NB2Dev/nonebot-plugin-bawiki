@@ -3,7 +3,7 @@ import json
 import random
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Dict, Iterable, List, Optional, Tuple, TypedDict
+from typing import Dict, Iterable, List, Optional, TypedDict, cast
 
 import aiofiles
 from nonebot import logger
@@ -38,7 +38,7 @@ DEFAULT_GACHA_DATA: GachaData = {"collected": [], "total_count": 0}
 
 @dataclass()
 class GachaStudent:
-    id: int
+    id: int  # noqa: A003
     new: bool = False
     pickup: bool = False
 
@@ -66,7 +66,7 @@ async def get_gacha_data(qq: str) -> GachaData:
     return user_data
 
 
-async def gen_stu_img(students: Iterable[GachaStudent]) -> Tuple[BuildImage]:
+async def gen_stu_img(students: Iterable[GachaStudent]) -> List[BuildImage]:
     stu_li = await schale_get_stu_dict("Id")
 
     async def gen_single(stu: GachaStudent) -> BuildImage:
@@ -113,16 +113,12 @@ async def gen_stu_img(students: Iterable[GachaStudent]) -> Tuple[BuildImage]:
 
         return bg
 
-    return await asyncio.gather(*[gen_single(x) for x in students])  # noqa
+    return await asyncio.gather(*[gen_single(x) for x in students])
 
 
-async def gen_gacha_img(
-    students: Iterable[GachaStudent], count: int
-) -> Optional[BytesIO]:
+async def gen_gacha_img(students: Iterable[GachaStudent], count: int) -> BytesIO:
     line_limit = 5
     stu_cards = split_list(await gen_stu_img(students), line_limit)
-    if not stu_cards:
-        return
     card_w, card_h = stu_cards[0][0].size
 
     bg = RES_GACHA_BG.copy()
@@ -154,7 +150,12 @@ async def gen_gacha_img(
     return bg.save("PNG")
 
 
-async def gacha(qq: str, times: int, gacha_data: dict, up_pool: List[int] = None):
+async def gacha(
+    qq: str,
+    times: int,
+    gacha_data_json: dict,
+    up_pool: Optional[List[int]] = None,
+):
     # 屎山代码 别骂了别骂了
     # 如果有大佬指点指点怎么优化或者愿意发个PR就真的太感激了
 
@@ -167,9 +168,9 @@ async def gacha(qq: str, times: int, gacha_data: dict, up_pool: List[int] = None
         for y in [3, 2]
     ]
 
-    base_char: dict = gacha_data["base"]
+    base_char: dict = gacha_data_json["base"]
     for up in up_pool:
-        for li in base_char.values():  # type: List[int]
+        for li in cast(List[List[int]], base_char.values()):
             if up in li:
                 li.remove(up)
 
@@ -181,10 +182,10 @@ async def gacha(qq: str, times: int, gacha_data: dict, up_pool: List[int] = None
     up_3_chance = 0
     up_2_chance = 0
     if up_3_li:
-        up_3_chance = gacha_data["up"]["3"]["chance"]
+        up_3_chance = gacha_data_json["up"]["3"]["chance"]
         star_3_chance -= up_3_chance
     if up_2_li:
-        up_2_chance = gacha_data["up"]["2"]["chance"]
+        up_2_chance = gacha_data_json["up"]["2"]["chance"]
         star_2_chance -= up_2_chance
 
     gacha_data = await get_gacha_data(qq)
@@ -199,7 +200,7 @@ async def gacha(qq: str, times: int, gacha_data: dict, up_pool: List[int] = None
             (star_3_base["char"], star_3_chance),
             (star_2_base["char"], star_2_chance),
         ]
-        if not i % 10 == 0:
+        if i % 10 != 0:
             pool_and_weight.append((star_1_base["char"], star_1_chance))
 
         pool_and_weight = [x for x in pool_and_weight if x[0]]

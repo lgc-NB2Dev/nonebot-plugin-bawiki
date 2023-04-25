@@ -4,7 +4,7 @@ from nonebot.plugin import PluginMetadata
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
 
-from .__main__ import *  # noqa: E402, F403
+from . import __main__ as __main__  # noqa: E402
 
 __version__ = "0.7.4"
 __plugin_meta__ = PluginMetadata(

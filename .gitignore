@@ -4,3 +4,5 @@
 /dist/
 venv/
 poetry.lock
+.pdm-python
+build/
