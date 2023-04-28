@@ -580,6 +580,9 @@ def get_1st_pool(data: dict) -> Optional[GachaPool]:
         return None
 
     pool_data = data["current_pools"]
+    if not pool_data:
+        return None
+
     pool = pool_data[0]
     return GachaPool(name=pool["name"], pool=pool["pool"], index=0)
 
@@ -624,10 +627,11 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
             await matcher.finish("获取抽卡基本数据失败，请检查后台输出")
 
         pool_data = gacha_data["current_pools"]
-        if not pool_data:
+        first_pool = get_1st_pool(gacha_data)
+        if not first_pool:
             await matcher.finish("当前没有可切换的卡池")
 
-        pool_obj = gacha_pool_index.get(qq) or get_1st_pool(gacha_data)
+        pool_obj = gacha_pool_index.get(qq) or first_pool
         if not pool_obj:
             await matcher.finish("当前没有UP池可供切换")
 
