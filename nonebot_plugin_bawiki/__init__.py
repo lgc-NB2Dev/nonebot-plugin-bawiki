@@ -6,7 +6,7 @@ require("nonebot_plugin_htmlrender")
 
 from . import __main__ as __main__  # noqa: E402
 
-__version__ = "0.7.6"
+__version__ = "0.7.7"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
