@@ -104,14 +104,15 @@ plugins = [
 
 在 nonebot2 项目的`.env`文件中添加下表中的配置
 
-|         配置项         | 必填 | 默认值 |                          说明                           |
-| :--------------------: | :--: | :----: | :-----------------------------------------------------: |
-|       `BA_PROXY`       |  否  | `None` | 访问 `SchaleDB`、`bawiki-data` 的 json 数据时使用的代理 |
-|  `BA_GACHA_COOL_DOWN`  |  否  |  `0`   |               每群每人的抽卡冷却，单位秒                |
-|    `BA_GAMEKEE_URL`    |  否  |  ...   |                  GameKee 数据源的地址                   |
-|    `BA_SCHALE_URL`     |  否  |  ...   |                SchaleDB Json 数据的地址                 |
-| `BA_SCHALE_MIRROR_URL` |  否  |  ...   |                 SchaleDB 网页截图的地址                 |
-|   `BA_BAWIKI_DB_URL`   |  否  |  ...   |                   bawiki-data 的地址                    |
+|         配置项         | 必填 | 默认值  |                          说明                           |
+| :--------------------: | :--: | :-----: | :-----------------------------------------------------: |
+|       `BA_PROXY`       |  否  | `None`  | 访问 `SchaleDB`、`bawiki-data` 的 json 数据时使用的代理 |
+|  `BA_GACHA_COOL_DOWN`  |  否  |   `0`   |               每群每人的抽卡冷却，单位秒                |
+|  `BA_VOICE_USE_CARD`   |  否  | `False` |           是否使用自定义音乐卡片发送角色语音            |
+|    `BA_GAMEKEE_URL`    |  否  |   ...   |                  GameKee 数据源的地址                   |
+|    `BA_SCHALE_URL`     |  否  |   ...   |                SchaleDB Json 数据的地址                 |
+| `BA_SCHALE_MIRROR_URL` |  否  |   ...   |                 SchaleDB 网页截图的地址                 |
+|   `BA_BAWIKI_DB_URL`   |  否  |   ...   |                   bawiki-data 的地址                    |
 
 ## 🎉 使用
 
@@ -153,6 +154,14 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.7.9
+
+- 添加配置项 `BA_VOICE_USE_CARD`
+
+### 0.7.8
+
+- 🎉 NoneBot 2.0 🚀
 
 ### 0.7.7
 

@@ -51,6 +51,7 @@ from .data_gamekee import (
     game_kee_calender,
     game_kee_get_page,
     game_kee_get_stu_cid_li,
+    game_kee_get_stu_li,
     game_kee_get_voice,
     game_kee_grab_l2d,
     game_kee_page_url,
@@ -539,7 +540,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     v_type = arg[-1].strip().lower() if arg_len > 1 else None
 
     try:
-        ret = await game_kee_get_stu_cid_li()
+        ret = await game_kee_get_stu_li()
     except:
         logger.exception("获取学生列表出错")
         await matcher.finish("获取学生列表出错，请检查后台输出")
@@ -554,17 +555,16 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         logger.exception("还原学生别名失败")
         await matcher.finish("还原学生别名失败，请检查后台输出")
 
-    if not (sid := ret.get(stu_name)):
+    if not (stu_info := ret.get(stu_name)):
         await matcher.finish("未找到该学生")
 
-    voices = await game_kee_get_voice(sid)
+    voices = await game_kee_get_voice(stu_info["content_id"])
     if v_type:
         voices = [x for x in voices if v_type in x.title.lower()]
     if not voices:
         await matcher.finish("没找到符合要求的语音捏")
 
     v: GameKeeVoice = random.choice(voices)
-    v_data = await async_req(v.url, raw=True)
 
     im = [f"学生 {org_stu_name} 语音 {v.title}\n-=-=-=-=-=-=-=-"]
     if v.jp:
@@ -572,7 +572,24 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     if v.cn:
         im.append(v.cn)
     await matcher.send("\n".join(im))
-    await matcher.send(MessageSegment.record(v_data))
+    if config.ba_voice_use_card:
+        await matcher.send(
+            MessageSegment(
+                "music",
+                {
+                    "type": "custom",
+                    "subtype": "163",
+                    "url": v.url,
+                    "voice": v.url,
+                    "title": v.title,
+                    "content": org_stu_name,
+                    "image": f'http:{stu_info["icon"]}',
+                },
+            ),
+        )
+    else:
+        v_data = await async_req(v.url, raw=True)
+        await matcher.send(MessageSegment.record(v_data))
 
 
 def get_1st_pool(data: dict) -> Optional[GachaPool]:

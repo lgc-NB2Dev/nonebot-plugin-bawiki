@@ -7,7 +7,7 @@ require("nonebot_plugin_htmlrender")
 from . import __main__ as __main__  # noqa: E402
 from .config import Cfg as Cfg  # noqa: E402
 
-__version__ = "0.7.8"
+__version__ = "0.7.9"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
@@ -15,7 +15,7 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki",
     type="application",
     config=Cfg,
-    supported_adapters=["~onebot.v11"],
+    supported_adapters={"~onebot.v11"},
     extra={"License": "MIT", "Author": "student_2333"},
 )
 

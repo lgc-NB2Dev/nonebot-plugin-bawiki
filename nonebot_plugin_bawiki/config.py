@@ -10,19 +10,23 @@ from pydantic import BaseModel, validator
 class Cfg(BaseModel):
     ba_proxy: Optional[str] = None
     ba_gacha_cool_down: int = 0
+    ba_voice_use_card: bool = False
 
-    ba_gamekee_url = "https://ba.gamekee.com/"
-    ba_schale_url = "https://schale.lgc.cyberczy.xyz/"
-    ba_schale_mirror_url = "https://schale.lgc.cyberczy.xyz/"
-    ba_bawiki_db_url = "https://bawiki.lgc.cyberczy.xyz/"
+    ba_gamekee_url: str = "https://ba.gamekee.com/"
+    ba_schale_url: str = "https://schale.lgc.cyberczy.xyz/"
+    ba_schale_mirror_url: str = "https://schale.lgc.cyberczy.xyz/"
+    ba_bawiki_db_url: str = "https://bawiki.lgc.cyberczy.xyz/"
 
-    @validator("ba_gamekee_url", allow_reuse=True)  # type: ignore
-    @validator("ba_schale_url", allow_reuse=True)  # type: ignore
-    @validator("ba_schale_mirror_url", allow_reuse=True)  # type: ignore
-    @validator("ba_bawiki_db_url", allow_reuse=True)  # type: ignore
+    @validator(
+        "ba_gamekee_url",
+        "ba_schale_url",
+        "ba_schale_mirror_url",
+        "ba_bawiki_db_url",
+    )
     def _(cls, val: str):  # noqa: N805
         if not ((val.startswith(("https://", "http://"))) and val.endswith("/")):
             raise ValueError('自定义的 URL 请以 "http(s)://" 开头，以 "/" 结尾')
+        return val
 
 
 config = Cfg.parse_obj(get_driver().config.dict())
