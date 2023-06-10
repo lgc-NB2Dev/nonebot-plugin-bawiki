@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import itertools
 import re
 import time
 from dataclasses import dataclass
@@ -24,7 +25,7 @@ async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
     ret = cast(
         dict,
         await async_req(
-            url,
+            f"{config.ba_gamekee_url}{url}",
             headers={"game-id": "0", "game-alias": "ba"},
             proxy=None,
             **kwargs,
@@ -36,7 +37,7 @@ async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
 
 
 async def game_kee_get_calender():
-    ret = cast(list, await game_kee_request(f"{config.ba_gamekee_url}v1/wiki/index"))
+    ret = cast(list, await game_kee_request("v1/wiki/index"))
 
     for i in ret:
         if i["module"]["id"] == 12:
@@ -54,7 +55,7 @@ async def game_kee_get_calender():
 
 
 async def game_kee_get_stu_li():
-    ret = cast(dict, await game_kee_request(f"{config.ba_gamekee_url}v1/wiki/entry"))
+    ret = cast(dict, await game_kee_request("v1/wiki/entry"))
 
     for i in ret["entry_list"]:
         if i["id"] == 23941:
@@ -233,7 +234,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
 async def game_kee_grab_l2d(cid):
     ret = cast(
         dict,
-        await game_kee_request(f"{config.ba_gamekee_url}v1/content/detail/{cid}"),
+        await game_kee_request(f"v1/content/detail/{cid}"),
     )
     content: str = ret["content"]
 
@@ -260,7 +261,7 @@ async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
     wiki_html = (
         cast(
             dict,
-            await game_kee_request(f"{config.ba_gamekee_url}v1/content/detail/{cid}"),
+            await game_kee_request(f"v1/content/detail/{cid}"),
         )
     )["content"]
     bs = BeautifulSoup(wiki_html, "lxml")
@@ -282,3 +283,31 @@ async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
         parsed.append(GameKeeVoice(title, jp, cn, url))
 
     return parsed
+
+
+async def get_level_list() -> Dict[str, int]:
+    entry = cast(dict, await game_kee_request("v1/wiki/entry"))
+    entry_list: List[Dict] = entry["entry_list"]
+    guide_entry: List[Dict] = next(x["child"] for x in entry_list if x["id"] == 50284)
+    levels = itertools.chain(
+        *(x["child"] for x in guide_entry if cast(str, x["name"]).endswith("章")),
+    )
+    return {
+        n.upper(): x["content_id"]
+        for x in levels
+        if re.match(r"^(H)?(TR|\d+)-(\d+)$", (n := cast(str, x["name"])))
+    }
+
+
+async def extract_content_pic(cid: int) -> List[str]:
+    wiki_html = (
+        cast(
+            dict,
+            await game_kee_request(f"v1/content/detail/{cid}"),
+        )
+    )["content"]
+    bs = BeautifulSoup(wiki_html, "lxml")
+    img_elem = bs.find_all("img")
+    img_urls = cast(List[str], [x["src"] for x in img_elem])
+    img_urls = [f"https:{x}" if x.startswith("//") else x for x in img_urls]
+    return img_urls

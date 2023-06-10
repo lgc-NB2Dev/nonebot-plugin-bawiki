@@ -48,6 +48,7 @@ from .data_bawiki import (
 )
 from .data_gamekee import (
     GameKeeVoice,
+    extract_content_pic,
     game_kee_calender,
     game_kee_get_page,
     game_kee_get_stu_cid_li,
@@ -55,6 +56,7 @@ from .data_gamekee import (
     game_kee_get_voice,
     game_kee_grab_l2d,
     game_kee_page_url,
+    get_level_list,
 )
 from .data_schaledb import (
     draw_fav_li,
@@ -753,3 +755,34 @@ async def _(matcher: Matcher):
         + f'{manga["title"]}\n-=-=-=-=-=-=-=-\n{manga["detail"]}'
         + [MessageSegment.image(x) for x in pics],
     )
+
+
+level_guide = on_command("ba关卡")
+
+
+@level_guide.handle()
+async def _(matcher: Matcher, arg: Message = CommandArg()):
+    arg_str = arg.extract_plain_text().strip().upper()
+    if not arg_str:
+        await matcher.finish("请输入关卡名称，如 ba关卡 1-1 或 ba关卡 H1-1")
+
+    try:
+        levels = await get_level_list()
+    except:
+        logger.exception("获取关卡列表失败")
+        await matcher.finish("获取关卡列表失败，请检查后台输出")
+
+    if arg_str not in levels:
+        await matcher.finish("未找到该关卡，请检查关卡名称是否正确")
+
+    cid = levels[arg_str]
+    try:
+        imgs = await extract_content_pic(cid)
+    except:
+        logger.exception("获取攻略图片失败")
+        await matcher.finish("获取攻略图片失败，请检查后台输出")
+
+    msg = Message()
+    msg += f"https://ba.gamekee.com/{cid}.html\n"
+    msg += [MessageSegment.image(x) for x in imgs]
+    await matcher.finish(msg)
