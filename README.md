@@ -155,6 +155,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.7.10
+
+- 添加指令 `ba关卡`
+
 ### 0.7.9
 
 - 添加配置项 `BA_VOICE_USE_CARD`

@@ -7,11 +7,11 @@ require("nonebot_plugin_htmlrender")
 from . import __main__ as __main__  # noqa: E402
 from .config import Cfg as Cfg  # noqa: E402
 
-__version__ = "0.7.9"
+__version__ = "0.7.10"
 __plugin_meta__ = PluginMetadata(
     name="BAWiki",
     description="碧蓝档案Wiki插件",
-    usage="感谢各位 sensei 使用本插件！装载 PicMenu 插件即可查看插件详细菜单哦\n祝玩得愉快～",
+    usage="装载 PicMenu 插件即可查看本插件详细菜单",
     homepage="https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki",
     type="application",
     config=Cfg,
@@ -19,6 +19,7 @@ __plugin_meta__ = PluginMetadata(
     extra={"License": "MIT", "Author": "student_2333"},
 )
 
+usage_pic_menu = "请使用指令 [菜单 BAWiki <ft color=(238,120,0)>功能名称或序号</ft>] 查看某功能详细介绍"
 extra_pic_menu = {
     "menu_template": "default",
     "menu_data": [
@@ -102,7 +103,7 @@ extra_pic_menu = {
                 " \n"
                 "指令示例：\n"
                 "- <ft color=(238,120,0)>ba学生评价 白子</ft>\n"
-                "- <ft color=(238,120,0)>ba角评 xcw</ft>"
+                "- <ft color=(238,120,0)>ba角评 xcw</ft>\n"
                 "- <ft color=(238,120,0)>ba角评 总览</ft>"
             ),
         },
@@ -123,7 +124,7 @@ extra_pic_menu = {
                 "- <ft color=(238,120,0)>ba总力战 -s j</ft>（日服当前总力战Boss配队攻略）\n"
                 "- <ft color=(238,120,0)>ba总力战 -s j -w</ft>（日服当前总力战Boss机制图）\n"
                 "- <ft color=(238,120,0)>ba总力战 寿司</ft>（Kaiten FX Mk.0 配队攻略）\n"
-                "- <ft color=(238,120,0)>ba总力战 寿司 -t 屋外</ft>（Kaiten FX Mk.0 屋外战配队攻略）\n"
+                "- <ft color=(238,120,0)>ba总力战 寿司 -t 屋外</ft>（Kaiten FX Mk.0 屋外战配队攻略）"
             ),
         },
         {
@@ -184,7 +185,7 @@ extra_pic_menu = {
                 "可以用这些指令触发：\n"
                 "- <ft color=(238,120,0)>ba制造</ft>\n"
                 "- <ft color=(238,120,0)>ba制作</ft>\n"
-                "- <ft color=(238,120,0)>ba合成</ft>\n"
+                "- <ft color=(238,120,0)>ba合成</ft>"
             ),
         },
         {
@@ -270,7 +271,7 @@ extra_pic_menu = {
                 " \n"
                 "指令示例：\n"
                 "- <ft color=(238,120,0)>ba切换卡池</ft>\n"
-                "- <ft color=(238,120,0)>ba切换卡池 常驻</ft>"
+                "- <ft color=(238,120,0)>ba切换卡池 常驻</ft>\n"
                 "- <ft color=(238,120,0)>ba切换卡池 小桃 小绿</ft>"
             ),
         },
@@ -287,6 +288,20 @@ extra_pic_menu = {
             "trigger_condition": "ba漫画",
             "brief_des": "随机发送一话官推漫画",
             "detail_des": "随机发送一话BA官推漫画\n来源：GameKee",
+        },
+        {
+            "func": "关卡攻略",
+            "trigger_method": "指令",
+            "trigger_condition": "ba关卡",
+            "brief_des": "获取关卡攻略",
+            "detail_des": (
+                "获取指定关卡攻略\n"
+                "来源：GameKee\n"
+                " \n"
+                "指令示例：\n"
+                "- <ft color=(238,120,0)>ba关卡 1-1</ft>\n"
+                "- <ft color=(238,120,0)>ba关卡 H1-1</ft>"
+            ),
         },
         {
             "func": "清空缓存",
@@ -307,4 +322,5 @@ extra_pic_menu = {
 }
 
 if "nonebot_plugin_PicMenu" in get_available_plugin_names():
+    __plugin_meta__.usage = usage_pic_menu
     __plugin_meta__.extra.update(extra_pic_menu)

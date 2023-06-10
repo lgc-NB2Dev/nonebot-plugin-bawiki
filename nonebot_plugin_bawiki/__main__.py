@@ -764,7 +764,7 @@ level_guide = on_command("ba关卡")
 async def _(matcher: Matcher, arg: Message = CommandArg()):
     arg_str = arg.extract_plain_text().strip().upper()
     if not arg_str:
-        await matcher.finish("请输入关卡名称，如 ba关卡 1-1 或 ba关卡 H1-1")
+        await matcher.finish("请输入关卡名称")
 
     try:
         levels = await get_level_list()
