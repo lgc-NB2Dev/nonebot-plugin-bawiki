@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, TypedDict
 
 from nonebot import logger
+from pypinyin import lazy_pinyin
 
 
 class HelpDict(TypedDict):
@@ -19,7 +20,7 @@ help_list: HelpList = []
 
 
 def sort_help():
-    help_list.sort(key=lambda x: x["func"])
+    help_list.sort(key=lambda x: "".join(lazy_pinyin(x["func"])))
 
 
 def append_and_sort_help(help_dict: HelpDict):
