@@ -117,7 +117,7 @@ async def async_req(
         resp = await cli.request(method, url, **kwargs)
         resp.raise_for_status()
 
-        if is_json:
+        if (not raw) and is_json:
             ret = resp.json()
         elif raw:
             ret = resp.content

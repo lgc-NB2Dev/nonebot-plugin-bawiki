@@ -6,7 +6,7 @@ require("nonebot_plugin_htmlrender")
 
 from .command import load_commands  # noqa: E402
 from .config import Cfg as Cfg  # noqa: E402
-from .help import extra, usage  # noqa: E402
+from .help import extra, register_help_cmd, usage  # noqa: E402
 
 __version__ = "0.8.0"
 __plugin_meta__ = PluginMetadata(
@@ -23,4 +23,5 @@ __plugin_meta__ = PluginMetadata(
 if extra:
     __plugin_meta__.extra.update(extra)
 
+register_help_cmd()
 load_commands()
