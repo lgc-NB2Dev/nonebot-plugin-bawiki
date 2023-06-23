@@ -1,10 +1,9 @@
 [project]
 name = "nonebot-plugin-bawiki"
-version = "0.7.10"
+version = "0.8.0"
 description = "A nonebot2 plugin for Blue Archive."
 authors = [{ name = "student_2333", email = "lgc2333@126.com" }]
 dependencies = [
-    "aiohttp>=3.8.3",
     "nonebot2>=2.0.0",
     "nonebot-adapter-onebot>=2.1.1",
     "nonebot-plugin-htmlrender>=0.2.0.1",
@@ -12,6 +11,7 @@ dependencies = [
     "beautifulsoup4>=4.11.1",
     "lxml>=4.9.1",
     "pil-utils>=0.1.4",
+    "httpx>=0.24.1",
 ]
 requires-python = ">=3.8,<4.0"
 readme = "README.md"
@@ -36,9 +36,8 @@ classifiers = [
 homepage = "https://github.com/lgc2333/nonebot-plugin-bawiki/"
 
 [project.optional-dependencies]
-menu = [
-    "nonebot-plugin-PicMenu>=0.2",
-]
+menu = ["nonebot-plugin-PicMenu>=0.2"]
+
 [tool.pdm.build]
 includes = []
 
