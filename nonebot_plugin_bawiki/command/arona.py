@@ -22,7 +22,6 @@ help_list: "HelpList" = [
             " \n"
             "可以搜索的内容：\n"
             "- 国际服未来视\n"
-            
             " \n"
             "可以用这些指令触发：\n"
             "- <ft color=(238,120,0)>arona</ft>\n"
