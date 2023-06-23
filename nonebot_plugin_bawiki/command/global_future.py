@@ -11,7 +11,7 @@ from ..data.bawiki import db_global_future
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "国际服千里眼",
         "trigger_method": "指令",

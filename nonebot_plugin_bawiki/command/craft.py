@@ -10,7 +10,7 @@ from ..data.bawiki import db_wiki_craft
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "制造一图流",
         "trigger_method": "指令",

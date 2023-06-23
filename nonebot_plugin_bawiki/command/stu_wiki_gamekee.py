@@ -12,7 +12,7 @@ from ..data.gamekee import game_kee_get_stu_cid_li, send_wiki_page
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "学生Wiki",
         "trigger_method": "指令",

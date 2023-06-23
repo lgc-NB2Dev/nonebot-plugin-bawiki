@@ -11,7 +11,7 @@ from ..data.gamekee import extract_content_pic, get_level_list
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "关卡攻略",
         "trigger_method": "指令",

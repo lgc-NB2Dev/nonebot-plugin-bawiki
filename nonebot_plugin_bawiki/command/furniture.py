@@ -10,7 +10,7 @@ from ..data.bawiki import db_wiki_furniture
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "互动家具总览",
         "trigger_method": "指令",

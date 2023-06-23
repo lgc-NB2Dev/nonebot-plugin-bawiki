@@ -14,7 +14,7 @@ from ..util import recover_alia, splice_msg
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "活动一图流",
         "trigger_method": "指令",

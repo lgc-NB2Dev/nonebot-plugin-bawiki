@@ -15,7 +15,7 @@ from ..util import async_req
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "羁绊查询",
         "trigger_method": "指令",

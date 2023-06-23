@@ -14,7 +14,7 @@ from ..data.schaledb import schale_calender
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "日程表",
         "trigger_method": "指令",

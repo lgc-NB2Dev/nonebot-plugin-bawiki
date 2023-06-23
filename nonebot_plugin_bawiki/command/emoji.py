@@ -11,7 +11,7 @@ from ..data.bawiki import db_get, db_get_emoji
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "抽表情",
         "trigger_method": "指令",

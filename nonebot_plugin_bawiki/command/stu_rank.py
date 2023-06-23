@@ -11,7 +11,7 @@ from ..data.bawiki import db_wiki_stu, recover_stu_alia
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "学生评价",
         "trigger_method": "指令",

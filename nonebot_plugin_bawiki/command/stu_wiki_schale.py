@@ -13,7 +13,7 @@ from ..data.schaledb import schale_get_stu_dict, schale_get_stu_info
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "学生图鉴",
         "trigger_method": "指令",

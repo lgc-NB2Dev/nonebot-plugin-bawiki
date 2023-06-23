@@ -9,7 +9,7 @@ from ..util import clear_req_cache
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "清空缓存",
         "trigger_method": "超级用户 指令",

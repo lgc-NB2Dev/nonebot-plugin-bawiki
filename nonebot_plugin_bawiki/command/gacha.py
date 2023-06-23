@@ -21,7 +21,7 @@ from ..util import recover_alia
 if TYPE_CHECKING:
     from . import HelpList
 
-help_list: HelpList = [
+help_list: "HelpList" = [
     {
         "func": "模拟抽卡",
         "trigger_method": "指令",
