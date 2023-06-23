@@ -4,12 +4,15 @@ from pil_utils import BuildImage
 
 RES_PATH = Path(__file__).parent / "res"
 
+CACHE_PATH = Path.cwd() / "cache" / "BAWiki"
+if not CACHE_PATH.exists():
+    CACHE_PATH.mkdir(parents=True)
+
 DATA_PATH = Path.cwd() / "data" / "BAWiki"
 if not DATA_PATH.exists():
     DATA_PATH.mkdir(parents=True)
 
 RES_CALENDER_BANNER = BuildImage.open(RES_PATH / "calender_banner.png")
-# RES_SCHALE_BG = BuildImage.open(RES_PATH / "schale_bg.jpg")
 RES_GRADIENT_BG = BuildImage.open(RES_PATH / "gradient.png")
 RES_GACHA_BG = BuildImage.open(RES_PATH / "gacha_bg.png")
 RES_GACHA_CARD_BG = BuildImage.open(RES_PATH / "gacha_card_bg.png")

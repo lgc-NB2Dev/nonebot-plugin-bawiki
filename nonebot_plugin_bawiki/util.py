@@ -1,17 +1,8 @@
 import datetime
+import json
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import Any, Dict, Iterable, List, Literal, Optional, TypeVar, overload
 
 from httpx import AsyncClient
 from nonebot.adapters.onebot.v11 import Message
@@ -30,6 +21,7 @@ class RequestCache:
     method: str
     raw: bool
     json: bool
+    params: str
     content: Any
 
 
@@ -38,13 +30,15 @@ def get_req_cache(
     method: Optional[str] = None,
     raw: Optional[bool] = None,
     json: Optional[bool] = None,
-) -> Optional[RequestCache]:
+    params: Optional[str] = None,
+) -> Optional[Any]:
     if (c := req_cache.get(url)) and (
         (method is None or method == c.method)
         and (raw is None or raw == c.raw)
         and (json is None or json == c.json)
+        and (params is None or params == c.params)
     ):
-        return c
+        return c.content
     return None
 
 
@@ -68,8 +62,9 @@ async def async_req(
     ignore_cache: bool = False,
     proxy: Optional[str] = config.ba_proxy,
     method: str = "GET",
+    params: Optional[Dict[str, Any]] = None,
     **kwargs,
-) -> Union[Dict[str, Any], list]:
+) -> Any:
     ...
 
 
@@ -82,6 +77,7 @@ async def async_req(
     ignore_cache: bool = False,
     proxy: Optional[str] = config.ba_proxy,
     method: str = "GET",
+    params: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> bytes:
     ...
@@ -96,6 +92,7 @@ async def async_req(
     ignore_cache: bool = False,
     proxy: Optional[str] = config.ba_proxy,
     method: str = "GET",
+    params: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> str:
     ...
@@ -108,13 +105,18 @@ async def async_req(
     ignore_cache=False,
     proxy=config.ba_proxy,
     method="GET",
+    params=None,
     **kwargs,
 ):
-    if (not ignore_cache) and (c := get_req_cache(url, method, raw, is_json)):
+    param_json = json.dumps(params) if params else "{}"
+
+    if (not ignore_cache) and (
+        c := get_req_cache(url, method, raw, is_json, param_json)
+    ):
         return c
 
     async with AsyncClient(proxies=proxy) as cli:
-        resp = await cli.request(method, url, **kwargs)
+        resp = await cli.request(method, url, params=params, **kwargs)
         resp.raise_for_status()
 
         if (not raw) and is_json:
@@ -124,7 +126,7 @@ async def async_req(
         else:
             ret = resp.text
 
-        req_cache[url] = RequestCache(method, raw, is_json, ret)
+        req_cache[url] = RequestCache(method, raw, is_json, param_json, ret)
         return ret
 
 

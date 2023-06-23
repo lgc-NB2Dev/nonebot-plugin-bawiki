@@ -17,7 +17,10 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
     arg = arg_msg.extract_plain_text().strip()
 
     if not arg:
-        cmd_list = "\n".join(f"▶ {k}" for k in [x["func"] for x in help_list])
+        cmd_list = "\n".join(
+            f"▶ {k['func']} ({k['trigger_method']}：{k['trigger_condition']}) - {k['brief_des']}"
+            for k in help_list
+        )
         await matcher.finish(
             f"目前插件支持的功能：\n"
             f"\n"
@@ -26,7 +29,18 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
             f"Tip: 使用指令 `ba帮助 <功能名>` 查看某功能详细信息",
         )
 
-    func = next((x for x in help_list if arg in x["func"]), None)
+    arg_lower = arg.lower()
+    func = next(
+        (
+            x
+            for x in help_list
+            if (
+                (arg_lower in x["func"].lower())
+                or (arg_lower in x["trigger_condition"].lower())
+            )
+        ),
+        None,
+    )
     if not func:
         await matcher.finish(f"未找到功能 `{arg}`")
 
