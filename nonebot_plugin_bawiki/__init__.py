@@ -4,7 +4,7 @@ from nonebot.plugin import PluginMetadata
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
 
-from . import __main__ as __main__  # noqa: E402
+from .command import load_commands  # noqa: E402
 from .config import Cfg as Cfg  # noqa: E402
 from .help import extra, usage  # noqa: E402
 
@@ -22,3 +22,5 @@ __plugin_meta__ = PluginMetadata(
 
 if extra:
     __plugin_meta__.extra.update(extra)
+
+load_commands()

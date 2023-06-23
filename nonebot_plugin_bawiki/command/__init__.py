@@ -27,16 +27,17 @@ def append_and_sort_help(help_dict: HelpDict):
     sort_help()
 
 
-for module in Path(__file__).parent.iterdir():
-    if module.name.startswith("_"):
-        continue
+def load_commands():
+    for module in Path(__file__).parent.iterdir():
+        if module.name.startswith("_"):
+            continue
 
-    module = importlib.import_module(f".{module.stem}", __package__)
-    assert module
+        module = importlib.import_module(f".{module.stem}", __package__)
+        assert module
 
-    if not hasattr(module, "help_list"):
-        logger.warning(f"Command module `{module.__name__}` has no `help_list`")
-    else:
-        help_list.extend(module.help_list)
+        if not hasattr(module, "help_list"):
+            logger.warning(f"Command module `{module.__name__}` has no `help_list`")
+        else:
+            help_list.extend(module.help_list)
 
-sort_help()
+    sort_help()
