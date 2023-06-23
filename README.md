@@ -104,15 +104,19 @@ plugins = [
 
 在 nonebot2 项目的`.env`文件中添加下表中的配置
 
-|         配置项         | 必填 | 默认值  |                          说明                           |
-| :--------------------: | :--: | :-----: | :-----------------------------------------------------: |
-|       `BA_PROXY`       |  否  | `None`  | 访问 `SchaleDB`、`bawiki-data` 的 json 数据时使用的代理 |
-|  `BA_GACHA_COOL_DOWN`  |  否  |   `0`   |               每群每人的抽卡冷却，单位秒                |
-|  `BA_VOICE_USE_CARD`   |  否  | `False` |           是否使用自定义音乐卡片发送角色语音            |
-|    `BA_GAMEKEE_URL`    |  否  |   ...   |                  GameKee 数据源的地址                   |
-|    `BA_SCHALE_URL`     |  否  |   ...   |                SchaleDB Json 数据的地址                 |
-| `BA_SCHALE_MIRROR_URL` |  否  |   ...   |                 SchaleDB 网页截图的地址                 |
-|   `BA_BAWIKI_DB_URL`   |  否  |   ...   |                   bawiki-data 的地址                    |
+|            配置项             | 必填 | 默认值  |                           说明                            |
+| :---------------------------: | :--: | :-----: | :-------------------------------------------------------: |
+|          `BA_PROXY`           |  否  | `None`  |  访问 `SchaleDB`、`bawiki-data` 的 json 数据时使用的代理  |
+|     `BA_GACHA_COOL_DOWN`      |  否  |   `0`   |                每群每人的抽卡冷却，单位秒                 |
+|      `BA_VOICE_USE_CARD`      |  否  | `False` |            是否使用自定义音乐卡片发送角色语音             |
+|       `BA_GAMEKEE_URL`        |  否  |   ...   |                   GameKee 数据源的地址                    |
+|        `BA_SCHALE_URL`        |  否  |   ...   |                SchaleDB Json 数据源的地址                 |
+|    `BA_SCHALE_MIRROR_URL`     |  否  |   ...   |                  SchaleDB 网页截图的地址                  |
+|      `BA_BAWIKI_DB_URL`       |  否  |   ...   |                    bawiki-data 的地址                     |
+|      `BA_ARONA_API_URL`       |  否  |   ...   |                  Arona Bot 数据源的地址                   |
+|      `BA_ARONA_CDN_URL`       |  否  |   ...   |                  Arona Bot 图片 CDN 地址                  |
+| `BA_CLEAR_REQ_CACHE_INTERVAL` |  否  |   `3`   |             插件清理请求缓存的间隔，单位小时              |
+|  `BA_AUTO_CLEAR_ARONA_CACHE`  |  否  |   ...   | 是否在插件每次加载时自动清理从 Arona Bot 数据源缓存的图片 |
 
 ## 🎉 使用
 
@@ -122,7 +126,8 @@ plugins = [
 
 **现在 BAWiki 会自动帮你把 PicMenu 的字体设为系统已安装的字体，再也不需要麻烦的手动配置了，好耶~**
 
-如果你不想用 PicMenu 的话，那么请看 [\_\_init\_\_.py](https://github.com/lgc2333/nonebot-plugin-bawiki/blob/master/nonebot_plugin_bawiki/__init__.py)
+如果你不想用 PicMenu 的话，那么使用 `ba帮助` 指令即可；  
+如果装载了 PicMenu，`ba帮助` 指令会调用 PicMenu 来生成帮助图片并发送
 
 ## 📞 联系
 
@@ -133,9 +138,15 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 💡 鸣谢
 
+### [GameKee](https://ba.gamekee.com/) & [SchaleDB](https://lonqie.github.io/SchaleDB/) & [Arona Bot](https://doc.arona.diyigemt.com/api/)
+
+- 插件数据源提供
+
+<!--
 ### [RainNight0](https://github.com/RainNight0)
 
 - 日程表 html 模板提供（已弃用）
+-->
 
 ### `bawiki-data` 数据源贡献列表
 
@@ -154,6 +165,14 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.8.0
+
+- 整理项目结构
+- 添加内置帮助指令 `ba帮助`
+- 添加 Arona Bot 数据源指令 `arona`
+- 添加了配置项 `BA_ARONA_API_URL`、`BA_ARONA_CDN_URL`、`BA_CLEAR_REQ_CACHE_INTERVAL`、`BA_AUTO_CLEAR_ARONA_CACHE`
+- 其他小更改（更换 `aiohttp` 为 `httpx` 等）
 
 ### 0.7.10
 
