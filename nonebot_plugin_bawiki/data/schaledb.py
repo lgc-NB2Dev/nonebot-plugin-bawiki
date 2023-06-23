@@ -13,9 +13,9 @@ from PIL.Image import Resampling
 from pil_utils import BuildImage, text2image
 from playwright.async_api import Page, ViewportSize
 
-from .config import config
-from .resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
-from .util import async_req, img_invert_rgba, parse_time_delta
+from ..config import config
+from ..resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
+from ..util import async_req, img_invert_rgba, parse_time_delta
 
 PAGE_KWARGS = {
     "is_mobile": True,

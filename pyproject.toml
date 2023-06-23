@@ -35,6 +35,10 @@ classifiers = [
 [project.urls]
 homepage = "https://github.com/lgc2333/nonebot-plugin-bawiki/"
 
+[project.optional-dependencies]
+menu = [
+    "nonebot-plugin-PicMenu>=0.2",
+]
 [tool.pdm.build]
 includes = []
 

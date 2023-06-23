@@ -115,6 +115,11 @@ requires_python = ">=3.7"
 summary = "A list-like structure which implements collections.abc.MutableSequence"
 
 [[package]]
+name = "fuzzywuzzy"
+version = "0.18.0"
+summary = "Fuzzy string matching in python"
+
+[[package]]
 name = "greenlet"
 version = "2.0.1"
 requires_python = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
@@ -253,6 +258,18 @@ dependencies = [
     "playwright>=1.17.2",
     "pymdown-extensions>=9.1",
     "python-markdown-math>=0.8",
+]
+
+[[package]]
+name = "nonebot-plugin-picmenu"
+version = "0.2"
+summary = "A Plugin for Nonebot2 to generate picture menu of Plugins"
+dependencies = [
+    "fuzzywuzzy",
+    "nonebot-adapter-onebot",
+    "nonebot2",
+    "pillow",
+    "pydantic",
 ]
 
 [[package]]
@@ -500,8 +517,8 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 [metadata]
 lock_version = "4.2"
 cross_platform = true
-groups = ["default"]
-content_hash = "sha256:481680a8d184888143449ea36793fdc5cc0dd3153517e3c5fa1dd55a0c053fc1"
+groups = ["default", "menu"]
+content_hash = "sha256:919dcb5e9e43146b1c9da336fc2e70e261f3271326fc1c0add2571adb7a8e02f"
 
 [metadata.files]
 "aiofiles 23.1.0" = [
@@ -860,6 +877,10 @@ content_hash = "sha256:481680a8d184888143449ea36793fdc5cc0dd3153517e3c5fa1dd55a0
     {url = "https://files.pythonhosted.org/packages/fa/3f/b25527623101da07f47fa071affb4a3e89d0f8ae2faf13266f62235f7175/frozenlist-1.3.3-cp39-cp39-musllinux_1_1_ppc64le.whl", hash = "sha256:8bae29d60768bfa8fb92244b74502b18fae55a80eac13c88eb0b496d4268fd2d"},
     {url = "https://files.pythonhosted.org/packages/fa/a1/d0822eb2f827f209c8fcf19ff1c9eb30ae08e25b710cf432b1013ea23429/frozenlist-1.3.3-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:9309869032abb23d196cb4e4db574232abe8b8be1339026f489eeb34a4acfd91"},
     {url = "https://files.pythonhosted.org/packages/fd/b8/9ed4ed37b2c3269660a86a10a09b2fe49dbbd6973ac684804ece7b51b63f/frozenlist-1.3.3-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:924620eef691990dfb56dc4709f280f40baee568c794b5c1885800c3ecc69816"},
+]
+"fuzzywuzzy 0.18.0" = [
+    {url = "https://files.pythonhosted.org/packages/11/4b/0a002eea91be6048a2b5d53c5f1b4dafd57ba2e36eea961d05086d7c28ce/fuzzywuzzy-0.18.0.tar.gz", hash = "sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8"},
+    {url = "https://files.pythonhosted.org/packages/43/ff/74f23998ad2f93b945c0309f825be92e04e0348e062026998b5eefef4c33/fuzzywuzzy-0.18.0-py2.py3-none-any.whl", hash = "sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993"},
 ]
 "greenlet 2.0.1" = [
     {url = "https://files.pythonhosted.org/packages/00/0b/5a6cbd757eeb53c4adb3a5037b3e0474a548838d699034982984c9409440/greenlet-2.0.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:9e112e03d37987d7b90c1e98ba5e1b59e1645226d78d73282f45b326f7bddcb9"},
@@ -1343,6 +1364,9 @@ content_hash = "sha256:481680a8d184888143449ea36793fdc5cc0dd3153517e3c5fa1dd55a0
 "nonebot-plugin-htmlrender 0.2.0.3" = [
     {url = "https://files.pythonhosted.org/packages/39/a8/acc4c2424715d2f3510396d396ebb715a4f3200ee234a22043b98f82ea91/nonebot_plugin_htmlrender-0.2.0.3-py3-none-any.whl", hash = "sha256:2a45d811513bd03dfe6825f6229f50f1e65a390d4ae9c5413184d6de42147147"},
     {url = "https://files.pythonhosted.org/packages/e7/f8/a9dccb4308f4ac1236025806dd13fd3b2d1e954a3e61726e46409b0a5c6d/nonebot_plugin_htmlrender-0.2.0.3.tar.gz", hash = "sha256:d7e0432ebb78abbc7d934141902722d36334ef12921f640da4c90dedb62452fb"},
+]
+"nonebot-plugin-picmenu 0.2" = [
+    {url = "https://files.pythonhosted.org/packages/04/2f/500c5377bbaaa4a9921f4e09310c6611adb4e818a091d30d9fe66885312c/nonebot_plugin_PicMenu-0.2.tar.gz", hash = "sha256:9cc5a126ccc0d2cee42759131a7616946af1747c57742ae9d11e1ce09e63ed3e"},
 ]
 "nonebot2 2.0.0" = [
     {url = "https://files.pythonhosted.org/packages/69/60/2c0d414ff1dd015848f28a7f63181d45838a91d406af8f8bbc595185561b/nonebot2-2.0.0.tar.gz", hash = "sha256:144c175ce100c3300d53475fc47b7a9f0a6545861ff12bdc8a1442ab12d430df"},

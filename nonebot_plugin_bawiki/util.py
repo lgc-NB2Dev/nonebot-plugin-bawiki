@@ -1,6 +1,6 @@
 import datetime
-import json
 from copy import deepcopy
+from dataclasses import dataclass
 from typing import (
     Any,
     Dict,
@@ -13,15 +13,50 @@ from typing import (
     overload,
 )
 
-from aiohttp import ClientSession
+from httpx import AsyncClient
 from nonebot.adapters.onebot.v11 import Message
+from nonebot_plugin_apscheduler import scheduler
 from PIL import Image, ImageOps
 
 from .config import config
 
 _T = TypeVar("_T")
 
-req_cache = {}
+req_cache: Dict[str, "RequestCache"] = {}
+
+
+@dataclass
+class RequestCache:
+    method: str
+    raw: bool
+    json: bool
+    content: Any
+
+
+def get_req_cache(
+    url: str,
+    method: Optional[str] = None,
+    raw: Optional[bool] = None,
+    json: Optional[bool] = None,
+) -> Optional[RequestCache]:
+    if (c := req_cache.get(url)) and (
+        (method is None or method == c.method)
+        and (raw is None or raw == c.raw)
+        and (json is None or json == c.json)
+    ):
+        return c
+    return None
+
+
+def clear_req_cache():
+    req_cache.clear()
+
+
+if config.ba_clear_req_cache_interval > 0:
+
+    @scheduler.scheduled_job("interval", hours=config.ba_clear_req_cache_interval)
+    async def _():
+        clear_req_cache()
 
 
 @overload
@@ -30,10 +65,9 @@ async def async_req(
     *,
     is_json: Literal[True] = True,
     raw: Literal[False] = False,
-    ignore_cache=False,
-    proxy=config.ba_proxy,
-    method="GET",
-    session: Optional[ClientSession] = None,
+    ignore_cache: bool = False,
+    proxy: Optional[str] = config.ba_proxy,
+    method: str = "GET",
     **kwargs,
 ) -> Union[Dict[str, Any], list]:
     ...
@@ -45,10 +79,9 @@ async def async_req(
     *,
     is_json: Literal[False] = False,
     raw: Literal[True] = True,
-    ignore_cache=False,
-    proxy=config.ba_proxy,
-    method="GET",
-    session: Optional[ClientSession] = None,
+    ignore_cache: bool = False,
+    proxy: Optional[str] = config.ba_proxy,
+    method: str = "GET",
     **kwargs,
 ) -> bytes:
     ...
@@ -60,10 +93,9 @@ async def async_req(
     *,
     is_json: Literal[False] = False,
     raw: Literal[False] = False,
-    ignore_cache=False,
-    proxy=config.ba_proxy,
-    method="GET",
-    session: Optional[ClientSession] = None,
+    ignore_cache: bool = False,
+    proxy: Optional[str] = config.ba_proxy,
+    method: str = "GET",
     **kwargs,
 ) -> str:
     ...
@@ -76,23 +108,24 @@ async def async_req(
     ignore_cache=False,
     proxy=config.ba_proxy,
     method="GET",
-    session: Optional[ClientSession] = None,
     **kwargs,
 ):
-    if (not ignore_cache) and (c := req_cache.get(url)):
+    if (not ignore_cache) and (c := get_req_cache(url, method, raw, is_json)):
         return c
 
-    async with (session or ClientSession()) as c:
-        async with c.request(method, url, **kwargs, proxy=proxy) as r:
-            ret = (await r.read()) if raw else (await r.text())
-            if is_json and (not raw):
-                ret = json.loads(ret)
-            req_cache[url] = ret
-            return ret
+    async with AsyncClient(proxies=proxy) as cli:
+        resp = await cli.request(method, url, **kwargs)
+        resp.raise_for_status()
 
+        if is_json:
+            ret = resp.json()
+        elif raw:
+            ret = resp.content
+        else:
+            ret = resp.text
 
-def clear_req_cache():
-    req_cache.clear()
+        req_cache[url] = RequestCache(method, raw, is_json, ret)
+        return ret
 
 
 def format_timestamp(t: int):

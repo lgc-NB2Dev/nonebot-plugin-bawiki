@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict, cast, overload
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
 
-from .config import config
-from .util import async_req, recover_alia
+from ..config import config
+from ..util import async_req, recover_alia
 
 
 class MangaDict(TypedDict):

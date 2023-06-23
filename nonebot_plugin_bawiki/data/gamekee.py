@@ -6,22 +6,23 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from io import BytesIO
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, NoReturn, Union, cast
 
 from bs4 import BeautifulSoup, ResultSet, Tag
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.internal.matcher import Matcher
 from nonebot_plugin_htmlrender import get_new_page
 from PIL.Image import Resampling
 from pil_utils import BuildImage, text2image
 from playwright.async_api import Page
 
-from .config import config
-from .resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
-from .util import async_req, parse_time_delta
+from ..config import config
+from ..resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
+from ..util import async_req, parse_time_delta
 
 
-async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
+async def game_kee_request(url: str, **kwargs) -> Union[List, Dict[str, Any]]:
     ret = cast(
         dict,
         await async_req(
@@ -36,7 +37,7 @@ async def game_kee_request(url, **kwargs) -> Union[List, Dict[str, Any]]:
     return ret["data"]
 
 
-async def game_kee_get_calender():
+async def game_kee_get_calender() -> List[dict]:
     ret = cast(list, await game_kee_request("v1/wiki/index"))
 
     for i in ret:
@@ -54,7 +55,7 @@ async def game_kee_get_calender():
     return []
 
 
-async def game_kee_get_stu_li():
+async def game_kee_get_stu_li() -> Dict[str, dict]:
     ret = cast(dict, await game_kee_request("v1/wiki/entry"))
 
     for i in ret["entry_list"]:
@@ -66,15 +67,15 @@ async def game_kee_get_stu_li():
     return {}
 
 
-async def game_kee_get_stu_cid_li():
+async def game_kee_get_stu_cid_li() -> Dict[str, int]:
     return {x: y["content_id"] for x, y in (await game_kee_get_stu_li()).items()}
 
 
-def game_kee_page_url(sid):
+def game_kee_page_url(sid: int) -> str:
     return f"{config.ba_gamekee_url}{sid}.html"
 
 
-async def game_kee_get_page(url):
+async def game_kee_get_page(url: str) -> bytes:
     async with cast(Page, get_new_page()) as page:
         await page.goto(url, timeout=60 * 1000)
 
@@ -101,7 +102,20 @@ async def game_kee_get_page(url):
         return await element.screenshot()
 
 
-async def game_kee_calender():
+async def send_wiki_page(sid: int, matcher: Matcher) -> NoReturn:
+    url = game_kee_page_url(sid)
+    await matcher.send(f"请稍等，正在截取Wiki页面……\n{url}")
+
+    try:
+        img = await game_kee_get_page(url)
+    except:
+        logger.exception(f"截取wiki页面出错 {url}")
+        await matcher.finish("截取页面出错，请检查后台输出")
+
+    await matcher.finish(MessageSegment.image(img))
+
+
+async def game_kee_calender() -> Union[MessageSegment, str]:
     ret = await game_kee_get_calender()
     if not ret:
         return "没有获取到GameKee日程表数据"
@@ -110,7 +124,7 @@ async def game_kee_calender():
     return MessageSegment.image(pic)
 
 
-async def game_kee_get_calender_page(ret, has_pic=True):
+async def game_kee_get_calender_page(ret, has_pic=True) -> BytesIO:
     now = datetime.now()
 
     async def draw(it: dict):
@@ -231,7 +245,7 @@ async def game_kee_get_calender_page(ret, has_pic=True):
     return bg.save_jpg()
 
 
-async def game_kee_grab_l2d(cid):
+async def game_kee_grab_l2d(cid) -> List[str]:
     ret = cast(
         dict,
         await game_kee_request(f"v1/content/detail/{cid}"),

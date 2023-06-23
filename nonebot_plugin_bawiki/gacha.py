@@ -12,7 +12,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
 
 from .config import config
-from .data_schaledb import schale_get, schale_get_stu_dict
+from .data.schaledb import schale_get, schale_get_stu_dict
 from .resource import (
     DATA_PATH,
     RES_GACHA_BG,
