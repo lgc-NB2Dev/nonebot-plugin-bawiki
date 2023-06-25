@@ -118,6 +118,15 @@ plugins = [
 | `BA_CLEAR_REQ_CACHE_INTERVAL` |  否  |   `3`   |             插件清理请求缓存的间隔，单位小时              |
 |  `BA_AUTO_CLEAR_ARONA_CACHE`  |  否  |   ...   | 是否在插件每次加载时自动清理从 Arona Bot 数据源缓存的图片 |
 
+由于 CDN 可能并不给力，如果有条件的话本人推荐使用代理直接访问原地址，下面是对应 `.env` 配置：
+
+```ini
+BA_PROXY=http://127.0.0.1:7890
+BA_SCHALE_URL=https://schale.gg/
+BA_SCHALE_MIRROR_URL=https://schale.lgc2333.top/
+BA_BAWIKI_DB_URL=https://bawiki.lgc2333.top/
+```
+
 ## 🎉 使用
 
 ### 指令表
@@ -165,6 +174,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.8.1
+
+- 使用 `arona` 指令模糊搜索的时候会显示图片类别了
 
 ### 0.8.0
 
