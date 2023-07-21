@@ -14,8 +14,8 @@ from nonebot.log import logger
 from nonebot.params import CommandArg
 
 from ..data.bawiki import db_get_gacha_data, db_get_stu_alias
+from ..data.gacha import gacha, get_gacha_cool_down, set_gacha_cool_down
 from ..data.schaledb import schale_get_stu_dict
-from ..gacha import gacha, get_gacha_cool_down, set_gacha_cool_down
 from ..util import recover_alia
 
 if TYPE_CHECKING:
@@ -96,7 +96,7 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
             try:
                 stu_li = await schale_get_stu_dict()
                 stu_alias = await db_get_stu_alias()
-            except:
+            except Exception:
                 logger.exception("获取学生列表或别名失败")
                 await matcher.finish("获取学生列表或别名失败，请检查后台输出")
 
@@ -115,7 +115,7 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
     else:
         try:
             gacha_data = await db_get_gacha_data()
-        except:
+        except Exception:
             logger.exception("获取抽卡基本数据失败")
             await matcher.finish("获取抽卡基本数据失败，请检查后台输出")
 
@@ -160,7 +160,7 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
 
     try:
         gacha_data = await db_get_gacha_data()
-    except:
+    except Exception:
         logger.exception("获取抽卡基本数据失败")
         await matcher.finish("获取抽卡基本数据失败，请检查后台输出")
 
@@ -182,7 +182,7 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
                 ),
             )
             gacha_times -= 10
-    except:
+    except Exception:
         logger.exception("抽卡错误")
         await matcher.finish("抽卡出错了，请检查后台输出")
 

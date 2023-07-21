@@ -515,7 +515,7 @@ async def draw_fav_li(lvl):
             for x in await schale_get_stu_data()
             if (x["MemoryLobby"] and x["MemoryLobby"][0] == lvl)
         ]
-    except:
+    except Exception:
         logger.exception("获取schale db学生数据失败")
         return "获取SchaleDB学生数据失败，请检查后台输出"
 

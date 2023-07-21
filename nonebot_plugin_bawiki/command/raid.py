@@ -97,7 +97,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
                     tasks.append(
                         db_wiki_raid(raid, [s], args.wiki, r[0].get("terrain")),
                     )
-        except:
+        except Exception:
             logger.exception("获取当前总力战失败")
             await matcher.finish("获取当前总力战失败")
 
@@ -119,7 +119,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
 
     try:
         ret = await asyncio.gather(*tasks)
-    except:
+    except Exception:
         logger.exception("获取总力战wiki失败")
         await matcher.finish("获取图片失败，请检查后台输出")
 

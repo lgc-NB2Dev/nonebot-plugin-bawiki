@@ -40,7 +40,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     try:
         levels = await get_level_list()
-    except:
+    except Exception:
         logger.exception("获取关卡列表失败")
         await matcher.finish("获取关卡列表失败，请检查后台输出")
 
@@ -50,7 +50,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
     cid = levels[arg_str]
     try:
         imgs = await extract_content_pic(cid)
-    except:
+    except Exception:
         logger.exception("获取攻略图片失败")
         await matcher.finish("获取攻略图片失败，请检查后台输出")
 

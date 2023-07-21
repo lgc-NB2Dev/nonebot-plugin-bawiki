@@ -53,7 +53,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         im = await db_wiki_stu(arg)
-    except:
+    except Exception:
         logger.exception("获取角评出错")
         await matcher.finish("获取角评出错，请检查后台输出")
 

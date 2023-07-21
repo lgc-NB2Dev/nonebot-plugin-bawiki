@@ -68,5 +68,5 @@ def set_pic_menu_font():
 
 try:
     set_pic_menu_font()
-except:
+except Exception:
     logger.exception("配置 PicMenu 字体失败")

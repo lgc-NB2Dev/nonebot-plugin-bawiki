@@ -36,7 +36,7 @@ cmd_craft_wiki = on_command("ba制造", aliases={"ba合成", "ba制作"})
 async def _(matcher: Matcher):
     try:
         im = await db_wiki_craft()
-    except:
+    except Exception:
         logger.exception("获取合成wiki图片错误")
         await matcher.finish("获取图片失败，请检查后台输出")
 

@@ -78,10 +78,7 @@ async def _(matcher: Matcher, state: T_State, param: str = ArgPlainText()):
         await send_image(matcher, res[0])
 
     state["res"] = res
-    list_txt = "\n".join(
-        f"{i}. {r.name} ({IMAGE_TYPE_MAP.get(r.type, '未知分类')})"
-        for i, r in enumerate(res, 1)
-    )
+    list_txt = "\n".join(f"{i}. {r.name}" for i, r in enumerate(res, 1))
     await matcher.pause(
         f"Arona 查到了多个结果，请 sensei 发送序号选择~\n{list_txt}\nTip：发送 0 取消选择",
     )

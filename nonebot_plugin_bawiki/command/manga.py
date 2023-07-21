@@ -40,7 +40,7 @@ async def _(matcher: Matcher):
     try:
         manga: MangaDict = random.choice(await db_get_manga())
         pics = await asyncio.gather(*[get_pic(x) for x in manga["pics"]])
-    except:
+    except Exception:
         logger.exception("获取漫画失败")
         await matcher.finish("获取漫画失败，请检查后台输出")
 

@@ -58,7 +58,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
                 ev = common["regions"][s]["current_events"]
                 if e := find_current_event(ev):
                     events.append((e[0]["event"]) % 10000)
-        except:
+        except Exception:
             logger.exception("获取当前活动失败")
             await matcher.finish("获取当前活动失败")
 
@@ -70,7 +70,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         ret = await asyncio.gather(*[db_wiki_event(x) for x in events])
-    except:
+    except Exception:
         logger.exception("获取活动wiki出错")
         await matcher.finish("获取图片出错，请检查后台输出")
 

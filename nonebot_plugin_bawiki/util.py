@@ -1,8 +1,18 @@
 import datetime
 import json
-from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Literal, Optional, TypeVar, overload
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from httpx import AsyncClient
 from nonebot.adapters.onebot.v11 import Message
@@ -11,7 +21,8 @@ from PIL import Image, ImageOps
 
 from .config import config
 
-_T = TypeVar("_T")
+T = TypeVar("T")
+NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
 
 req_cache: Dict[str, "RequestCache"] = {}
 
@@ -183,14 +194,14 @@ def splice_msg(msgs: list) -> Message:
     return im
 
 
-def split_list(li: Iterable[_T], length: int) -> List[List[_T]]:
+def split_list(li: Iterable[T], length: int) -> List[List[T]]:
     latest = []
     tmp = []
     for n, i in enumerate(li):
         tmp.append(i)
         if (n + 1) % length == 0:
-            latest.append(deepcopy(tmp))
-            tmp.clear()
+            latest.append(tmp)
+            tmp = []
     if tmp:
-        latest.append(deepcopy(tmp))
+        latest.append(tmp)
     return latest

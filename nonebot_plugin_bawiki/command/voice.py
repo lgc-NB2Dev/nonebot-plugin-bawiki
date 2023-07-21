@@ -23,14 +23,21 @@ help_list: "HelpList" = [
         "brief_des": "发送学生语音",
         "detail_des": (
             "从GameKee爬取学生语音并发送\n"
-            "指定关键词时会从匹配结果中随机选择一个语音发送\n"
+            "可以用 语音名称 或 中文或日文台词 搜索角色语音\n"
+            "如果有多个结果，则会从中随机选择一个语音发送\n"
             " \n"
-            "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba语音</ft>\n"
+            "默认获取日配语音，如果角色有中配，则可以在指令后方带上 `中配` 来获取\n"
+            "如果找不到中配语音对应的台词，则会展示日配台词\n"
+            # " \n"
+            # "可以用这些指令触发：\n"
+            # "- <ft color=(238,120,0)>ba语音</ft>\n"
             " \n"
             "指令示例：\n"
             "- <ft color=(238,120,0)>ba语音 忧</ft>\n"
-            "- <ft color=(238,120,0)>ba语音 美游 被cc</ft>"
+            "- <ft color=(238,120,0)>ba语音 美游 被cc</ft>\n"
+            "- <ft color=(238,120,0)>ba语音 水大叔 好热</ft>\n"
+            "- <ft color=(238,120,0)>ba语音中配 白子</ft>\n"
+            "- <ft color=(238,120,0)>ba语音中配 大叔 睡午觉</ft>"
         ),
     },
 ]
@@ -42,6 +49,11 @@ cmd_voice = on_command("ba语音")
 @cmd_voice.handle()
 async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     arg = cmd_arg.extract_plain_text().strip()
+    is_chinese = False
+    if arg.startswith("中配"):
+        arg = arg[2:].strip()
+        is_chinese = True
+
     if not arg:
         await matcher.finish("请提供学生名称")
 
@@ -52,7 +64,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         ret = await game_kee_get_stu_li()
-    except:
+    except Exception:
         logger.exception("获取学生列表出错")
         await matcher.finish("获取学生列表出错，请检查后台输出")
 
@@ -62,29 +74,40 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     try:
         org_stu_name = await recover_stu_alia(name, True)
         stu_name = await schale_to_gamekee(org_stu_name)
-    except:
+    except Exception:
         logger.exception("还原学生别名失败")
         await matcher.finish("还原学生别名失败，请检查后台输出")
 
     if not (stu_info := ret.get(stu_name)):
         await matcher.finish("未找到该学生")
 
-    voices = await game_kee_get_voice(stu_info["content_id"])
+    voices = await game_kee_get_voice(stu_info["content_id"], is_chinese)
     if v_type:
-        voices = [x for x in voices if v_type in x.title.lower()]
+        voices = [
+            x
+            for x in voices
+            if (
+                (v_type in x.title.lower())
+                or (v_type in x.jp.lower())
+                or (v_type in x.cn.lower())
+            )
+        ]
     if not voices:
         await matcher.finish("没找到符合要求的语音捏")
 
     v: GameKeeVoice = random.choice(voices)
-
-    im = [f"学生 {org_stu_name} 语音 {v.title}\n-=-=-=-=-=-=-=-"]
-    if v.jp:
-        im.append(v.jp)
-    if v.cn:
-        im.append(v.cn)
+    voice_type = "中配" if is_chinese else "日配"
+    im = [f"学生 {org_stu_name} {voice_type}语音 {v.title}"]
+    if v.jp or v.cn:
+        im.append("-=-=-=-=-=-=-=-")
+        if v.jp:
+            im.append(v.jp)
+        if v.cn:
+            im.append(v.cn)
     await matcher.send("\n".join(im))
+
     if config.ba_voice_use_card:
-        await matcher.send(
+        await matcher.finish(
             MessageSegment(
                 "music",
                 {
@@ -98,6 +121,6 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
                 },
             ),
         )
-    else:
-        v_data = await async_req(v.url, raw=True)
-        await matcher.send(MessageSegment.record(v_data))
+
+    v_data = await async_req(v.url, raw=True)
+    await matcher.finish(MessageSegment.record(v_data))

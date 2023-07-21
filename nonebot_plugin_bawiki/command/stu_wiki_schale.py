@@ -41,7 +41,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         ret = await schale_get_stu_dict()
-    except:
+    except Exception:
         logger.exception("获取学生列表出错")
         await matcher.finish("获取学生列表表出错，请检查后台输出")
 
@@ -56,7 +56,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))
-    except:
+    except Exception:
         logger.exception(f"截取schale db页面出错 chara={stu_name}")
         await matcher.finish("截取页面出错，请检查后台输出")
 

@@ -40,7 +40,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         ret = await game_kee_get_stu_cid_li()
-    except:
+    except Exception:
         logger.exception("获取学生列表出错")
         await matcher.finish("获取学生列表出错，请检查后台输出")
 

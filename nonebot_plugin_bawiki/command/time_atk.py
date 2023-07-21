@@ -66,7 +66,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
                 raid = common["regions"][s]["current_raid"]
                 if (r := find_current_event(raid)) and (raid := r[0]["raid"]) >= 1000:
                     events.append(raid)
-        except:
+        except Exception:
             logger.exception("获取当前综合战术考试失败")
             await matcher.finish("获取当前综合战术考试失败")
 
@@ -80,7 +80,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         ret = await asyncio.gather(*[db_wiki_time_atk(x) for x in events])
-    except:
+    except Exception:
         logger.exception("获取综合战术考试wiki出错")
         await matcher.finish("获取图片出错，请检查后台输出")
 

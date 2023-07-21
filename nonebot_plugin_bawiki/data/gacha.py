@@ -11,9 +11,8 @@ from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
 
-from .config import config
-from .data.schaledb import schale_get, schale_get_stu_dict
-from .resource import (
+from ..config import config
+from ..resource import (
     DATA_PATH,
     RES_GACHA_BG,
     RES_GACHA_CARD_BG,
@@ -23,7 +22,8 @@ from .resource import (
     RES_GACHA_STAR,
     RES_GACHA_STU_ERR,
 )
-from .util import split_list
+from ..util import split_list
+from .schaledb import schale_get, schale_get_stu_dict
 
 GACHA_DATA_PATH = DATA_PATH / "gacha.json"
 if not GACHA_DATA_PATH.exists():
@@ -103,7 +103,7 @@ async def gen_stu_img(students: Iterable[GachaStudent]) -> List[BuildImage]:
                 True,
             )
             stu_img = BuildImage.open(BytesIO(stu_img))
-        except:
+        except Exception:
             logger.exception(f"学生数据获取失败 {stu.id}")
             stu_img = RES_GACHA_STU_ERR
 

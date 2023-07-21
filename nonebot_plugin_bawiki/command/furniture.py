@@ -28,7 +28,7 @@ cmd_furniture_wiki = on_command("ba互动家具")
 async def _(matcher: Matcher):
     try:
         im = await db_wiki_furniture()
-    except:
+    except Exception:
         logger.exception("获取互动家具wiki图片错误")
         await matcher.finish("获取图片失败，请检查后台输出")
 

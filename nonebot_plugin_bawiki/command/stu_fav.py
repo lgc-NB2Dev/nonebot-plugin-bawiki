@@ -68,7 +68,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
         try:
             p = await draw_fav_li(arg)
-        except:
+        except Exception:
             logger.exception("绘制图片出错")
             await matcher.finish("绘制图片出错，请检查后台输出")
 
@@ -79,7 +79,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     try:
         ret = await schale_get_stu_dict()
-    except:
+    except Exception:
         logger.exception("获取学生列表出错")
         await matcher.finish("获取学生列表表出错，请检查后台输出")
 

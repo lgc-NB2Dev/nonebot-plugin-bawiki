@@ -108,7 +108,7 @@ async def send_wiki_page(sid: int, matcher: Matcher) -> NoReturn:
 
     try:
         img = await game_kee_get_page(url)
-    except:
+    except Exception:
         logger.exception(f"截取wiki页面出错 {url}")
         await matcher.finish("截取页面出错，请检查后台输出")
 
@@ -136,7 +136,7 @@ async def game_kee_get_calender_page(ret, has_pic=True) -> BytesIO:
                     .resize_width(1290)
                     .circle_corner(15)
                 )
-            except:
+            except Exception:
                 logger.exception("下载日程表图片失败")
 
         begin = datetime.fromtimestamp(it["begin_at"])
@@ -271,7 +271,43 @@ class GameKeeVoice:
     url: str
 
 
-async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
+def parse_voice_elem(elem: Tag) -> GameKeeVoice:
+    url: str = cast(str, elem["src"])
+    if not url.startswith("http"):
+        url = f"https:{url}"
+
+    tr1: Tag = elem.parent.parent.parent.parent  # type: ignore
+    tds: ResultSet[Tag] = tr1.find_all("td")
+    title = tds[0].text.strip()
+    jp = "\n".join(tds[2].stripped_strings)
+
+    tr2 = tr1.next_sibling
+    cn = "\n".join(tr2.stripped_strings)  # type: ignore
+    return GameKeeVoice(title, jp, cn, url)
+
+
+def merge_voice_dialogue(voices: List[List[GameKeeVoice]]) -> List[List[GameKeeVoice]]:
+    main_voices = voices[0]
+    other_voice_entries = voices[1:]
+
+    for voice_entry in other_voice_entries:
+        for voice in (x for x in voice_entry if (not x.jp) or (not x.cn)):
+            corresponding_voice = next(
+                (x for x in main_voices if x.title == voice.title),
+                None,
+            )
+            if not corresponding_voice:
+                continue
+
+            if not voice.jp:
+                voice.jp = corresponding_voice.jp
+            if not voice.cn:
+                voice.cn = corresponding_voice.cn
+
+    return voices
+
+
+async def game_kee_get_voice(cid: int, is_chinese: bool = False) -> List[GameKeeVoice]:
     wiki_html = (
         cast(
             dict,
@@ -279,24 +315,37 @@ async def game_kee_get_voice(cid) -> List[GameKeeVoice]:
         )
     )["content"]
     bs = BeautifulSoup(wiki_html, "lxml")
-    audios = bs.select(".mould-table>tbody>tr>td>div>div>audio")
 
-    parsed: List[GameKeeVoice] = []
-    for au in audios:
-        url: str = cast(str, au["src"])
-        if not url.startswith("http"):
-            url = f"https:{url}"
+    multi_lang_voices = [
+        [parse_voice_elem(x) for x in audios]
+        for table_fathers in bs.select(".slide-item")
+        if (
+            # 选择 tables
+            (tables := table_fathers.select(".table-overflow > .mould-table"))
+            # 检查 tables 中是否有语音，如果有，就取出语音到变量 aus -> audios
+            and (
+                audios := next(
+                    (aus for child in tables if (aus := child.find_all("audio"))),
+                    None,
+                )
+            )
+        )
+    ]
+    if multi_lang_voices:
+        return merge_voice_dialogue(multi_lang_voices)[1 if is_chinese else 0]
 
-        tr1: Tag = au.parent.parent.parent.parent  # type: ignore
-        tds: ResultSet[Tag] = tr1.find_all("td")
-        title = tds[0].text.strip()
-        jp = "\n".join(tds[2].stripped_strings)
-
-        tr2 = tr1.next_sibling
-        cn = "\n".join(tr2.stripped_strings)  # type: ignore
-        parsed.append(GameKeeVoice(title, jp, cn, url))
-
-    return parsed
+    # 没有中配
+    if is_chinese:
+        return []
+    return list(
+        itertools.chain(
+            *(
+                [parse_voice_elem(x) for x in a]
+                for x in bs.select(".mould-table")
+                if (a := x.find_all("audio"))
+            )
+        )
+    )
 
 
 async def get_level_list() -> Dict[str, int]:
