@@ -7,3 +7,4 @@ poetry.lock
 .pdm-python
 build/
 __pycache__/
+/bawiki-data/
