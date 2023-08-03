@@ -1,16 +1,28 @@
+import shutil
 from pathlib import Path
 
+from nonebot import logger
 from pil_utils import BuildImage
 
 RES_PATH = Path(__file__).parent / "res"
-
-CACHE_PATH = Path.cwd() / "cache" / "BAWiki"
-if not CACHE_PATH.exists():
-    CACHE_PATH.mkdir(parents=True)
-
 DATA_PATH = Path.cwd() / "data" / "BAWiki"
+CACHE_PATH = DATA_PATH / "cache"
+
+_OLD_CACHE_FOLDER = Path.cwd() / "cache"
+_OLD_CACHE_PATH = _OLD_CACHE_FOLDER / "BAWiki"
+
 if not DATA_PATH.exists():
     DATA_PATH.mkdir(parents=True)
+
+if _OLD_CACHE_PATH.exists():
+    logger.warning("Moving old cache to new path...")
+    shutil.move(str(_OLD_CACHE_PATH), CACHE_PATH)
+
+    if not any(_OLD_CACHE_FOLDER.iterdir()):
+        _OLD_CACHE_FOLDER.rmdir()
+
+if not CACHE_PATH.exists():
+    CACHE_PATH.mkdir(parents=True)
 
 RES_CALENDER_BANNER = BuildImage.open(RES_PATH / "calender_banner.png")
 RES_GRADIENT_BG = BuildImage.open(RES_PATH / "gradient.png")
