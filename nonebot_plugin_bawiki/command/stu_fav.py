@@ -89,10 +89,10 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
             await matcher.finish("该学生没有L2D")
 
         im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\n')
-        image_seg = Message()
+        image_seg = None
         if p := await get_l2d(await schale_to_gamekee(arg)):
             images = await asyncio.gather(*[async_req(x, raw=True) for x in p])
-            image_seg += "L2D预览：" + Message(MessageSegment.image(x) for x in images)
+            image_seg = "L2D预览：" + Message(MessageSegment.image(x) for x in images)
 
         else:
             im += (
