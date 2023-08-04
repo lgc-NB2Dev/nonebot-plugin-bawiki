@@ -1,7 +1,8 @@
+import asyncio
 from typing import TYPE_CHECKING
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
 from nonebot.params import CommandArg
@@ -87,9 +88,12 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             await matcher.finish("该学生没有L2D")
 
-        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\nL2D预览：')
+        im = MessageSegment.text(f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\n')
+        image_seg = Message()
         if p := await get_l2d(await schale_to_gamekee(arg)):
-            im += [MessageSegment.image(await async_req(x, raw=True)) for x in p]
+            images = await asyncio.gather(*[async_req(x, raw=True) for x in p])
+            image_seg += "L2D预览：" + Message(MessageSegment.image(x) for x in images)
+
         else:
             im += (
                 "没找到该学生的L2D看板\n"
@@ -97,6 +101,12 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
                 "- GameKee页面爬取不到角色L2D图片\n"
                 "- GameKee和插件没有收录该学生的L2D\n"
             )
-        await matcher.finish(im)
+
+        try:
+            await matcher.finish(im)
+        except ActionFailed:
+            if image_seg:
+                await matcher.finish(im + "抱歉，L2D 图片被 tx 风控了，或许是因为太涩了……")
+            raise
 
     await matcher.finish("未找到学生")

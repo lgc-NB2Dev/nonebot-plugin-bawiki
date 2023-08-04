@@ -115,16 +115,34 @@ async def send_wiki_page(sid: int, matcher: Matcher) -> NoReturn:
     await matcher.finish(MessageSegment.image(img))
 
 
-async def game_kee_calender() -> Union[MessageSegment, str]:
+async def game_kee_calender() -> Union[List[MessageSegment], str]:
     ret = await game_kee_get_calender()
     if not ret:
         return "没有获取到GameKee日程表数据"
-
-    pic = await game_kee_get_calender_page(ret)
-    return MessageSegment.image(pic)
+    return [MessageSegment.image(x) for x in await game_kee_get_calender_page(ret)]
 
 
-async def game_kee_get_calender_page(ret, has_pic=True) -> BytesIO:
+def split_images(
+    images: List[BuildImage],
+    max_height: int,
+    padding: int,
+) -> List[List[BuildImage]]:
+    ret = []
+    cur = []
+    height = 0
+    for i in images:
+        if height + i.height > max_height:
+            ret.append(cur)
+            cur = []
+            height = 0
+        cur.append(i)
+        height += i.height + padding
+    if cur:
+        ret.append(cur)
+    return ret
+
+
+async def game_kee_get_calender_page(ret, has_pic=True) -> List[BytesIO]:
     now = datetime.now()
 
     async def draw(it: dict):
@@ -196,53 +214,79 @@ async def game_kee_get_calender_page(ret, has_pic=True) -> BytesIO:
             img.draw_text((1250, 0, 1400, 60), "未开始", max_fontsize=50, fill="white")
 
         ii = 50
-        img.paste(title_p, (60, ii), True)
+        img.paste(title_p, (60, ii), alpha=True)
         ii += title_p.height + 25
-        img.paste(time_p, (60, ii), True)
+        img.paste(time_p, (60, ii), alpha=True)
         ii += time_p.height + 25
         if _p:
-            img.paste(_p, (60, ii), True)
+            img.paste(_p, (60, ii), alpha=True)
             ii += _p.height + 25
         if desc_p:
-            img.paste(desc_p, (60, ii), True)
+            img.paste(desc_p, (60, ii), alpha=True)
             ii += desc_p.height + 25
-        img.paste(remain_p, (60, ii), True)
-        # img = img.circle_corner(15)
+        img.paste(remain_p, (60, ii), alpha=True)
+        return img.circle_corner(15)
 
-        return img
+    def draw_list(li: List[BuildImage], title: str) -> BuildImage:
+        bg_w = 1500
+        bg_h = 200 + sum([x.height + 50 for x in li])
+        bg = (
+            BuildImage.new("RGBA", (bg_w, bg_h))
+            .paste(RES_CALENDER_BANNER.copy().resize((1500, 150)))
+            .draw_text(
+                (50, 0, 1480, 150),
+                title,
+                max_fontsize=100,
+                weight="bold",
+                fill="#ffffff",
+                halign="left",
+            )
+            .paste(
+                RES_GRADIENT_BG.copy().resize(
+                    (1500, bg_h - 150),
+                    resample=Resampling.NEAREST,
+                ),
+                (0, 150),
+            )
+        )
 
-    pics: List[BuildImage] = await asyncio.gather(  # type: ignore
-        *[draw(x) for x in ret],
+        index = 200
+        for p in li:
+            bg.paste(p.circle_corner(10), (50, index), alpha=True)
+            index += p.height + 50
+        return bg
+
+    important_data = []
+    common_data = []
+    for data in ret:
+        (important_data if data["importance"] else common_data).append(data)
+
+    important_pics, common_pics = await asyncio.gather(
+        asyncio.gather(*(draw(x) for x in important_data)),
+        asyncio.gather(*(draw(x) for x in common_data)),
     )
 
-    bg_w = 1500
-    bg_h = 200 + sum([x.height + 50 for x in pics])
-    bg = (
-        BuildImage.new("RGBA", (bg_w, bg_h))
-        .paste(RES_CALENDER_BANNER.copy().resize((1500, 150)))
-        .draw_text(
-            (50, 0, 1480, 150),
-            "GameKee丨活动日程",
-            max_fontsize=100,
-            weight="bold",
-            fill="#ffffff",
-            halign="left",
+    max_height = 6000
+    if not common_pics:
+        pics = important_pics
+    else:
+        chain = itertools.chain(important_pics, common_pics)
+        pics: List[List[BuildImage]] = (
+            [list(chain)]
+            if sum(x.height + 50 for x in chain) <= max_height + 50
+            else [important_pics, *split_images(common_pics, max_height, 50)]
         )
-        .paste(
-            RES_GRADIENT_BG.copy().resize(
-                (1500, bg_h - 150),
-                resample=Resampling.NEAREST,
-            ),
-            (0, 150),
-        )
-    )
 
-    index = 200
-    for p in pics:
-        bg.paste(p.circle_corner(10), (50, index), True)
-        index += p.height + 50
+    title_prefix = "GameKee丨活动日程"
+    if len(pics) == 1:
+        images = [draw_list(pics[0], title_prefix)]
+    else:
+        if len(pics[-1]) < 3:
+            extra = pics.pop()
+            pics[-1].extend(extra)
+        images = [draw_list(x, f"{title_prefix}丨P{i}") for i, x in enumerate(pics, 1)]
 
-    return bg.save_jpg()
+    return [x.save_jpg() for x in images]
 
 
 async def game_kee_grab_l2d(cid) -> List[str]:
@@ -343,8 +387,8 @@ async def game_kee_get_voice(cid: int, is_chinese: bool = False) -> List[GameKee
                 [parse_voice_elem(x) for x in a]
                 for x in bs.select(".mould-table")
                 if (a := x.find_all("audio"))
-            )
-        )
+            ),
+        ),
     )
 
 
@@ -372,5 +416,4 @@ async def extract_content_pic(cid: int) -> List[str]:
     bs = BeautifulSoup(wiki_html, "lxml")
     img_elem = bs.find_all("img")
     img_urls = cast(List[str], [x["src"] for x in img_elem])
-    img_urls = [f"https:{x}" if x.startswith("//") else x for x in img_urls]
-    return img_urls
+    return [f"https:{x}" if x.startswith("//") else x for x in img_urls]

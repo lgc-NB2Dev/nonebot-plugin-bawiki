@@ -10,7 +10,6 @@ from typing import (
     Optional,
     TypeVar,
     Union,
-    cast,
     overload,
 )
 
