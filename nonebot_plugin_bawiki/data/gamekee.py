@@ -8,7 +8,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List, NoReturn, Union, cast
 
-from bs4 import BeautifulSoup, ResultSet, Tag
+from bs4 import BeautifulSoup, PageElement, ResultSet, Tag
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.internal.matcher import Matcher
@@ -434,3 +434,81 @@ async def extract_content_pic(cid: int) -> List[str]:
     img_elem = bs.find_all("img")
     img_urls = cast(List[str], [x["src"] for x in img_elem])
     return [f"https:{x}" if x.startswith("//") else x for x in img_urls]
+
+
+@dataclass()
+class MangaMetadata:
+    category: str
+    name: str
+    cid: int
+
+
+@dataclass()
+class MangaContent:
+    title: str
+    content: str
+    images: List[str]
+
+
+async def get_manga_list() -> List[MangaMetadata]:
+    entry = cast(dict, await game_kee_request("v1/wiki/entry"))
+    entry_list: List[Dict] = entry["entry_list"]
+    guide_entry: List[Dict] = next(x["child"] for x in entry_list if x["id"] == 51508)
+
+    manga_list: List[MangaMetadata] = []
+
+    current_category = "ぶるーあーかいぶっ！"
+    for entry in guide_entry:
+        category = entry["name"]
+        if category.startswith("【"):
+            current_category = category[1 : category.find("】")]
+        manga_list.extend(
+            MangaMetadata(
+                category=current_category,
+                name=x["name"],
+                cid=x["content_id"],
+            )
+            for x in entry["child"]
+        )
+
+    return manga_list
+
+
+def tags_to_str(tag: PageElement) -> str:
+    def process(elem: PageElement) -> str:
+        if c := getattr(elem, "contents", None):
+            return "".join([s for x in c if (s := process(x))])
+        if s := elem.text.strip().replace("\u200b", ""):
+            return s
+        if hasattr(elem, "name") and (elem.name == "img" or elem.name == "br"):  # type: ignore
+            return "\n"
+        return ""
+
+    text = process(tag).strip()
+    if not text:
+        return text
+
+    lines = text.splitlines()
+    last_line = lines[-1]
+    if last_line.startswith("第") and last_line.endswith("话 >"):
+        lines.pop()
+    return "\n".join(lines).strip()
+
+
+async def get_manga_content(cid: int) -> MangaContent:
+    article = cast(dict, await game_kee_request(f"v1/content/detail/{cid}"))
+    soup = BeautifulSoup(article["content"], "lxml")
+
+    content = tags_to_str(soup).strip()
+    if "汉化：" in content:
+        content = content.replace("汉化：", "\n汉化：").replace("\n）", "）")
+
+    return MangaContent(
+        title=article["title"],
+        content=content,
+        images=[
+            f"https:{src}"
+            for x in soup.find_all("img")
+            if (not (src := x["src"]).endswith(".gif")) and "gamekee" in src
+        ],
+    )

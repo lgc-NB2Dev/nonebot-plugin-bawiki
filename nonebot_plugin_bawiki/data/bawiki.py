@@ -1,20 +1,13 @@
 import asyncio
 import datetime
 from io import BytesIO
-from typing import Any, Dict, List, Literal, Optional, TypedDict, cast, overload
+from typing import Any, Dict, List, Literal, Optional, cast, overload
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
 
 from ..config import config
 from ..util import async_req, recover_alia
-
-
-class MangaDict(TypedDict):
-    cid: int
-    title: str
-    detail: str
-    pics: List[str]
 
 
 @overload
@@ -65,10 +58,6 @@ async def db_get_gacha_data() -> Dict[str, Any]:
 
 async def db_get_emoji() -> List[str]:
     return await db_get("data/emoji.json")
-
-
-async def db_get_manga() -> List[MangaDict]:
-    return await db_get("data/manga.json")
 
 
 async def schale_to_gamekee(o: str) -> str:
