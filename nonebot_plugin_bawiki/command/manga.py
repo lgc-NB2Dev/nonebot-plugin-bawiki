@@ -20,8 +20,8 @@ help_list: "HelpList" = [
         "func": "随机漫画",
         "trigger_method": "指令",
         "trigger_condition": "ba漫画",
-        "brief_des": "随机发送一话官推漫画",
-        "detail_des": "随机发送一话BA官推漫画\n来源：GameKee",
+        "brief_des": "随机发送一话官推/同人漫画",
+        "detail_des": "随机发送一话BA官推/同人漫画\n来源：GameKee",
     },
 ]
 

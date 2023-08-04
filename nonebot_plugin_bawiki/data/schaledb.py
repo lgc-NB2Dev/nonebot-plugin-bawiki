@@ -68,7 +68,7 @@ async def schale_get_stu_info(stu):
         # 进度条拉最大
         await page.add_script_tag(content="utilStuSetAllProgressMax();")
 
-        return await page.screenshot(full_page=True)
+        return await page.screenshot(full_page=True, type="jpeg")
 
 
 async def schale_calender(server):
@@ -134,7 +134,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     align="center",
                 ),
                 (int((1400 - ti.width) / 2), 150),
-                True,
+                alpha=True,
             )
             stu = [students[x] for x in g["characters"]]
 
@@ -152,7 +152,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     .paste(
                         BuildImage.new("RGBA", (300, 65), (255, 255, 255, 120)),
                         (0, 275),
-                        True,
+                        alpha=True,
                     )
                     .convert("RGB")
                     .circle_corner(25)
@@ -164,7 +164,7 @@ async def schale_get_calender(server, students, common, localization, raids):
             x_index = int((1400 - (300 + 25) * ava_len + 25) / 2)
 
             for p in avatars:
-                pic = pic.paste(p, (x_index, 250), True)
+                pic = pic.paste(p, (x_index, 250), alpha=True)
                 x_index += p.width + 25
 
             return pic
@@ -190,7 +190,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     align="center",
                 ),
                 (int((1400 - ti.width) / 2), 150),
-                True,
+                alpha=True,
             )
             ev = g["event"]
             ev_name = ""
@@ -200,10 +200,10 @@ async def schale_get_calender(server, students, common, localization, raids):
             ev_name = localization["EventName"][str(ev)] + ev_name
 
             ev_bg, ev_img = await asyncio.gather(
-                schale_get(f"images/campaign/Campaign_Event_{ev}_Normal.png", True),
+                schale_get(f"images/campaign/Campaign_Event_{ev}_Normal.png", raw=True),
                 schale_get(
                     f"images/eventlogo/Event_{ev}_{'Tw' if server else 'Jp'}.png",
-                    True,
+                    raw=True,
                 ),
             )
 
@@ -228,7 +228,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                 .paste(
                     BuildImage.new("RGBA", (ev_bg.width, 65), (255, 255, 255, 120)),
                     (0, ev_bg.height - 65),
-                    True,
+                    alpha=True,
                 )
                 .convert("RGB")
                 .circle_corner(25)
@@ -238,7 +238,11 @@ async def schale_get_calender(server, students, common, localization, raids):
                     max_fontsize=50,
                 )
             )
-            return pic.paste(ev_bg, (int((pic.width - ev_bg.width) / 2), 250), True)
+            return pic.paste(
+                ev_bg,
+                (int((pic.width - ev_bg.width) / 2), 250),
+                alpha=True,
+            )
         return None
 
     async def draw_raid():
@@ -255,7 +259,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     align="center",
                 ),
                 (int((1400 - ti.width) / 2), 150),
-                True,
+                alpha=True,
             )
 
             tp = "TimeAttack" if (time_atk := (ri["raid"] >= 1000)) else "Raid"
@@ -300,33 +304,37 @@ async def schale_get_calender(server, students, common, localization, raids):
 
             c_bg, c_fg, icon_def, icon_atk, icon_tr = await asyncio.gather(
                 *[
-                    schale_get(bg_url, True),
-                    schale_get(fg_url, True),
-                    schale_get("images/ui/Type_Defense_s.png", True),
-                    schale_get("images/ui/Type_Attack_s.png", True),
-                    schale_get(f"images/ui/Terrain_{terrain}.png", True),
+                    schale_get(bg_url, raw=True),
+                    schale_get(fg_url, raw=True),
+                    schale_get("images/ui/Type_Defense_s.png", raw=True),
+                    schale_get("images/ui/Type_Attack_s.png", raw=True),
+                    schale_get(f"images/ui/Terrain_{terrain}.png", raw=True),
                 ],
             )
 
             icon_def = (
                 BuildImage.new("RGBA", (64, 64), def_color)
                 .paste(
-                    BuildImage.open(BytesIO(icon_def))
-                    .convert("RGBA")
-                    .resize_height(48),
+                    (
+                        BuildImage.open(BytesIO(icon_def))
+                        .convert("RGBA")
+                        .resize_height(48)
+                    ),
                     (8, 8),
-                    True,
+                    alpha=True,
                 )
                 .circle()
             )
             icon_atk = (
                 BuildImage.new("RGBA", (64, 64), atk_color)
                 .paste(
-                    BuildImage.open(BytesIO(icon_atk))
-                    .convert("RGBA")
-                    .resize_height(48),
+                    (
+                        BuildImage.open(BytesIO(icon_atk))
+                        .convert("RGBA")
+                        .resize_height(48)
+                    ),
                     (8, 8),
-                    True,
+                    alpha=True,
                 )
                 .circle()
             )
@@ -335,7 +343,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                 .paste(
                     img_invert_rgba(Image.open(BytesIO(icon_tr)).convert("RGBA")),
                     (-2, -2),
-                    True,
+                    alpha=True,
                 )
                 .circle()
             )
@@ -355,16 +363,16 @@ async def schale_get_calender(server, students, common, localization, raids):
                 c_bg.paste(
                     c_fg,
                     (int((c_bg.width - c_fg.width) / 2), 0),
-                    True,
+                    alpha=True,
                 )
                 .paste(
                     BuildImage.new("RGBA", (c_bg.width, 65), (255, 255, 255, 120)),
                     (0, c_bg.height - 65),
-                    True,
+                    alpha=True,
                 )
-                .paste(icon_atk, (10, 10), True)
-                .paste(icon_def, (10, 79), True)
-                .paste(icon_tr, (10, 147), True)
+                .paste(icon_atk, (10, 10), alpha=True)
+                .paste(icon_def, (10, 79), alpha=True)
+                .paste(icon_tr, (10, 147), alpha=True)
                 .convert("RGB")
                 .circle_corner(25)
                 .draw_text(
@@ -377,7 +385,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     max_fontsize=50,
                 )
             )
-            return pic.paste(c_bg, (int((pic.width - c_bg.width) / 2), 250), True)
+            return pic.paste(c_bg, (int((pic.width - c_bg.width) / 2), 250), alpha=True)
         return None
 
     async def draw_birth():
@@ -423,7 +431,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     *[
                         schale_get(
                             f'images/student/icon/{x["CollectionTexture"]}.png',
-                            True,
+                            raw=True,
                         )
                         for x in birth_this_week + birth_next_week
                     ],
@@ -440,7 +448,11 @@ async def schale_get_calender(server, students, common, localization, raids):
                     max_fontsize=50,
                 )
                 for s in birth_this_week:
-                    pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
+                    pic.paste(
+                        stu_pics.pop(0),
+                        (x_index, y_index),
+                        alpha=True,
+                    ).draw_text(
                         (x_index, y_index + 180, x_index + 180, y_index + 220),
                         s["BirthDay"],
                     )
@@ -458,7 +470,11 @@ async def schale_get_calender(server, students, common, localization, raids):
                     max_fontsize=50,
                 )
                 for s in birth_next_week:
-                    pic.paste(stu_pics.pop(0), (x_index, y_index), True).draw_text(
+                    pic.paste(
+                        stu_pics.pop(0),
+                        (x_index, y_index),
+                        alpha=True,
+                    ).draw_text(
                         (x_index, y_index + 180, x_index + 180, y_index + 220),
                         s["BirthDay"],
                     )
@@ -503,7 +519,7 @@ async def schale_get_calender(server, students, common, localization, raids):
 
     h_index = 200
     for im in img:
-        bg.paste(im.circle_corner(10), (50, h_index), True)
+        bg.paste(im.circle_corner(10), (50, h_index), alpha=True)
         h_index += im.height + 50
     return bg.convert("RGB").save("png")
 
@@ -546,10 +562,10 @@ async def draw_fav_li(lvl):
 
         ret = await schale_get(
             f"images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
-            True,
+            raw=True,
         )
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
-        img.paste(icon_img, (left, top), True)
+        img.paste(icon_img, (left, top), alpha=True)
         img.draw_text(
             (left, top + pic_h, left + icon_w, top + icon_h),
             name_,

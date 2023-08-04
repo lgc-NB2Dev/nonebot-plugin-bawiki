@@ -6,7 +6,7 @@ from nonebot.internal.matcher import Matcher
 from nonebot.params import ArgPlainText, CommandArg
 from nonebot.typing import T_State
 
-from ..data.arona import IMAGE_TYPE_MAP, ImageModel, get_image, search
+from ..data.arona import ImageModel, get_image, search
 
 if TYPE_CHECKING:
     from . import HelpList

@@ -91,7 +91,7 @@ async def db_wiki_stu(name):
     wiki = (await db_get_wiki_data())["student"]
     if not (url := wiki.get(name)):
         return "没有找到该角色的角评，可能是学生名称错误或者插件还未收录该角色角评"
-    return MessageSegment.image(await db_get(url, True))
+    return MessageSegment.image(await db_get(url, raw=True))
 
 
 async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
@@ -124,7 +124,7 @@ async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
 
     return [
         MessageSegment.image(x)
-        for x in await asyncio.gather(*[db_get(x, True) for x in img])
+        for x in await asyncio.gather(*[db_get(x, raw=True) for x in img])
     ]
 
 
@@ -135,7 +135,7 @@ async def db_wiki_event(event_id):
         return "没有找到该活动"
     return [
         MessageSegment.image(x)
-        for x in await asyncio.gather(*[db_get(x, True) for x in ev])
+        for x in await asyncio.gather(*[db_get(x, raw=True) for x in ev])
     ]
 
 
@@ -147,14 +147,14 @@ async def db_wiki_time_atk(raid_id):
         return f"没有找到该综合战术考试（目前共有{len(wiki)}个综合战术考试）"
     raid_id -= 1
 
-    return MessageSegment.image(await db_get(wiki[raid_id], True))  # type: ignore
+    return MessageSegment.image(await db_get(wiki[raid_id], raw=True))  # type: ignore
 
 
 async def db_wiki_craft():
     wiki = (await db_get_wiki_data())["craft"]
     return [
         MessageSegment.image(x)
-        for x in await asyncio.gather(*[db_get(y, True) for y in wiki])
+        for x in await asyncio.gather(*[db_get(y, raw=True) for y in wiki])
     ]
 
 
@@ -162,7 +162,7 @@ async def db_wiki_furniture():
     wiki = (await db_get_wiki_data())["furniture"]
     return [
         MessageSegment.image(x)
-        for x in await asyncio.gather(*[db_get(y, True) for y in wiki])
+        for x in await asyncio.gather(*[db_get(y, raw=True) for y in wiki])
     ]
 
 
@@ -172,7 +172,7 @@ async def db_global_future(
     all_img=False,
 ):
     data = (await db_get_wiki_data())["global_future"]
-    img = cast(bytes, await db_get(data["img"], True))
+    img = cast(bytes, await db_get(data["img"], raw=True))
 
     if all_img:
         return MessageSegment.image(img)

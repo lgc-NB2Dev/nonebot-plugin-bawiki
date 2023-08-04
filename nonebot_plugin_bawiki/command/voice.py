@@ -72,7 +72,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         await matcher.finish("没有获取到学生列表数据")
 
     try:
-        org_stu_name = await recover_stu_alia(name, True)
+        org_stu_name = await recover_stu_alia(name, game_kee=True)
         stu_name = await schale_to_gamekee(org_stu_name)
     except Exception:
         logger.exception("还原学生别名失败")

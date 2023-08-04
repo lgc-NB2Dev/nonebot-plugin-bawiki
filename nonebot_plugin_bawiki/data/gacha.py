@@ -100,7 +100,7 @@ async def gen_stu_img(students: Iterable[GachaStudent]) -> List[BuildImage]:
             stu_star: int = stu_j["StarGrade"]
             stu_img = await schale_get(
                 f"images/student/collection/{stu_j['CollectionTexture']}.webp",
-                True,
+                raw=True,
             )
             stu_img = BuildImage.open(BytesIO(stu_img))
         except Exception:
@@ -113,25 +113,29 @@ async def gen_stu_img(students: Iterable[GachaStudent]) -> List[BuildImage]:
             mask=RES_GACHA_CARD_MASK.image,
         )
 
-        bg = bg.paste(card_img, (26, 13), True)
+        bg = bg.paste(card_img, (26, 13), alpha=True)
 
         star_x_offset = int(26 + (159 - 30 * stu_star) / 2)
         star_y_offset = 198
         for i in range(stu_star):
-            bg = bg.paste(RES_GACHA_STAR, (star_x_offset + i * 30, star_y_offset), True)
+            bg = bg.paste(
+                RES_GACHA_STAR,
+                (star_x_offset + i * 30, star_y_offset),
+                alpha=True,
+            )
 
         font_x_offset = 45
         font_y_offset = 2
 
         if stu.new:
-            bg = bg.paste(RES_GACHA_NEW, (font_x_offset, font_y_offset), True)
+            bg = bg.paste(RES_GACHA_NEW, (font_x_offset, font_y_offset), alpha=True)
             font_x_offset -= 2
             font_y_offset += 29
 
         if stu.pickup:
             font_x_offset -= 4
             font_y_offset -= 4
-            bg = bg.paste(RES_GACHA_PICKUP, (font_x_offset, font_y_offset), True)
+            bg = bg.paste(RES_GACHA_PICKUP, (font_x_offset, font_y_offset), alpha=True)
 
         return bg
 
@@ -151,7 +155,7 @@ async def gen_gacha_img(students: Iterable[GachaStudent], count: int) -> BytesIO
     for line in stu_cards:
         x_offset = int((bg.width - (len(line) * (x_gap + card_w) - x_gap)) / 2)
         for card in line:
-            bg = bg.paste(card, (x_offset, y_offset), True)
+            bg = bg.paste(card, (x_offset, y_offset), alpha=True)
             x_offset += card_w + x_gap
         y_offset += card_h + y_gap
 

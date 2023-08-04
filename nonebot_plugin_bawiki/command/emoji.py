@@ -29,7 +29,7 @@ cmd_random_emoji = on_command("ba表情")
 async def _(matcher: Matcher):
     try:
         emojis = await db_get_emoji()
-        emo = await db_get(random.choice(emojis), True)
+        emo = await db_get(random.choice(emojis), raw=True)
     except Exception:
         logger.exception("获取表情失败")
         await matcher.finish("获取表情失败，请检查后台输出")
