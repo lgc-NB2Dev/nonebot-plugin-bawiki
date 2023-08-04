@@ -75,31 +75,48 @@ def game_kee_page_url(sid: int) -> str:
     return f"{config.ba_gamekee_url}{sid}.html"
 
 
+GAMEKEE_WIKI_PAGE_JS = """() => {
+  // 给内容加上 padding
+  document.querySelector('div.wiki-detail-body').style.padding = '20px';
+
+  // 隐藏 Header 避免遮挡页面
+  document.querySelector('div.wiki-header').style.display = 'none';
+
+  // 隐藏关注按钮
+  document.querySelector('div.user-box > button').style.display = 'none';
+
+  // 删掉视频播放器
+  for (const it of document.querySelectorAll('div.video-play-wrapper'))
+    it.remove();
+
+  // 展开所有选项卡内容
+  for (const it of document.querySelectorAll('div.slide-item'))
+    it.classList.add('active');
+
+  // 删掉点赞和收藏按钮
+  document.querySelector('div.article-options').remove();
+
+  // 删掉底部边距
+  document.querySelector('div.wiki-detail-body').style.marginBottom = '0';
+};"""
+
+
 async def game_kee_get_page(url: str) -> bytes:
     async with cast(Page, get_new_page()) as page:
         await page.goto(url, timeout=60 * 1000)
 
-        # 删掉header
-        await page.add_script_tag(
-            content='document.getElementsByClassName("wiki-header")'
-            ".forEach((v)=>{v.remove()})",
-        )
+        await page.evaluate(GAMEKEE_WIKI_PAGE_JS)
 
         # 展开折叠的语音
-        folds = await page.query_selector_all('xpath=//div[@class="fold-table-btn"]')
+        folds = await page.query_selector_all("div.fold-table-btn")
         for i in folds:
             with contextlib.suppress(Exception):
                 await i.click()
 
-        # 隐藏 header 和 footer
-        js_str = "(obj) => { obj.style.display = 'none' }"
-        await page.eval_on_selector(".wiki-header", js_str)
-        await page.eval_on_selector(".wiki-footer", js_str)
-
-        element = await page.query_selector('xpath=//div[@class="wiki-detail-body"]')
+        element = await page.query_selector("div.wiki-detail-body")
         if not element:
             raise ValueError
-        return await element.screenshot()
+        return await element.screenshot(type="jpeg")
 
 
 async def send_wiki_page(sid: int, matcher: Matcher) -> NoReturn:

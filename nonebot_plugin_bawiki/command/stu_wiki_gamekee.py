@@ -47,7 +47,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     if not ret:
         await matcher.finish("没有获取到学生列表数据")
 
-    if not (sid := ret.get(await recover_stu_alia(arg, True))):
+    if not (sid := ret.get(await recover_stu_alia(arg, game_kee=True))):
         await matcher.finish("未找到该学生")
 
     await send_wiki_page(sid, matcher)
