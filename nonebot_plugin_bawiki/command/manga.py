@@ -27,8 +27,18 @@ help_list: "HelpList" = [
         "func": "随机漫画",
         "trigger_method": "指令",
         "trigger_condition": "ba漫画",
-        "brief_des": "随机发送一话官推/同人漫画",
-        "detail_des": "随机发送一话BA官推/同人漫画\n来源：GameKee",
+        "brief_des": "发送一话官推/同人漫画",
+        "detail_des": (
+            "从GameKee爬取BA官推/同人漫画并发送\n"
+            "可以使用GameKee主页漫画图书馆的漫画名字和链接标题搜索\n"
+            "搜索到多个结果时，会从搜到的结果中随机选择一个发送\n"
+            "不带参数时，会从所有漫画中随机抽取一话发送\n"
+            " \n"
+            "指令示例：\n"
+            "- <ft color=(238,120,0)>ba漫画</ft>\n"
+            "- <ft color=(238,120,0)>ba漫画 蔚蓝档案四格漫画</ft>\n"
+            "- <ft color=(238,120,0)>ba漫画 布噜布噜档案 第一话</ft>"
+        ),
     },
 ]
 
