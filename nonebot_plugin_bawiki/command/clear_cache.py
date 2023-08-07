@@ -1,4 +1,4 @@
-import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from nonebot import on_command
@@ -29,14 +29,27 @@ help_list: "HelpList" = [
 ]
 
 
+def clear_cache_dir() -> int:
+    counter = 0
+
+    def run(path: Path):
+        nonlocal counter
+        for p in path.iterdir():
+            if p.is_dir():
+                run(p)
+            else:
+                p.unlink()
+                counter += 1
+
+    run(CACHE_PATH)
+    return counter
+
+
 cmd_clear_cache = on_command("ba清空缓存", aliases={"ba清除缓存"}, permission=SUPERUSER)
 
 
 @cmd_clear_cache.handle()
 async def _(matcher: Matcher):
-    clear_req_cache()
-
-    for path in CACHE_PATH.iterdir():
-        path.unlink() if path.is_file() else shutil.rmtree(path)
-
-    await matcher.finish("缓存已清空～")
+    req_count = clear_req_cache()
+    cache_count = clear_cache_dir()
+    await matcher.finish(f"已清除 {req_count} 项请求缓存与 {cache_count} 项文件缓存～")

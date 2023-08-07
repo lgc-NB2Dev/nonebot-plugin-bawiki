@@ -52,8 +52,10 @@ def get_req_cache(
     return None
 
 
-def clear_req_cache():
+def clear_req_cache() -> int:
+    count = len(req_cache)
     req_cache.clear()
+    return count
 
 
 if config.ba_clear_req_cache_interval > 0:

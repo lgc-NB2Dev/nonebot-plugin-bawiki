@@ -10,10 +10,11 @@ from ..resource import CACHE_PATH
 from ..util import async_req
 
 ARONA_CACHE_PATH = CACHE_PATH / "arona"
-if ARONA_CACHE_PATH.exists() and config.ba_auto_clear_arona_cache:
+if config.ba_auto_clear_arona_cache and ARONA_CACHE_PATH.exists():
     shutil.rmtree(ARONA_CACHE_PATH)
 if not ARONA_CACHE_PATH.exists():
     ARONA_CACHE_PATH.mkdir(parents=True)
+
 
 IMAGE_TYPE_MAP = {
     1: "学生攻略",

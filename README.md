@@ -102,7 +102,7 @@ plugins = [
 
 ## ⚙️ 配置
 
-在 nonebot2 项目的`.env`文件中添加下表中的配置
+在 nonebot2 项目的 `.env` 文件中添加下表中的配置
 
 |            配置项             | 必填 | 默认值  |                           说明                            |
 | :---------------------------: | :--: | :-----: | :-------------------------------------------------------: |
@@ -116,7 +116,7 @@ plugins = [
 |      `BA_ARONA_API_URL`       |  否  |   ...   |                  Arona Bot 数据源的地址                   |
 |      `BA_ARONA_CDN_URL`       |  否  |   ...   |                  Arona Bot 图片 CDN 地址                  |
 | `BA_CLEAR_REQ_CACHE_INTERVAL` |  否  |   `3`   |             插件清理请求缓存的间隔，单位小时              |
-|  `BA_AUTO_CLEAR_ARONA_CACHE`  |  否  |   ...   | 是否在插件每次加载时自动清理从 Arona Bot 数据源缓存的图片 |
+|  `BA_AUTO_CLEAR_ARONA_CACHE`  |  否  | `False` | 是否在插件每次加载时自动清理从 Arona Bot 数据源缓存的图片 |
 
 由于 CDN 可能并不给力，如果有条件的话本人推荐使用代理直接访问原地址，下面是对应 `.env` 配置：
 
@@ -178,6 +178,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 ### 0.8.5
 
 - 修复 [#41](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/41)
+- 配置项 `BA_AUTO_CLEAR_ARONA_CACHE` 默认值改为 `False`
 
 ### 0.8.4
 

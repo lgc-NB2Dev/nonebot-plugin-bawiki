@@ -17,7 +17,7 @@ class Cfg(BaseModel):
     ba_arona_cdn_url: str = "https://arona.cdn.diyigemt.com/"
 
     ba_clear_req_cache_interval: int = 3
-    ba_auto_clear_arona_cache: bool = True
+    ba_auto_clear_arona_cache: bool = False
 
     @validator(
         "ba_gamekee_url",
