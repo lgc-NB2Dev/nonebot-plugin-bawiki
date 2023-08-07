@@ -175,6 +175,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.8.5
+
+- 修复 [#41](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/41)
+
 ### 0.8.4
 
 - 现在会对 GameKee 的日程表分页了

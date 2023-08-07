@@ -1,7 +1,6 @@
 import shutil
 from typing import TYPE_CHECKING
 
-import anyio
 from nonebot import on_command
 from nonebot.internal.matcher import Matcher
 from nonebot.permission import SUPERUSER
@@ -37,7 +36,7 @@ cmd_clear_cache = on_command("ba清空缓存", aliases={"ba清除缓存"}, permi
 async def _(matcher: Matcher):
     clear_req_cache()
 
-    async for path in anyio.Path(CACHE_PATH).iterdir():
-        await path.unlink() if path.is_file() else shutil.rmtree(path)
+    for path in CACHE_PATH.iterdir():
+        path.unlink() if path.is_file() else shutil.rmtree(path)
 
     await matcher.finish("缓存已清空～")
