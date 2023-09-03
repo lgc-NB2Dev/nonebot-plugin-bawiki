@@ -33,3 +33,8 @@ RES_GACHA_NEW = BuildImage.open(RES_PATH / "gacha_new.png")
 RES_GACHA_PICKUP = BuildImage.open(RES_PATH / "gacha_pickup.png")
 RES_GACHA_STAR = BuildImage.open(RES_PATH / "gacha_star.png")
 RES_GACHA_STU_ERR = BuildImage.open(RES_PATH / "gacha_stu_err.png")
+
+RES_JS_DIR = RES_PATH / "js"
+RES_GAMEKEE_UTIL_JS_PATH = RES_JS_DIR / "gamekee_util.js"
+
+GAMEKEE_UTIL_JS = RES_GAMEKEE_UTIL_JS_PATH.read_text(encoding="u8")

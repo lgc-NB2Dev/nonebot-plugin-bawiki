@@ -81,7 +81,7 @@ async def _(
         content = await get_manga_content(manga.cid)
         pics = await asyncio.gather(*[get_pic(x) for x in content.images])
     except Exception:
-        logger.exception("获取漫画失败")
+        logger.exception(f"获取 CID {manga.cid} 漫画失败")
         await matcher.finish("获取漫画失败，请检查后台输出")
 
     image_seg = [MessageSegment.image(x) for x in pics]

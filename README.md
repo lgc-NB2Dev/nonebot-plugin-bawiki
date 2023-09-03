@@ -175,6 +175,11 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.8.6
+
+- 修复 [#39](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/39)
+- 尝试修复 [#45](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/45)
+
 ### 0.8.5
 
 - 修复 [#41](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/41)

@@ -1,6 +1,7 @@
 import datetime
 import json
 from dataclasses import dataclass
+from io import BytesIO
 from typing import (
     Any,
     Dict,
@@ -206,3 +207,31 @@ def split_list(li: Iterable[T], length: int) -> List[List[T]]:
     if tmp:
         latest.append(tmp)
     return latest
+
+
+def split_pic(pic: Image.Image, max_height: int = 4096) -> List[Image.Image]:
+    pw, ph = pic.size
+    if ph <= max_height:
+        return [pic]
+
+    ret = []
+    need_merge_last = ph % max_height < max_height // 2
+    iter_times = ph // max_height
+
+    now_h = 0
+    for i in range(iter_times):
+        if i == iter_times - 1 and need_merge_last:
+            ret.append(pic.crop((0, now_h, pw, ph)))
+            break
+
+        ret.append(pic.crop((0, now_h, pw, now_h + max_height)))
+        now_h += max_height
+
+    return ret
+
+
+def i2b(image: Image.Image, img_format: str = "JPEG") -> BytesIO:
+    buf = BytesIO()
+    image.save(buf, img_format)
+    buf.seek(0)
+    return buf
