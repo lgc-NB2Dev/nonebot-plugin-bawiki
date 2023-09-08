@@ -468,7 +468,7 @@ def tags_to_str(tag: PageElement) -> str:
 
     lines = text.splitlines()
     last_line = lines[-1]
-    if last_line.startswith("第") and last_line.endswith("话 >"):
+    if last_line.strip().endswith(">"):
         lines.pop()
     return "\n".join(lines).strip()
 
