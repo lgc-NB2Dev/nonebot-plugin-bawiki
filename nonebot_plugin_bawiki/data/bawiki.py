@@ -155,12 +155,13 @@ async def db_wiki_furniture():
     ]
 
 
-async def db_global_future(
+async def db_future(
+    future_type: Literal["global", "chinese"],
     date: Optional[datetime.datetime] = None,
-    num=1,
-    all_img=False,
+    num: int = 1,
+    all_img: bool = False,
 ):
-    data = (await db_get_wiki_data())["global_future"]
+    data = (await db_get_wiki_data())[f"{future_type}_future"]
     img = cast(bytes, await db_get(data["img"], raw=True))
 
     if all_img:
