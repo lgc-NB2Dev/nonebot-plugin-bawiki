@@ -109,15 +109,16 @@ plugins = [
 |          `BA_PROXY`           |  否  | `None`  |  访问 `SchaleDB`、`bawiki-data` 的 json 数据时使用的代理  |
 |     `BA_GACHA_COOL_DOWN`      |  否  |   `0`   |                每群每人的抽卡冷却，单位秒                 |
 |      `BA_VOICE_USE_CARD`      |  否  | `False` |            是否使用自定义音乐卡片发送角色语音             |
+|    `BA_SCREENSHOT_TIMEOUT`    |  否  |  `60`   |                   网页截图超时，单位秒                    |
 |       `BA_GAMEKEE_URL`        |  否  |   ...   |                   GameKee 数据源的地址                    |
 |        `BA_SCHALE_URL`        |  否  |   ...   |                SchaleDB Json 数据源的地址                 |
-|    `BA_SCHALE_MIRROR_URL`     |  否  |   ...   |                  SchaleDB 网页截图的地址                  |
 |      `BA_BAWIKI_DB_URL`       |  否  |   ...   |                    bawiki-data 的地址                     |
 |      `BA_ARONA_API_URL`       |  否  |   ...   |                  Arona Bot 数据源的地址                   |
 |      `BA_ARONA_CDN_URL`       |  否  |   ...   |                  Arona Bot 图片 CDN 地址                  |
 | `BA_CLEAR_REQ_CACHE_INTERVAL` |  否  |   `3`   |             插件清理请求缓存的间隔，单位小时              |
 |  `BA_AUTO_CLEAR_ARONA_CACHE`  |  否  | `False` | 是否在插件每次加载时自动清理从 Arona Bot 数据源缓存的图片 |
 
+<!--
 由于 CDN 可能并不给力，如果有条件的话本人推荐使用代理直接访问原地址，下面是对应 `.env` 配置：
 
 ```ini
@@ -126,6 +127,7 @@ BA_SCHALE_URL=https://schale.gg/
 BA_SCHALE_MIRROR_URL=https://schale.lgc2333.top/
 BA_BAWIKI_DB_URL=https://bawiki.lgc2333.top/
 ```
+-->
 
 ## 🎉 使用
 
@@ -174,6 +176,16 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.9.0
+
+- 更新了 SchaleDB 页面的截图处理方式，现在可以支持源站与任何镜像了
+- 添加国服前瞻获取，详见指令 `ba千里眼` 帮助
+- 由于 CDN 域名过期，修改了默认源到原源
+- 尝试修复 [#43](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/43) 与 [#46](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/issues/46)
+- 配置项变更：
+  - 删除 `BA_SCHALE_MIRROR_URL`
+  - 添加 `BA_SCREENSHOT_TIMEOUT`
 
 ### 0.8.6
 
