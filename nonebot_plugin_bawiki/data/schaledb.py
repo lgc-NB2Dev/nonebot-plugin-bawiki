@@ -14,7 +14,12 @@ from pil_utils import BuildImage, text2image
 from playwright.async_api import Page, ViewportSize
 
 from ..config import config
-from ..resource import RES_CALENDER_BANNER, RES_GRADIENT_BG
+from ..resource import (
+    RES_CALENDER_BANNER,
+    RES_GRADIENT_BG,
+    SCHALE_UTIL_CSS,
+    SCHALE_UTIL_JS,
+)
 from ..util import async_req, img_invert_rgba, parse_time_delta
 
 PAGE_KWARGS = {
@@ -59,15 +64,16 @@ async def schale_get_stu_dict(key="Name"):
 
 async def schale_get_stu_info(stu):
     async with cast(Page, get_new_page(**PAGE_KWARGS)) as page:
+        await page.goto(config.ba_schale_url, wait_until="domcontentloaded")
+        await page.evaluate(SCHALE_UTIL_JS)
+
         await page.goto(
-            f"{config.ba_schale_mirror_url}?chara={stu}",
-            timeout=60 * 1000,
+            f"{config.ba_schale_url}?chara={stu}",
+            timeout=config.ba_screenshot_timeout * 1000,
             wait_until="networkidle",
         )
-
-        # 进度条拉最大
-        await page.add_script_tag(content="utilStuSetAllProgressMax();")
-
+        await page.add_style_tag(content=SCHALE_UTIL_CSS)
+        await page.evaluate(SCHALE_UTIL_JS)
         return await page.screenshot(full_page=True, type="jpeg")
 
 

@@ -1,0 +1,18 @@
+.nav.nav-pills {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+#ba-student-page-stats,
+#ba-student-page-skills,
+#ba-student-page-weapon,
+#ba-student-page-gear,
+#ba-student-page-profile {
+  padding-bottom: 1rem;
+  border-top: 2px solid var(--col-theme-text-t);
+  border-radius: 0px !important;
+}
+
+#ba-student-page-profile {
+  padding-bottom: 0;
+}

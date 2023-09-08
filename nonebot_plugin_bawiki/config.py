@@ -8,11 +8,11 @@ class Cfg(BaseModel):
     ba_proxy: Optional[str] = None
     ba_gacha_cool_down: int = 0
     ba_voice_use_card: bool = False
+    ba_screenshot_timeout: int = 60
 
     ba_gamekee_url: str = "https://ba.gamekee.com/"
-    ba_schale_url: str = "https://schale.lgc.cyberczy.xyz/"
-    ba_schale_mirror_url: str = "https://schale.lgc.cyberczy.xyz/"
-    ba_bawiki_db_url: str = "https://bawiki.lgc.cyberczy.xyz/"
+    ba_schale_url: str = "https://schale.gg/"
+    ba_bawiki_db_url: str = "https://bawiki.lgc2333.top/"
     ba_arona_api_url: str = "https://arona.diyigemt.com/"
     ba_arona_cdn_url: str = "https://arona.cdn.diyigemt.com/"
 
@@ -22,15 +22,14 @@ class Cfg(BaseModel):
     @validator(
         "ba_gamekee_url",
         "ba_schale_url",
-        "ba_schale_mirror_url",
         "ba_bawiki_db_url",
         "ba_arona_api_url",
         "ba_arona_cdn_url",
     )
-    def _(cls, val: str):  # noqa: N805
-        if not (val.startswith(("https://", "http://")) and val.endswith("/")):
+    def _(cls, v: str):  # noqa: N805
+        if not (v.startswith(("https://", "http://")) and v.endswith("/")):
             raise ValueError('自定义的 URL 请以 "http(s)://" 开头，以 "/" 结尾')
-        return val
+        return v
 
 
 config = Cfg.parse_obj(get_driver().config.dict())

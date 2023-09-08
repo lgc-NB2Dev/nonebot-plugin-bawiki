@@ -78,7 +78,7 @@ def game_kee_page_url(sid: int) -> str:
 
 async def game_kee_get_page(url: str) -> List[BytesIO]:
     async with cast(Page, get_new_page()) as page:
-        await page.goto(url, timeout=60 * 1000)
+        await page.goto(url, timeout=config.ba_screenshot_timeout * 1000)
 
         await page.evaluate(GAMEKEE_UTIL_JS)
 
@@ -89,8 +89,7 @@ async def game_kee_get_page(url: str) -> List[BytesIO]:
                 await i.click()
 
         element = await page.query_selector("div.wiki-detail-body")
-        if not element:
-            raise ValueError
+        assert element
 
         pic_bytes = await element.screenshot(type="jpeg")
         pic = Image.open(BytesIO(pic_bytes))
@@ -456,7 +455,8 @@ def tags_to_str(tag: PageElement) -> str:
     def process(elem: PageElement) -> str:
         if c := getattr(elem, "contents", None):
             return "".join([s for x in c if (s := process(x))])
-        if s := elem.text.strip().replace("\u200b", ""):
+        text = elem if isinstance(elem, str) else elem.text
+        if s := text.strip().replace("\u200b", ""):
             return s
         if hasattr(elem, "name") and (elem.name == "img" or elem.name == "br"):  # type: ignore
             return "\n"
