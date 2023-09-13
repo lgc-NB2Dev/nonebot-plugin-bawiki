@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 from dataclasses import dataclass
@@ -15,6 +16,7 @@ from typing import (
 )
 
 from httpx import AsyncClient
+from nonebot import logger
 from nonebot.adapters.onebot.v11 import Message
 from nonebot_plugin_apscheduler import scheduler
 from PIL import Image, ImageOps
@@ -24,32 +26,46 @@ from .config import config
 T = TypeVar("T")
 NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
 
-req_cache: Dict[str, "RequestCache"] = {}
+req_cache: List["RequestCache"] = []
 
 
 @dataclass
 class RequestCache:
+    url: str
     method: str
     raw: bool
     json: bool
     params: str
-    content: Any
+    content: Union[Any, None]
 
 
-def get_req_cache(
+async def get_req_cache(
     url: str,
     method: Optional[str] = None,
     raw: Optional[bool] = None,
     json: Optional[bool] = None,
     params: Optional[str] = None,
 ) -> Optional[Any]:
-    if (c := req_cache.get(url)) and (
-        (method is None or method == c.method)
-        and (raw is None or raw == c.raw)
-        and (json is None or json == c.json)
-        and (params is None or params == c.params)
-    ):
-        return c.content
+    cache = next(
+        (
+            c
+            for c in req_cache
+            if (
+                c.url == url
+                and c.method == method
+                and c.raw == raw
+                and c.json == json
+                and c.params == params
+            )
+        ),
+        None,
+    )
+    if cache:
+        while cache.content is None:
+            logger.debug(f"Waiting for cache {url}")
+            await asyncio.sleep(0.1)
+        if (not isinstance(cache.content, Exception)) and (cache.content is not None):
+            return cache.content
     return None
 
 
@@ -124,23 +140,33 @@ async def async_req(
     param_json = json.dumps(params) if params else "{}"
 
     if (not ignore_cache) and (
-        c := get_req_cache(url, method, raw, is_json, param_json)
+        c := await get_req_cache(url, method, raw, is_json, param_json)
     ):
         return c
 
-    async with AsyncClient(proxies=proxy) as cli:
-        resp = await cli.request(method, url, params=params, **kwargs)
-        resp.raise_for_status()
+    cache_obj = RequestCache(url, method, raw, is_json, param_json, None)
+    req_cache.append(cache_obj)
 
-        if (not raw) and is_json:
-            ret = resp.json()
-        elif raw:
-            ret = resp.content
-        else:
-            ret = resp.text
+    logger.debug(f"Requesting {url}")
+    try:
+        async with AsyncClient(proxies=proxy) as cli:
+            resp = await cli.request(method, url, params=params, **kwargs)
+            resp.raise_for_status()
 
-        req_cache[url] = RequestCache(method, raw, is_json, param_json, ret)
-        return ret
+            if (not raw) and is_json:
+                ret = resp.json()
+            elif raw:
+                ret = resp.content
+            else:
+                ret = resp.text
+
+            cache_obj.content = ret
+            return ret
+
+    except Exception as e:
+        cache_obj.content = e
+        req_cache.remove(cache_obj)
+        raise
 
 
 def format_timestamp(t: int):

@@ -1,4 +1,3 @@
-import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Optional
 
@@ -13,6 +12,7 @@ from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
 from nonebot.params import CommandArg
 
+from ..config import config
 from ..data.bawiki import db_get_gacha_data, db_get_stu_alias
 from ..data.gacha import gacha, get_gacha_cool_down, set_gacha_cool_down
 from ..data.schaledb import schale_get_stu_dict
@@ -30,7 +30,11 @@ help_list: "HelpList" = [
         "detail_des": (
             "模拟抽卡\n"
             "可以使用 <ft color=(238,120,0)>ba切换卡池</ft> 指令来切换卡池\n"
-            "可以指定抽卡次数，需要在1~90之间，默认10\n"
+            "可以指定抽卡次数，默认10次\n"
+            " \n"
+            "可以用这些指令触发：\n"
+            "- <ft color=(238,120,0)>ba抽卡</ft>\n"
+            "- <ft color=(238,120,0)>ba招募</ft>\n"
             " \n"
             "指令示例：\n"
             "- <ft color=(238,120,0)>ba抽卡</ft>\n"
@@ -58,7 +62,7 @@ help_list: "HelpList" = [
 
 
 cmd_change_pool = on_command("ba切换卡池")
-cmd_gacha_once = on_command("ba抽卡")
+cmd_gacha_once = on_command("ba抽卡", aliases={"ba招募"})
 
 
 @dataclass()
@@ -68,6 +72,7 @@ class GachaPool:
     index: Optional[int] = None
 
 
+STATIC_POOL = GachaPool(name="常驻池", pool=[])
 gacha_pool_index: Dict[str, GachaPool] = {}
 
 
@@ -90,7 +95,7 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
 
     if arg:
         if "常驻" in arg:
-            current = GachaPool(name="常驻池", pool=[])
+            current = STATIC_POOL
         else:
             pool = []
             try:
@@ -143,20 +148,28 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
 
 
 @cmd_gacha_once.handle()
-async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg()):
+async def _(
+    matcher: Matcher,
+    event: MessageEvent,
+    cmd_arg: Message = CommandArg(),
+):
     user_id = event.user_id
     group_id = event.group_id if isinstance(event, GroupMessageEvent) else None
 
     if cool_down := get_gacha_cool_down(user_id, group_id):
         await matcher.finish(f"你先别急，先等 {cool_down} 秒再来抽吧qwq")
 
-    set_gacha_cool_down(user_id, group_id)
-
-    arg = cmd_arg.extract_plain_text().strip().lower()
-
     gacha_times = 10
-    if arg and ((not arg.isdigit()) or (not (1 <= (gacha_times := int(arg)) <= 90))):
-        await matcher.finish("请输入有效的抽卡次数，在1~90之间")
+    arg = cmd_arg.extract_plain_text().strip().lower()
+    if arg:
+        if not arg.isdigit():
+            await matcher.finish("请输入有效的整数")
+        gacha_times = int(arg)
+        if not (
+            gacha_times >= 1
+            and (config.ba_gacha_max < 1 or gacha_times <= config.ba_gacha_max)
+        ):
+            await matcher.finish(f"请输入有效的抽卡次数，在1~{config.ba_gacha_max}之间")
 
     try:
         gacha_data = await db_get_gacha_data()
@@ -168,22 +181,17 @@ async def _(matcher: Matcher, event: MessageEvent, cmd_arg: Message = CommandArg
         gacha_data,
     )
     if not pool_obj:
-        await matcher.finish("目前没有UP池，请使用[ba切换卡池]指令来切换到常驻池或组建一个自定义UP池")
+        await matcher.send("数据源内没有提供当期UP池，已自动切换到常驻池")
+        pool_obj = STATIC_POOL
+        gacha_pool_index[qq] = STATIC_POOL
 
+    set_gacha_cool_down(user_id, group_id)
     try:
-        img = []
-        for _ in range(math.ceil(gacha_times / 10)):
-            img.append(
-                await gacha(
-                    qq,
-                    10 if gacha_times >= 10 else gacha_times,
-                    gacha_data,
-                    pool_obj.pool,
-                ),
-            )
-            gacha_times -= 10
+        img = await gacha(qq, gacha_times, gacha_data, pool_obj.pool)
     except Exception:
         logger.exception("抽卡错误")
         await matcher.finish("抽卡出错了，请检查后台输出")
 
-    await matcher.finish(MessageSegment.at(qq) + f"当前抽取卡池：{pool_obj.name}" + img)
+    await matcher.finish(
+        MessageSegment.at(event.user_id) + f"当前抽取卡池：{pool_obj.name}" + img,
+    )

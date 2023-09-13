@@ -110,6 +110,7 @@ plugins = [
 |     `BA_GACHA_COOL_DOWN`      |  否  |   `0`   |                每群每人的抽卡冷却，单位秒                 |
 |      `BA_VOICE_USE_CARD`      |  否  | `False` |            是否使用自定义音乐卡片发送角色语音             |
 |    `BA_SCREENSHOT_TIMEOUT`    |  否  |  `60`   |                   网页截图超时，单位秒                    |
+|        `BA_GACHA_MAX`         |  否  |  `200`  |                     单次抽卡最大次数                      |
 |       `BA_GAMEKEE_URL`        |  否  |   ...   |                   GameKee 数据源的地址                    |
 |        `BA_SCHALE_URL`        |  否  |   ...   |                SchaleDB Json 数据源的地址                 |
 |      `BA_BAWIKI_DB_URL`       |  否  |   ...   |                    bawiki-data 的地址                     |
@@ -176,6 +177,13 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.9.1
+
+- 重构抽卡绘图部分
+- 将阿罗娜的回复变得更二次元了
+- 配置项变更：
+  - 添加 `BA_GACHA_MAX`
 
 ### 0.9.0
 
