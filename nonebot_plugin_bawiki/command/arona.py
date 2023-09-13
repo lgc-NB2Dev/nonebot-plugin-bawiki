@@ -91,14 +91,14 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
     index_str = event.get_plaintext().strip()
     res: List[ImageModel] = state["res"]
 
+    if index_str == "0":
+        await matcher.finish("OK，阿罗娜已经取消老师的选择了~")
+
     if not index_str.isdigit():
         await matcher.reject("不要再逗我了，老师！快发送你要选择的序号吧quq")
     index = int(index_str)
     if not (0 <= index <= len(res)):
         await matcher.reject("阿罗娜找不到老师发送的序号哦，请老师重新发送一下吧")
-
-    if index == 0:
-        await matcher.finish("OK，阿罗娜已经取消老师的选择了~")
 
     param = res[index - 1].name
     try:
