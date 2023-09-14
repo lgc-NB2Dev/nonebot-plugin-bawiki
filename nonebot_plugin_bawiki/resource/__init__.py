@@ -27,6 +27,7 @@ if not CACHE_PATH.exists():
 RES_CALENDER_BANNER = BuildImage.open(RES_PATH / "calender_banner.png")
 RES_GRADIENT_BG = BuildImage.open(RES_PATH / "gradient.png")
 RES_GACHA_BG = BuildImage.open(RES_PATH / "gacha_bg.png")
+RES_GACHA_BG_OLD = BuildImage.open(RES_PATH / "gacha_bg_old.png")
 RES_GACHA_CARD_BG = BuildImage.open(RES_PATH / "gacha_card_bg.png")
 RES_GACHA_CARD_MASK = BuildImage.open(RES_PATH / "gacha_card_mask.png").convert("RGBA")
 RES_GACHA_NEW = BuildImage.open(RES_PATH / "gacha_new.png")

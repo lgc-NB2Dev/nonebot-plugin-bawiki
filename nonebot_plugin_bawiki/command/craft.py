@@ -6,6 +6,7 @@ from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
 
 from ..data.bawiki import db_wiki_craft
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -21,9 +22,9 @@ help_list: "HelpList" = [
             "图片作者 B站@夜猫咪喵喵猫\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba制造</ft>\n"
-            "- <ft color=(238,120,0)>ba制作</ft>\n"
-            "- <ft color=(238,120,0)>ba合成</ft>"
+            f"- {FT_S}ba制造{FT_E}\n"
+            f"- {FT_S}ba制作{FT_E}\n"
+            f"- {FT_S}ba合成{FT_E}"
         ),
     },
 ]

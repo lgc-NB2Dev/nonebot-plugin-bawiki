@@ -12,6 +12,7 @@ from PIL import Image
 from pil_utils.fonts import get_proper_font
 
 from ..command import help_list
+from .const import FT_E, FT_S
 
 if "nonebot_plugin_PicMenu" not in get_available_plugin_names():
     raise ImportError
@@ -20,7 +21,7 @@ require("nonebot_plugin_PicMenu")
 
 from nonebot_plugin_PicMenu import menu_manager  # noqa: E402
 
-usage = "请使用指令 [ba帮助 <ft color=(238,120,0)>功能名称或序号</ft>] 查看某功能详细介绍"
+usage = f"请使用指令 [ba帮助 {FT_S}功能名称或序号{FT_E}] 查看某功能详细介绍"
 extra = {"menu_template": "default", "menu_data": help_list}
 
 

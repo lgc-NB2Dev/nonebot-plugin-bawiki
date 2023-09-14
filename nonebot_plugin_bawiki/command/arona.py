@@ -7,6 +7,7 @@ from nonebot.params import ArgPlainText, CommandArg
 from nonebot.typing import T_State
 
 from ..data.arona import ImageModel, get_image, search
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -22,21 +23,21 @@ help_list: "HelpList" = [
             "感谢 diyigemt 佬的开放 API 数据源\n"
             " \n"
             "可以搜索的内容：\n"
-            "- <ft color=(238,120,0)>学生攻略图</ft>（星野，白子 等）\n"
-            "- <ft color=(238,120,0)>主线地图</ft>（1-1，H1-1 等）\n"
-            "- <ft color=(238,120,0)>杂图</ft>（使用 <ft color=(238,120,0)>arona 杂图</ft> 可以获取图片列表）\n"
+            f"- {FT_S}学生攻略图{FT_E}（星野，白子 等）\n"
+            f"- {FT_S}主线地图{FT_E}（1-1，H1-1 等）\n"
+            f"- {FT_S}杂图{FT_E}（使用 {FT_S}arona 杂图{FT_E} 可以获取图片列表）\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>arona</ft>\n"
-            "- <ft color=(238,120,0)>蓝色恶魔</ft>\n"
-            "- <ft color=(238,120,0)>Arona</ft>\n"
-            "- <ft color=(238,120,0)>ARONA</ft>\n"
-            "- <ft color=(238,120,0)>阿罗娜</ft>\n"
+            f"- {FT_S}arona{FT_E}\n"
+            f"- {FT_S}蓝色恶魔{FT_E}\n"
+            f"- {FT_S}Arona{FT_E}\n"
+            f"- {FT_S}ARONA{FT_E}\n"
+            f"- {FT_S}阿罗娜{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>arona</ft>（会向你提问需要搜索什么）\n"
-            "- <ft color=(238,120,0)>arona 国际服未来视</ft>（精确搜索）\n"
-            "- <ft color=(238,120,0)>arona 国际服</ft>（模糊搜索）"
+            f"- {FT_S}arona{FT_E}（会向你提问需要搜索什么）\n"
+            f"- {FT_S}arona 国际服未来视{FT_E}（精确搜索）\n"
+            f"- {FT_S}arona 国际服{FT_E}（模糊搜索）"
         ),
     },
 ]

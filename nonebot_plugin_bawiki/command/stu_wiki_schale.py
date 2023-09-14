@@ -9,6 +9,7 @@ from nonebot.params import CommandArg
 from ..config import config
 from ..data.bawiki import recover_stu_alia
 from ..data.schaledb import schale_get_stu_dict, schale_get_stu_info
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -23,8 +24,8 @@ help_list: "HelpList" = [
             "访问对应学生SchaleDB页面并截图，支持部分学生别名\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba学生图鉴 白子</ft>\n"
-            "- <ft color=(238,120,0)>ba学生图鉴 xcw</ft>"
+            f"- {FT_S}ba学生图鉴 白子{FT_E}\n"
+            f"- {FT_S}ba学生图鉴 xcw{FT_E}"
         ),
     },
 ]

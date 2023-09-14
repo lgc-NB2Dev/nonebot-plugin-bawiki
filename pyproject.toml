@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-bawiki"
-version = "0.9.2"
+version = "0.9.3"
 description = "A nonebot2 plugin for Blue Archive."
 authors = [{ name = "student_2333", email = "lgc2333@126.com" }]
 dependencies = [

@@ -7,6 +7,7 @@ from nonebot.log import logger
 from nonebot.params import CommandArg
 
 from ..data.gamekee import extract_content_pic, get_level_list
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -22,8 +23,8 @@ help_list: "HelpList" = [
             "来源：GameKee\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba关卡 1-1</ft>\n"
-            "- <ft color=(238,120,0)>ba关卡 H1-1</ft>"
+            f"- {FT_S}ba关卡 1-1{FT_E}\n"
+            f"- {FT_S}ba关卡 H1-1{FT_E}"
         ),
     },
 ]

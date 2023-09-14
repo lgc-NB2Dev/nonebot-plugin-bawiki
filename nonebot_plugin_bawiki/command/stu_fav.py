@@ -11,6 +11,7 @@ from ..config import config
 from ..data.bawiki import db_get_extra_l2d_list, recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import game_kee_get_stu_cid_li, game_kee_grab_l2d
 from ..data.schaledb import draw_fav_li, schale_get_stu_dict
+from ..help import FT_E, FT_S
 from ..util import async_req
 
 if TYPE_CHECKING:
@@ -28,14 +29,14 @@ help_list: "HelpList" = [
             "使用学生名称查询时支持部分学生别名\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba羁绊</ft>\n"
-            "- <ft color=(238,120,0)>ba好感度</ft>\n"
-            "- <ft color=(238,120,0)>bal2d</ft>\n"
-            "- <ft color=(238,120,0)>balive2d</ft>\n"
+            f"- {FT_S}ba羁绊{FT_E}\n"
+            f"- {FT_S}ba好感度{FT_E}\n"
+            f"- {FT_S}bal2d{FT_E}\n"
+            f"- {FT_S}balive2d{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba羁绊 xcw</ft>\n"
-            "- <ft color=(238,120,0)>ba羁绊 9</ft>"
+            f"- {FT_S}ba羁绊 xcw{FT_E}\n"
+            f"- {FT_S}ba羁绊 9{FT_E}"
         ),
     },
 ]

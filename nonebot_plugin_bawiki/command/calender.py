@@ -1,5 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Literal, Union
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import (
@@ -16,6 +16,7 @@ from nonebot.params import CommandArg
 
 from ..data.gamekee import game_kee_calender
 from ..data.schaledb import schale_calender
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -27,13 +28,25 @@ help_list: "HelpList" = [
         "trigger_condition": "ba日程表",
         "brief_des": "查看活动日程表",
         "detail_des": (
-            "查看当前未结束的卡池、活动以及起止时间，"
-            "默认为GameKee源，可以在指令后带参数使用SchaleDB数据源\n"
+            "查看当前未结束的卡池、活动以及起止时间\n"
+            "默认展示来自GameKee源的所有服务器日程\n"
+            "可以使用下方的指令参数指定数据源和展示的服务器\n"
+            " \n"
+            "可以在指令后带参数，每个参数请使用空格分隔\n"
+            "参数列表：\n"
+            "- 使用SchaleDB数据源：\n"
+            f"  {FT_S}夏莱{FT_E} / {FT_S}沙勒{FT_E} / {FT_S}s{FT_E} / {FT_S}schale{FT_E} / {FT_S}schaledb{FT_E}\n"
+            "- 展示日服日程：\n"
+            f"  {FT_S}日{FT_E} / {FT_S}日服{FT_E} / {FT_S}j{FT_E} / {FT_S}jp{FT_E} / {FT_S}japan{FT_E}\n"
+            "- 展示国际服日程：\n"
+            f"  {FT_S}国际{FT_E} / {FT_S}国际服{FT_E} / {FT_S}g{FT_E} / {FT_S}gl{FT_E} / {FT_S}global{FT_E}\n"
+            "- 展示国服日程：\n"
+            f"  {FT_S}国服{FT_E} / {FT_S}c{FT_E} / {FT_S}cn{FT_E} / {FT_S}china{FT_E} / {FT_S}chinese{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba日程表</ft> （GameKee源）\n"
-            "- <ft color=(238,120,0)>ba日程表 schaledb</ft> （SchaleDB源，日服国际服一起发）\n"
-            "- <ft color=(238,120,0)>ba日程表 schale 国际服</ft> （SchaleDB源，国际服）"
+            f"- {FT_S}ba日程表{FT_E} （GameKee源）\n"
+            f"- {FT_S}ba日程表 schale{FT_E} （SchaleDB源，所有服务器）\n"
+            f"- {FT_S}ba日程表 schale 日服 国际服{FT_E} （SchaleDB源，日服和国际服）"
         ),
     },
 ]
@@ -49,18 +62,26 @@ async def _(
     matcher: Matcher,
     cmd_arg: Message = CommandArg(),
 ):
-    arg: str = cmd_arg.extract_plain_text()
+    args: List[str] = cmd_arg.extract_plain_text().strip().lower().split()
 
-    if "s" not in (arg := arg.lower()):
-        # gamekee
-        task = game_kee_calender()
+    gamekee = True
+    servers: List[Literal["Jp", "Global", "Cn"]] = []
+
+    if any((x in ("夏莱", "沙勒", "s", "schale", "schaledb")) for x in args):
+        gamekee = False
+    if any((x in ("日", "日服", "j", "jp", "japan")) for x in args):
+        servers.append("Jp")
+    if any((x in ("国际", "国际服", "g", "gl", "global")) for x in args):
+        servers.append("Global")
+    if any((x in ("国服", "c", "cn", "china", "chinese")) for x in args):
+        servers.append("Cn")
+
+    if not servers:
+        servers = ["Jp", "Global", "Cn"]
+
+    if gamekee:
+        task = game_kee_calender(servers)
     else:
-        # schale
-        servers = []
-        if any(x in arg for x in ("日", "j")):
-            servers.append(0)
-        if any(x in arg for x in ("国", "g")):
-            servers.append(1)
         task = asyncio.gather(*(schale_calender(x) for x in servers))
 
     await matcher.send("正在绘制图片，请稍等")
@@ -70,8 +91,8 @@ async def _(
         logger.exception("绘制日程表图片出错")
         await matcher.finish("绘制日程表图片出错，请检查后台输出")
 
-    if isinstance(messages, str):
-        await matcher.finish(messages)
+    if isinstance(messages, str) or len(messages) == 1:
+        await matcher.finish(Message() + messages)
 
     try:
         forward_nodes: List[MessageSegment] = [

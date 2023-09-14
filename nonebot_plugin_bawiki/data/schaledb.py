@@ -77,20 +77,24 @@ async def schale_get_stu_info(stu):
         return await page.screenshot(full_page=True, type="jpeg")
 
 
-async def schale_calender(server):
-    return MessageSegment.image(
-        await schale_get_calender(
-            server,
-            *(
-                await asyncio.gather(
-                    schale_get_stu_data(),
-                    schale_get_common(),
-                    schale_get_localization(),
-                    schale_get_raids(),
-                )
-            ),
-        ),
+async def schale_calender(server: str) -> MessageSegment:
+    students, common, localization, raids = await asyncio.gather(
+        schale_get_stu_dict("Id"),
+        schale_get_common(),
+        schale_get_localization(),
+        schale_get_raids(),
     )
+    region_index_map: Dict[str, int] = {
+        x["name"]: i for i, x in enumerate(common["regions"])
+    }
+    image = await schale_get_calender(
+        region_index_map[server],
+        students,
+        common,
+        localization,
+        raids,
+    )
+    return MessageSegment.image(image)
 
 
 def find_current_event(ev, now=None):
@@ -105,10 +109,14 @@ def find_current_event(ev, now=None):
     return None
 
 
-async def schale_get_calender(server, students, common, localization, raids):
-    students = {x["Id"]: x for x in students}
-
-    region = common["regions"][server]
+async def schale_get_calender(
+    server_index: int,
+    students: Dict[str, Dict],
+    common: dict,
+    localization: dict,
+    raids: dict,
+):
+    region = common["regions"][server_index]
     now = datetime.now()
 
     pic_bg = BuildImage.new("RGBA", (1400, 640), (255, 255, 255, 70))
@@ -149,7 +157,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                     BuildImage.open(
                         BytesIO(
                             await schale_get(
-                                f'images/student/collection/{s["CollectionTexture"]}.webp',
+                                f'images/student/collection/{s["Id"]}.webp',
                                 raw=True,
                             ),
                         ),
@@ -208,7 +216,7 @@ async def schale_get_calender(server, students, common, localization, raids):
             ev_bg, ev_img = await asyncio.gather(
                 schale_get(f"images/campaign/Campaign_Event_{ev}_Normal.png", raw=True),
                 schale_get(
-                    f"images/eventlogo/Event_{ev}_{'Tw' if server else 'Jp'}.png",
+                    f"images/eventlogo/{ev}_{'Tw' if server_index else 'Jp'}.webp",
                     raw=True,
                 ),
             )
@@ -268,12 +276,15 @@ async def schale_get_calender(server, students, common, localization, raids):
                 alpha=True,
             )
 
-            tp = "TimeAttack" if (time_atk := (ri["raid"] >= 1000)) else "Raid"
-            raid = {x["Id"]: x for x in raids[tp]}
+            raid_type = ri["type"]
+            time_atk = raid_type == "TimeAttack"
+            type_key = "TimeAttack" if time_atk else "Raid"
+
+            raid = {x["Id"]: x for x in raids[type_key]}
             c_ri = raid[ri["raid"]]
             pic = pic.draw_text(
                 (25, 25, 1375, 150),
-                localization["StageType"][tp],
+                localization["StageType"][type_key],
                 weight="bold",
                 max_fontsize=80,
             )
@@ -284,14 +295,14 @@ async def schale_get_calender(server, students, common, localization, raids):
                     "Defense": "TimeAttack_SlotBG_01",
                     "Destruction": "TimeAttack_SlotBG_03",
                 }
-                bg_url = f'images/timeattack/{tk_bg[c_ri["DungeonType"]]}'
-                fg_url = f'images/enemy/{c_ri["Icon"]}.png'
+                bg_url = f'images/timeattack/{tk_bg[c_ri["DungeonType"]]}.png'
+                fg_url = f'images/enemy/{c_ri["Icon"]}.webp'
             else:
                 bg_url = f'images/raid/Boss_Portrait_{c_ri["PathName"]}_LobbyBG'
                 if len(c_ri["Terrain"]) > 1 and ri["terrain"] == c_ri["Terrain"][1]:
                     bg_url += f'_{ri["terrain"]}'
+                bg_url = f"{bg_url}.png"
                 fg_url = f'images/raid/Boss_Portrait_{c_ri["PathName"]}_Lobby.png'
-            bg_url += ".png"
             terrain = c_ri["Terrain"] if time_atk else ri["terrain"]
 
             color_map = {
@@ -409,7 +420,7 @@ async def schale_get_calender(server, students, common, localization, raids):
 
         birth_this_week = []
         birth_next_week = []
-        for s in [x for x in students.values() if x["IsReleased"][server]]:
+        for s in [x for x in students.values() if x["IsReleased"][server_index]]:
             birth = time.mktime(
                 time.strptime(f'{now.year}/{s["BirthDay"]}', "%Y/%m/%d"),
             )
@@ -436,7 +447,7 @@ async def schale_get_calender(server, students, common, localization, raids):
                 for x in await asyncio.gather(
                     *[
                         schale_get(
-                            f'images/student/icon/{x["CollectionTexture"]}.png',
+                            f'images/student/icon/{x["Id"]}.webp',
                             raw=True,
                         )
                         for x in birth_this_week + birth_next_week
@@ -508,7 +519,7 @@ async def schale_get_calender(server, students, common, localization, raids):
         .paste(RES_CALENDER_BANNER.copy().resize((1500, 150)))
         .draw_text(
             (50, 0, 1480, 150),
-            f"SchaleDB丨活动日程丨{localization['ServerName'][str(server)]}",
+            f"SchaleDB丨活动日程丨{localization['ServerName'][str(server_index)]}",
             max_fontsize=100,
             weight="bold",
             fill="#ffffff",
@@ -527,7 +538,7 @@ async def schale_get_calender(server, students, common, localization, raids):
     for im in img:
         bg.paste(im.circle_corner(10), (50, h_index), alpha=True)
         h_index += im.height + 50
-    return bg.convert("RGB").save("png")
+    return bg.convert("RGB").save("JPEG")
 
 
 async def draw_fav_li(lvl):

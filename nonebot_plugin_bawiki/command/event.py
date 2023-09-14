@@ -9,6 +9,7 @@ from nonebot.params import CommandArg
 
 from ..data.bawiki import db_get_event_alias, db_wiki_event
 from ..data.schaledb import find_current_event, schale_get_common
+from ..help import FT_E, FT_S
 from ..util import recover_alia, splice_msg
 
 if TYPE_CHECKING:
@@ -29,9 +30,9 @@ help_list: "HelpList" = [
             "跟其他文本则代表指定活动名称\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba活动</ft>\n"
-            "- <ft color=(238,120,0)>ba活动 日</ft>\n"
-            "- <ft color=(238,120,0)>ba活动 温泉浴场</ft>"
+            f"- {FT_S}ba活动{FT_E}\n"
+            f"- {FT_S}ba活动 日{FT_E}\n"
+            f"- {FT_S}ba活动 温泉浴场{FT_E}"
         ),
     },
 ]

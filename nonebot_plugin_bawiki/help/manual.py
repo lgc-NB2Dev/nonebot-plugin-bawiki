@@ -9,7 +9,7 @@ from ..command import help_list
 usage = "使用指令 `ba帮助` 查询插件功能帮助"
 extra = None
 
-FT_START_REGEX = r"<ft color=\((\d+),(\d+),(\d+)\)>"
+FT_START_REGEX = r"<ft(.*?)>"
 FT_END_REGEX = r"</ft>"
 
 

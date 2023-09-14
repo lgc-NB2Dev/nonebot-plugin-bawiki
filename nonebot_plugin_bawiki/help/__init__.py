@@ -1,6 +1,8 @@
 from nonebot import on_command
 
 from ..command import help_list
+from .const import FT_E as FT_E
+from .const import FT_S as FT_S
 
 try:
     from .pic_menu import extra as extra
@@ -24,13 +26,13 @@ def register_help_cmd():
                 "装载 PicMenu 插件后插件将会调用 PicMenu 生成帮助图片\n"
                 " \n"
                 "可以用这些指令触发：\n"
-                "- <ft color=(238,120,0)>ba帮助</ft>\n"
-                "- <ft color=(238,120,0)>ba菜单</ft>\n"
-                "- <ft color=(238,120,0)>ba功能</ft>\n"
+                f"- {FT_S}ba帮助{FT_E}\n"
+                f"- {FT_S}ba菜单{FT_E}\n"
+                f"- {FT_S}ba功能{FT_E}\n"
                 " \n"
                 "指令示例：\n"
-                "- <ft color=(238,120,0)>ba帮助</ft>（功能列表）\n"
-                "- <ft color=(238,120,0)>ba帮助 日程表</ft>（功能详情）"
+                f"- {FT_S}ba帮助{FT_E}（功能列表）\n"
+                f"- {FT_S}ba帮助 日程表{FT_E}（功能详情）"
             ),
         },
     )

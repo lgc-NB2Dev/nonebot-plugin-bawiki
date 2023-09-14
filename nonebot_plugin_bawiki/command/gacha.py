@@ -17,6 +17,7 @@ from ..config import config
 from ..data.bawiki import db_get_gacha_data, db_get_stu_alias
 from ..data.gacha import gacha, get_gacha_cool_down, set_gacha_cool_down
 from ..data.schaledb import schale_get_stu_dict
+from ..help import FT_E, FT_S
 from ..util import recover_alia
 
 if TYPE_CHECKING:
@@ -30,16 +31,16 @@ help_list: "HelpList" = [
         "brief_des": "模拟抽卡",
         "detail_des": (
             "模拟抽卡\n"
-            "可以使用 <ft color=(238,120,0)>ba切换卡池</ft> 指令来切换卡池\n"
+            f"可以使用 {FT_S}ba切换卡池{FT_E} 指令来切换卡池\n"
             "可以指定抽卡次数，默认10次\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba抽卡</ft>\n"
-            "- <ft color=(238,120,0)>ba招募</ft>\n"
+            f"- {FT_S}ba抽卡{FT_E}\n"
+            f"- {FT_S}ba招募{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba抽卡</ft>\n"
-            "- <ft color=(238,120,0)>ba抽卡 20</ft>"
+            f"- {FT_S}ba抽卡{FT_E}\n"
+            f"- {FT_S}ba抽卡 20{FT_E}"
         ),
     },
     {
@@ -50,13 +51,13 @@ help_list: "HelpList" = [
         "detail_des": (
             "设置模拟抽卡功能的UP池角色\n"
             "当不带参数时，会展示所有池子以供切换\n"
-            "当参数为 <ft color=(238,120,0)>常驻</ft> 时，切换到常驻池（没有UP）\n"
+            f"当参数为 {FT_S}常驻{FT_E} 时，切换到常驻池（没有UP）\n"
             "可以自定义池子UP角色，支持2星与3星角色，参数中学生名称用空格分隔，支持部分学生别名\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba切换卡池</ft>\n"
-            "- <ft color=(238,120,0)>ba切换卡池 常驻</ft>\n"
-            "- <ft color=(238,120,0)>ba切换卡池 小桃 小绿</ft>"
+            f"- {FT_S}ba切换卡池{FT_E}\n"
+            f"- {FT_S}ba切换卡池 常驻{FT_E}\n"
+            f"- {FT_S}ba切换卡池 小桃 小绿{FT_E}"
         ),
     },
 ]

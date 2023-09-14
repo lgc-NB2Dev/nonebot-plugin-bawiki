@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from io import BytesIO
-from typing import Any, Dict, List, NoReturn, Union, cast
+from typing import Any, Dict, List, Literal, NoReturn, Optional, Union, cast
 
 from bs4 import BeautifulSoup, PageElement, ResultSet, Tag
 from nonebot import logger
@@ -109,10 +109,23 @@ async def send_wiki_page(sid: int, matcher: Matcher) -> NoReturn:
     await matcher.finish(Message(MessageSegment.image(x) for x in images))
 
 
-async def game_kee_calender() -> Union[List[MessageSegment], str]:
+async def game_kee_calender(
+    servers: Optional[List[Literal["Jp", "Global", "Cn"]]] = None,
+) -> Union[List[MessageSegment], str]:
     ret = await game_kee_get_calender()
+
+    if ret and servers:
+        server_name_map = {
+            "Jp": "日服",
+            "Global": "国际服",
+            "Cn": "国服",
+        }
+        server_names = [server_name_map[x] for x in servers]
+        ret = [x for x in ret if x["pub_area"] in server_names]
+
     if not ret:
         return "没有获取到GameKee日程表数据"
+
     return [MessageSegment.image(x) for x in await game_kee_get_calender_page(ret)]
 
 
@@ -280,7 +293,7 @@ async def game_kee_get_calender_page(ret, has_pic=True) -> List[BytesIO]:
             pics[-1].extend(extra)
         images = [draw_list(x, f"{title_prefix}丨P{i}") for i, x in enumerate(pics, 1)]
 
-    return [x.save_jpg() for x in images]
+    return [x.convert("RGB").save_jpg() for x in images]
 
 
 async def game_kee_grab_l2d(cid) -> List[str]:

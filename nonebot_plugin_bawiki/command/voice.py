@@ -10,6 +10,7 @@ from nonebot.params import CommandArg
 from ..config import config
 from ..data.bawiki import recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import GameKeeVoice, game_kee_get_stu_li, game_kee_get_voice
+from ..help import FT_E, FT_S
 from ..util import async_req
 
 if TYPE_CHECKING:
@@ -28,16 +29,13 @@ help_list: "HelpList" = [
             " \n"
             "默认获取日配语音，如果角色有中配，则可以在指令后方带上 `中配` 来获取\n"
             "如果找不到中配语音对应的台词，则会展示日配台词\n"
-            # " \n"
-            # "可以用这些指令触发：\n"
-            # "- <ft color=(238,120,0)>ba语音</ft>\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba语音 忧</ft>\n"
-            "- <ft color=(238,120,0)>ba语音 美游 被cc</ft>\n"
-            "- <ft color=(238,120,0)>ba语音 水大叔 好热</ft>\n"
-            "- <ft color=(238,120,0)>ba语音中配 白子</ft>\n"
-            "- <ft color=(238,120,0)>ba语音中配 大叔 睡午觉</ft>"
+            f"- {FT_S}ba语音 忧{FT_E}\n"
+            f"- {FT_S}ba语音 美游 被cc{FT_E}\n"
+            f"- {FT_S}ba语音 水大叔 好热{FT_E}\n"
+            f"- {FT_S}ba语音中配 白子{FT_E}\n"
+            f"- {FT_S}ba语音中配 大叔 睡午觉{FT_E}"
         ),
     },
 ]

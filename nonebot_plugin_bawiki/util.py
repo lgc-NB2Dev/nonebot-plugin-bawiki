@@ -64,8 +64,11 @@ async def get_req_cache(
         while cache.content is None:
             logger.debug(f"Waiting for cache {url}")
             await asyncio.sleep(0.1)
-        if (not isinstance(cache.content, Exception)) and (cache.content is not None):
-            return cache.content
+        if isinstance(cache.content, Exception):
+            logger.debug(f"Cache for {url} got exception: {cache.content!r}")
+            return None
+        # if cache.content is not None:
+        return cache.content
     return None
 
 

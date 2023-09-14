@@ -8,6 +8,7 @@ from nonebot.params import CommandArg
 from nonebot.typing import T_State
 
 from ..data.bawiki import db_future
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -30,28 +31,26 @@ help_list: "HelpList" = [
             "如果参数不以这些词开头时，默认发送国际服前瞻图\n"
             " \n"
             "日期格式可以为（Y代表4位数年，m代表月，d代表日）：\n"
-            "- <ft color=(238,120,0)>Y/m/d</ft>；<ft color=(238,120,0)>m/d</ft>\n"
-            "- <ft color=(238,120,0)>Y-m-d</ft>；<ft color=(238,120,0)>m-d</ft>\n"
-            "- <ft color=(238,120,0)>Y年m月d日</ft>；<ft color=(238,120,0)>m月d日</ft>\n"
+            f"- {FT_S}Y/m/d{FT_E}；{FT_S}m/d{FT_E}\n"
+            f"- {FT_S}Y-m-d{FT_E}；{FT_S}m-d{FT_E}\n"
+            f"- {FT_S}Y年m月d日{FT_E}；{FT_S}m月d日{FT_E}\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba千里眼</ft>\n"
-            "- <ft color=(238,120,0)>ba前瞻</ft>\n"
+            f"- {FT_S}ba千里眼{FT_E}\n"
+            f"- {FT_S}ba前瞻{FT_E}\n"
             " \n"
             "有以下指令别名：\n"
-            "- <ft color=(238,120,0)>ba国服千里眼</ft> 或 <ft color=(238,120,0)>ba国服前瞻</ft> -> "
-            "<ft color=(238,120,0)>ba千里眼 国服</ft>\n"
-            "- <ft color=(238,120,0)>ba国际服千里眼</ft> 或 <ft color=(238,120,0)>ba国际服前瞻</ft> -> "
-            "<ft color=(238,120,0)>ba千里眼 国际服</ft>\n"
+            f"- {FT_S}ba国服千里眼{FT_E} 或 {FT_S}ba国服前瞻{FT_E} -> {FT_S}ba千里眼 国服{FT_E}\n"
+            f"- {FT_S}ba国际服千里眼{FT_E} 或 {FT_S}ba国际服前瞻{FT_E} -> {FT_S}ba千里眼 国际服{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba千里眼</ft>\n"
-            "- <ft color=(238,120,0)>ba千里眼 all</ft>\n"
-            "- <ft color=(238,120,0)>ba千里眼 3</ft>\n"
-            "- <ft color=(238,120,0)>ba千里眼 11/15</ft>\n"
-            "- <ft color=(238,120,0)>ba千里眼 11/15 3</ft>\n"
-            "- <ft color=(238,120,0)>ba千里眼 国服</ft>\n"
-            "- <ft color=(238,120,0)>ba千里眼 国际服 11/15</ft>"
+            f"- {FT_S}ba千里眼{FT_E}\n"
+            f"- {FT_S}ba千里眼 all{FT_E}\n"
+            f"- {FT_S}ba千里眼 3{FT_E}\n"
+            f"- {FT_S}ba千里眼 11/15{FT_E}\n"
+            f"- {FT_S}ba千里眼 11/15 3{FT_E}\n"
+            f"- {FT_S}ba千里眼 国服{FT_E}\n"
+            f"- {FT_S}ba千里眼 国际服 11/15{FT_E}"
         ),
     },
 ]

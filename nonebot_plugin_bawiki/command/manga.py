@@ -17,6 +17,7 @@ from nonebot.params import CommandArg
 from pil_utils import BuildImage
 
 from ..data.gamekee import get_manga_content, get_manga_list
+from ..help import FT_E, FT_S
 from ..util import async_req
 
 if TYPE_CHECKING:
@@ -35,9 +36,9 @@ help_list: "HelpList" = [
             "不带参数时，会从所有漫画中随机抽取一话发送\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba漫画</ft>\n"
-            "- <ft color=(238,120,0)>ba漫画 蔚蓝档案四格漫画</ft>\n"
-            "- <ft color=(238,120,0)>ba漫画 布噜布噜档案 第一话</ft>"
+            f"- {FT_S}ba漫画{FT_E}\n"
+            f"- {FT_S}ba漫画 蔚蓝档案四格漫画{FT_E}\n"
+            f"- {FT_S}ba漫画 布噜布噜档案 第一话{FT_E}"
         ),
     },
 ]

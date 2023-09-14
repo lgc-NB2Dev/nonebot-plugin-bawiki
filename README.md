@@ -110,6 +110,7 @@ plugins = [
 |     `BA_GACHA_COOL_DOWN`      |  否  |   `0`   |                每群每人的抽卡冷却，单位秒                 |
 |      `BA_VOICE_USE_CARD`      |  否  | `False` |            是否使用自定义音乐卡片发送角色语音             |
 |    `BA_SCREENSHOT_TIMEOUT`    |  否  |  `60`   |                   网页截图超时，单位秒                    |
+|  `BA_DISABLE_CLASSIC_GACHA`   |  否  | `False` |        抽卡次数 10 次以下时是否不使用经典抽卡样式         |
 |        `BA_GACHA_MAX`         |  否  |  `200`  |                     单次抽卡最大次数                      |
 |       `BA_GAMEKEE_URL`        |  否  |   ...   |                   GameKee 数据源的地址                    |
 |        `BA_SCHALE_URL`        |  否  |   ...   |                SchaleDB Json 数据源的地址                 |
@@ -178,6 +179,16 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.9.3
+
+- 微调 `ba日程表` 指令：GameKee 源的日程表现在可以分服务器展示了，顺便修复了 SchaleDB 源日程的 Bug，详见指令帮助
+- 现在在抽卡次数为 10 次以下时，默认使用经典抽卡样式（旧版的还原游戏的抽卡样式）
+- 配置项变更：
+  - 添加 `BA_DISABLE_CLASSIC_GACHA`
+
+<details>
+<summary><strong>历史更新日志（点击展开）</strong></summary>
+
 ### 0.9.2
 
 - `ba切换卡池` 指令现在不带参数时会显示所有卡池以供切换了
@@ -216,7 +227,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 - 修复 `ba学生wiki` 截图失败的 bug，同时优化截图样式
 - 漫画获取不再依赖 bawiki-data 数据源，现在直接从 GameKee 现爬；加入了搜索漫画功能，并且图片过多会使用合并转发的方式发送
 
-## 0.8.3
+### 0.8.3
 
 - 修改缓存路径
 
@@ -366,3 +377,5 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 - 日程表不会显示未开始的活动了
 - 小 bug 修复
 - ~~移除了 herobrine~~
+
+</details>

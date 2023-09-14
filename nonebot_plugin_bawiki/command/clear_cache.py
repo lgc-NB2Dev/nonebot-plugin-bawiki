@@ -5,6 +5,7 @@ from nonebot import on_command
 from nonebot.internal.matcher import Matcher
 from nonebot.permission import SUPERUSER
 
+from ..help import FT_E, FT_S
 from ..resource import CACHE_PATH
 from ..util import clear_req_cache
 
@@ -19,11 +20,11 @@ help_list: "HelpList" = [
         "brief_des": "清空插件请求缓存",
         "detail_des": (
             "手动清空插件请求网络缓存下来的数据，如API返回的数据\n"
-            "注：该指令只能由<ft color=(238,120,0)>超级用户</ft>触发\n"
+            f"注：该指令只能由{FT_S}超级用户{FT_E}触发\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba清空缓存</ft>\n"
-            "- <ft color=(238,120,0)>ba清除缓存</ft>"
+            f"- {FT_S}ba清空缓存{FT_E}\n"
+            f"- {FT_S}ba清除缓存{FT_E}"
         ),
     },
 ]

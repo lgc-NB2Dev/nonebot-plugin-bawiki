@@ -11,6 +11,7 @@ from nonebot.rule import ArgumentParser
 
 from ..data.bawiki import db_get_raid_alias, db_get_terrain_alias, db_wiki_raid
 from ..data.schaledb import find_current_event, schale_get_common
+from ..help import FT_E, FT_S
 from ..util import recover_alia, splice_msg
 
 if TYPE_CHECKING:
@@ -27,14 +28,14 @@ help_list: "HelpList" = [
             "支持部分Boss别名\n"
             "图片作者 B站@夜猫咪喵喵猫\n"
             " \n"
-            "使用 <ft color=(238,120,0)>ba总力战 -h</ft> 查询指令用法\n"
+            f"使用 {FT_S}ba总力战 -h{FT_E} 查询指令用法\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba总力战</ft>（日服&国际服当前总力战Boss配队攻略）\n"
-            "- <ft color=(238,120,0)>ba总力战 -s j</ft>（日服当前总力战Boss配队攻略）\n"
-            "- <ft color=(238,120,0)>ba总力战 -s j -w</ft>（日服当前总力战Boss机制图）\n"
-            "- <ft color=(238,120,0)>ba总力战 寿司</ft>（Kaiten FX Mk.0 配队攻略）\n"
-            "- <ft color=(238,120,0)>ba总力战 寿司 -t 屋外</ft>（Kaiten FX Mk.0 屋外战配队攻略）"
+            f"- {FT_S}ba总力战{FT_E}（日服&国际服当前总力战Boss配队攻略）\n"
+            f"- {FT_S}ba总力战 -s j{FT_E}（日服当前总力战Boss配队攻略）\n"
+            f"- {FT_S}ba总力战 -s j -w{FT_E}（日服当前总力战Boss机制图）\n"
+            f"- {FT_S}ba总力战 寿司{FT_E}（Kaiten FX Mk.0 配队攻略）\n"
+            f"- {FT_S}ba总力战 寿司 -t 屋外{FT_E}（Kaiten FX Mk.0 屋外战配队攻略）"
         ),
     },
 ]

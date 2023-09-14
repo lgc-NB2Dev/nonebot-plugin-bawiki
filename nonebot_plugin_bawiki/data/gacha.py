@@ -16,6 +16,7 @@ from ..resource import (
     DATA_PATH,
     RES_CALENDER_BANNER,
     RES_GACHA_BG,
+    RES_GACHA_BG_OLD,
     RES_GACHA_CARD_BG,
     RES_GACHA_CARD_MASK,
     RES_GACHA_NEW,
@@ -121,7 +122,10 @@ async def get_student_icon(student_id: int) -> BuildImage:
     return stu_img.resize((64, 64), keep_ratio=True).circle()
 
 
-async def gen_important_img(student: GachaStudent) -> BuildImage:
+async def get_student_card(
+    student: GachaStudent,
+    draw_count: bool = True,
+) -> BuildImage:
     bg = RES_GACHA_CARD_BG.copy()
 
     try:
@@ -164,12 +168,14 @@ async def gen_important_img(student: GachaStudent) -> BuildImage:
         font_y_offset -= 4
         bg = bg.paste(RES_GACHA_PICKUP, (font_x_offset, font_y_offset), alpha=True)
 
-    Text2Image.from_text(
-        format_count(student.count),
-        16,
-        style="italic",
-        fill="white",
-    ).draw_on_image(bg.image, (29, 195))
+    if draw_count:
+        bg.draw_text(
+            (29, 195),
+            format_count(student.count),
+            fontsize=16,
+            style="italic",
+            fill="white",
+        )
 
     return bg
 
@@ -189,7 +195,7 @@ def collect_regular_info(
     ]
 
 
-async def gen_gacha_img(result: List[GachaStudent]) -> BuildImage:
+async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
     important_result: List[GachaStudent] = []
     regular_result: List[GachaStudent] = []
     for res in result:
@@ -206,7 +212,7 @@ async def gen_gacha_img(result: List[GachaStudent]) -> BuildImage:
     regular_collected.sort(key=lambda x: x.student.pickup, reverse=True)
 
     important_pics: List[List[BuildImage]] = split_list(
-        await asyncio.gather(*[gen_important_img(x) for x in important_result]),
+        await asyncio.gather(*[get_student_card(x) for x in important_result]),
         5,
     )
     regular_icons: List[BuildImage] = await asyncio.gather(
@@ -350,6 +356,43 @@ async def gen_gacha_img(result: List[GachaStudent]) -> BuildImage:
     )
 
 
+async def draw_classic_gacha_img(students: List[GachaStudent]) -> BuildImage:
+    line_limit = 5
+    card_w, card_h = (256, 256)
+
+    stu_cards: List[List[BuildImage]] = split_list(
+        await asyncio.gather(
+            *(get_student_card(student, draw_count=False) for student in students),
+        ),
+        line_limit,
+    )
+    bg = RES_GACHA_BG_OLD.copy()
+
+    x_gap = 10
+    y_gap = 80
+    y_offset = int((bg.height - (len(stu_cards) * (y_gap + card_h) - y_gap)) / 2)
+    for line in stu_cards:
+        x_offset = int((bg.width - (len(line) * (x_gap + card_w) - x_gap)) / 2)
+        for card in line:
+            bg = bg.paste(card, (x_offset, y_offset), alpha=True)
+            x_offset += card_w + x_gap
+        y_offset += card_h + y_gap
+
+    return bg.draw_text(
+        (1678, 841, 1888, 885),
+        "BAWiki",
+        max_fontsize=30,
+        weight="bold",
+        fill=(36, 90, 126),
+    ).draw_text(
+        (1643, 885, 1890, 935),
+        "经典抽卡样式",
+        max_fontsize=30,
+        weight="bold",
+        fill=(255, 255, 255),
+    )
+
+
 async def do_gacha(
     qq: str,
     times: int,
@@ -438,5 +481,10 @@ async def gacha(
     up_pool: Optional[List[int]] = None,
 ) -> MessageSegment:
     result = await do_gacha(qq, times, gacha_data_json, up_pool)
-    img = (await gen_gacha_img(result)).save_jpg()
-    return MessageSegment.image(img)
+    img = (
+        (await draw_summary_gacha_img(result))
+        if (times > 10) or (config.ba_disable_classic_gacha)
+        else (await draw_classic_gacha_img(result))
+    )
+    img_bytes = img.convert("RGB").save_jpg()
+    return MessageSegment.image(img_bytes)

@@ -8,6 +8,7 @@ from nonebot.params import CommandArg
 
 from ..data.bawiki import recover_stu_alia
 from ..data.gamekee import game_kee_get_stu_cid_li, send_wiki_page
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -22,8 +23,8 @@ help_list: "HelpList" = [
             "访问对应学生GameKee Wiki页面并截图，支持部分学生别名\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba学生wiki 白子</ft>\n"
-            "- <ft color=(238,120,0)>ba学生wiki xcw</ft>"
+            f"- {FT_S}ba学生wiki 白子{FT_E}\n"
+            f"- {FT_S}ba学生wiki xcw{FT_E}"
         ),
     },
 ]

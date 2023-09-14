@@ -7,6 +7,7 @@ from nonebot.log import logger
 from nonebot.params import CommandArg
 
 from ..data.bawiki import db_wiki_stu, recover_stu_alia
+from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -25,13 +26,13 @@ help_list: "HelpList" = [
             "可以使用 `all` / `总览` / `全部` 参数 查看全学生角评一图流\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba学生评价</ft>\n"
-            "- <ft color=(238,120,0)>ba角评</ft>\n"
+            f"- {FT_S}ba学生评价{FT_E}\n"
+            f"- {FT_S}ba角评{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba学生评价 白子</ft>\n"
-            "- <ft color=(238,120,0)>ba角评 xcw</ft>\n"
-            "- <ft color=(238,120,0)>ba角评 总览</ft>"
+            f"- {FT_S}ba学生评价 白子{FT_E}\n"
+            f"- {FT_S}ba角评 xcw{FT_E}\n"
+            f"- {FT_S}ba角评 总览{FT_E}"
         ),
     },
 ]

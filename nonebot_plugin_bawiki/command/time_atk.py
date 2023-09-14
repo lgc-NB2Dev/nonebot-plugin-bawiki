@@ -9,6 +9,7 @@ from nonebot.params import CommandArg
 
 from ..data.bawiki import db_wiki_time_atk
 from ..data.schaledb import find_current_event, schale_get_common
+from ..help import FT_E, FT_S
 from ..util import splice_msg
 
 if TYPE_CHECKING:
@@ -28,18 +29,18 @@ help_list: "HelpList" = [
             "指令后面跟`日`或`j`开头的文本代表查询日服当前综合战术考试攻略，带以`国`或`g`开头的文本同理\n"
             "跟整数则代表指定第几个综合战术考试\n"
             " \n"
-            "p.s. 综合战术考试 和 合同火力演习 其实是一个东西，国际服叫前者，日服叫后者～\n"
+            "p.s. 综合战术考试 和 合同火力演习 其实是一个东西，翻译不同而已～\n"
             " \n"
             "可以用这些指令触发：\n"
-            "- <ft color=(238,120,0)>ba综合战术考试</ft>\n"
-            "- <ft color=(238,120,0)>ba合同火力演习</ft>\n"
-            "- <ft color=(238,120,0)>ba战术考试</ft>\n"
-            "- <ft color=(238,120,0)>ba火力演习</ft>\n"
+            f"- {FT_S}ba综合战术考试{FT_E}\n"
+            f"- {FT_S}ba合同火力演习{FT_E}\n"
+            f"- {FT_S}ba战术考试{FT_E}\n"
+            f"- {FT_S}ba火力演习{FT_E}\n"
             " \n"
             "指令示例：\n"
-            "- <ft color=(238,120,0)>ba综合战术考试</ft>\n"
-            "- <ft color=(238,120,0)>ba综合战术考试 日</ft>\n"
-            "- <ft color=(238,120,0)>ba综合战术考试 8</ft>"
+            f"- {FT_S}ba综合战术考试{FT_E}\n"
+            f"- {FT_S}ba综合战术考试 日{FT_E}\n"
+            f"- {FT_S}ba综合战术考试 8{FT_E}"
         ),
     },
 ]

@@ -9,6 +9,7 @@ class Cfg(BaseModel):
     ba_gacha_cool_down: int = 0
     ba_voice_use_card: bool = False
     ba_screenshot_timeout: int = 60
+    ba_disable_classic_gacha: bool = False
     ba_gacha_max: int = 200
 
     ba_gamekee_url: str = "https://ba.gamekee.com/"
