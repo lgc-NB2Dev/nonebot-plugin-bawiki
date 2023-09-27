@@ -441,7 +441,7 @@ async def do_gacha(
             (up_3_li, up_3_chance),
             (up_2_li, up_2_chance),
             (star_3_base["char"], star_3_chance),
-            (star_2_base["char"], now_2_chance)
+            (star_2_base["char"], now_2_chance),
         ]
         if not is_10th:
             pool_and_weight.append((star_1_base["char"], star_1_chance))
