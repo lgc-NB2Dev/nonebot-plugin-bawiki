@@ -179,15 +179,19 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.9.4
+
+- 修复了三星爆率过高的 bug ([#47](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/47))
+
+<details>
+<summary><strong>历史更新日志（点击展开）</strong></summary>
+
 ### 0.9.3
 
 - 微调 `ba日程表` 指令：GameKee 源的日程表现在可以分服务器展示了，顺便修复了 SchaleDB 源日程的 Bug，详见指令帮助
 - 现在在抽卡次数为 10 次以下时，默认使用经典抽卡样式（旧版的还原游戏的抽卡样式）
 - 配置项变更：
   - 添加 `BA_DISABLE_CLASSIC_GACHA`
-
-<details>
-<summary><strong>历史更新日志（点击展开）</strong></summary>
 
 ### 0.9.2
 
