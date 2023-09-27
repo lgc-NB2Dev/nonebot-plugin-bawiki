@@ -443,6 +443,8 @@ async def do_gacha(
         ]
         if i % 10 != 0:
             pool_and_weight.append((star_1_base["char"], star_1_chance))
+        else:
+            pool_and_weight.append((star_2_base["char"], star_1_chance))
 
         pool_and_weight = [x for x in pool_and_weight if x[0]]
         pool = [x[0] for x in pool_and_weight]
