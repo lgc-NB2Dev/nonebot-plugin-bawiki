@@ -435,13 +435,15 @@ async def do_gacha(
     gacha_result: List[GachaStudent] = []
 
     for i in range(1, times + 1):
+        is_10th = i % 10 == 0
+        now_2_chance = star_2_chance + star_1_chance if is_10th else star_2_chance
         pool_and_weight = [
             (up_3_li, up_3_chance),
             (up_2_li, up_2_chance),
             (star_3_base["char"], star_3_chance),
-            (star_2_base["char"], star_2_chance),
+            (star_2_base["char"], now_2_chance),
         ]
-        if i % 10 != 0:
+        if not is_10th:
             pool_and_weight.append((star_1_base["char"], star_1_chance))
 
         pool_and_weight = [x for x in pool_and_weight if x[0]]
