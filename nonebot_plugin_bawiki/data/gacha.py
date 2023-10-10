@@ -348,10 +348,15 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
             fill="#ffffff",
             halign="left",
         )
-        .paste(important_img, (padding, banner_h + padding))
         .paste(
-            regular_img,
+            important_img.circle_corner(10),
+            (padding, banner_h + padding),
+            alpha=True,
+        )
+        .paste(
+            regular_img.circle_corner(10),
             (padding, banner_h + padding + important_img.height + padding),
+            alpha=True,
         )
     )
 

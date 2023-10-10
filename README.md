@@ -179,12 +179,16 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
-### 0.9.4
+### 0.9.5
 
-- 修复了三星爆率过高的 bug ([#47](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/47))
+- 抽卡总结图现在有半透明和圆角了
 
 <details>
 <summary><strong>历史更新日志（点击展开）</strong></summary>
+
+### 0.9.4
+
+- 修复了三星爆率过高的 bug ([#47](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/47))
 
 ### 0.9.3
 

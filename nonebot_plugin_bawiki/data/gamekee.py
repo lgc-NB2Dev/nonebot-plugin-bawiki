@@ -232,7 +232,7 @@ async def game_kee_get_calender_page(ret, has_pic=True) -> List[BytesIO]:
             img.paste(desc_p, (60, ii), alpha=True)
             ii += desc_p.height + 25
         img.paste(remain_p, (60, ii), alpha=True)
-        return img.circle_corner(15)
+        return img
 
     def draw_list(li: List[BuildImage], title: str) -> BuildImage:
         bg_w = 1500
