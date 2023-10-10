@@ -8,7 +8,7 @@ from nonebot.log import logger
 from nonebot.params import CommandArg
 
 from ..data.bawiki import db_wiki_time_atk
-from ..data.schaledb import find_current_event, schale_get_common
+from ..data.schaledb import find_current_event, schale_get_config
 from ..help import FT_E, FT_S
 from ..util import splice_msg
 
@@ -26,7 +26,7 @@ help_list: "HelpList" = [
             "图片作者 B站@夜猫咪喵喵猫\n"
             " \n"
             "指令默认发送日服和国际服当前的综合战术考试攻略\n"
-            "指令后面跟`日`或`j`开头的文本代表查询日服当前综合战术考试攻略，带以`国`或`g`开头的文本同理\n"
+            "指令后面跟`日`或`j`开头的文本代表查询日服当前综合战术考试攻略，带以`国际`或`g`、`国`或`c`开头的文本同理\n"
             "跟整数则代表指定第几个综合战术考试\n"
             " \n"
             "p.s. 综合战术考试 和 合同火力演习 其实是一个东西，翻译不同而已～\n"
@@ -53,18 +53,25 @@ cmd_time_atk_wiki = on_command("ba综合战术考试", aliases={"ba合同火力�
 async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     arg = cmd_arg.extract_plain_text().lower().strip()
 
+    keys = {
+        0: ("日", "j"),
+        1: ("国际", "g"),
+        2: ("国", "c"),
+    }
+
     server = []
-    if arg.startswith(("日", "j")) or not arg:
-        server.append(0)
-    if arg.startswith(("国", "g")) or not arg:
-        server.append(1)
+    for k, v in keys.items():
+        if (not arg) or arg.startswith(v):
+            server.append(k)
+            for kw in v:
+                arg = arg.replace(kw, "", 1)
 
     events = []
     if server:
         try:
-            common = await schale_get_common()
+            common = await schale_get_config()
             for s in server:
-                raid = common["regions"][s]["current_raid"]
+                raid = common["Regions"][s]["CurrentRaid"]
                 if (r := find_current_event(raid)) and (raid := r[0]["raid"]) >= 1000:
                     events.append(raid)
         except Exception:

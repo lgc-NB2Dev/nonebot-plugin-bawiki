@@ -46,8 +46,8 @@ async def schale_get_stu_data(loc: str = "cn") -> List[Dict[str, Any]]:
     return await schale_get(f"data/{loc}/students.min.json")
 
 
-async def schale_get_common() -> Dict[str, Any]:
-    return await schale_get("data/common.min.json")
+async def schale_get_config() -> Dict[str, Any]:
+    return await schale_get("data/config.min.json")
 
 
 async def schale_get_localization(loc: str = "cn") -> Dict[str, Any]:
@@ -78,19 +78,19 @@ async def schale_get_stu_info(stu):
 
 
 async def schale_calender(server: str) -> MessageSegment:
-    students, common, localization, raids = await asyncio.gather(
+    students, s_config, localization, raids = await asyncio.gather(
         schale_get_stu_dict("Id"),
-        schale_get_common(),
+        schale_get_config(),
         schale_get_localization(),
         schale_get_raids(),
     )
     region_index_map: Dict[str, int] = {
-        x["name"]: i for i, x in enumerate(common["regions"])
+        x["Name"]: i for i, x in enumerate(s_config["Regions"])
     }
     image = await schale_get_calender(
         region_index_map[server],
         students,
-        common,
+        s_config,
         localization,
         raids,
     )
@@ -112,11 +112,11 @@ def find_current_event(ev, now=None):
 async def schale_get_calender(
     server_index: int,
     students: Dict[str, Dict],
-    common: dict,
+    s_config: dict,
     localization: dict,
     raids: dict,
 ):
-    region = common["regions"][server_index]
+    region = s_config["Regions"][server_index]
     now = datetime.now()
 
     pic_bg = BuildImage.new("RGBA", (1400, 640), (255, 255, 255, 70))
@@ -135,7 +135,7 @@ async def schale_get_calender(
             weight="bold",
             max_fontsize=80,
         )
-        c_gacha = region["current_gacha"]
+        c_gacha = region["CurrentGacha"]
         if r := find_current_event(c_gacha):
             g = r[0]
             t = format_time(*(r[1:]))
@@ -191,7 +191,7 @@ async def schale_get_calender(
             weight="bold",
             max_fontsize=80,
         )
-        c_event = region["current_events"]
+        c_event = region["CurrentEvents"]
         if r := find_current_event(c_event):
             g = r[0]
             t = format_time(*(r[1:]))
@@ -261,7 +261,7 @@ async def schale_get_calender(
 
     async def draw_raid():
         pic = pic_bg.copy()
-        if r := find_current_event(region["current_raid"]):
+        if r := find_current_event(region["CurrentRaid"]):
             ri = r[0]
             t = format_time(*(r[1:]))
             pic = pic.paste(

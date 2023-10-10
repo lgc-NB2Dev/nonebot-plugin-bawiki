@@ -269,6 +269,7 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
                         padding + j * pic.width,
                         padding * 2 + title_height + i * img_size,
                     ),
+                    alpha=True,
                 )
         return bg
 

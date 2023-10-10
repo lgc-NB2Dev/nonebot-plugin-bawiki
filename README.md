@@ -181,6 +181,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ### 0.9.5
 
+- 修复由于 SchaleDB 数据结构变动导致的一些 Bug
 - 抽卡总结图现在有半透明和圆角了
 
 <details>

@@ -8,7 +8,7 @@ from nonebot.log import logger
 from nonebot.params import CommandArg
 
 from ..data.bawiki import db_get_event_alias, db_wiki_event
-from ..data.schaledb import find_current_event, schale_get_common
+from ..data.schaledb import find_current_event, schale_get_config
 from ..help import FT_E, FT_S
 from ..util import recover_alia, splice_msg
 
@@ -26,7 +26,7 @@ help_list: "HelpList" = [
             "图片作者 B站@夜猫咪喵喵猫\n"
             " \n"
             "指令默认发送日服和国际服当前的活动攻略\n"
-            "指令后面跟`日`或`j`开头的文本代表查询日服当前活动攻略，带以`国`或`g`开头的文本同理\n"
+            "指令后面跟`日`或`j`开头的文本代表查询日服当前活动攻略，带以`国际`或`g`、`国`或`c`开头的文本同理\n"
             "跟其他文本则代表指定活动名称\n"
             " \n"
             "指令示例：\n"
@@ -45,18 +45,25 @@ cmd_event_wiki = on_command("ba活动")
 async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     arg = cmd_arg.extract_plain_text().lower().strip()
 
+    keys = {
+        0: ("日", "j"),
+        1: ("国际", "g"),
+        2: ("国", "c"),
+    }
+
     server = []
-    if arg.startswith(("日", "j")) or not arg:
-        server.append(0)
-    if arg.startswith(("国", "g")) or not arg:
-        server.append(1)
+    for k, v in keys.items():
+        if (not arg) or arg.startswith(v):
+            server.append(k)
+            for kw in v:
+                arg = arg.replace(kw, "", 1)
 
     events = []
     if server:
         try:
-            common = await schale_get_common()
+            common = await schale_get_config()
             for s in server:
-                ev = common["regions"][s]["current_events"]
+                ev = common["Regions"][s]["CurrentEvents"]
                 if e := find_current_event(ev):
                     events.append((e[0]["event"]) % 10000)
         except Exception:

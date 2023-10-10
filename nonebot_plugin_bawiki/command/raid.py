@@ -10,7 +10,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 
 from ..data.bawiki import db_get_raid_alias, db_get_terrain_alias, db_wiki_raid
-from ..data.schaledb import find_current_event, schale_get_common
+from ..data.schaledb import find_current_event, schale_get_config
 from ..help import FT_E, FT_S
 from ..util import recover_alia, splice_msg
 
@@ -52,8 +52,8 @@ raid_wiki_parser.add_argument(
     "-s",
     "--server",
     nargs="*",
-    help="服务器名称，`j`或`日`代表日服，`g`或`国`代表国际服，可指定多个，默认全选",
-    default=["j", "g"],
+    help="服务器名称，`j`或`日`代表日服，`g`或`国际`代表国际服，`c`或`国`代表国服，可指定多个，默认全选",
+    default=["j", "g", "c"],
 )
 raid_wiki_parser.add_argument("-t", "--terrain", help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
 raid_wiki_parser.add_argument(
@@ -79,21 +79,26 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
     if not args.server:
         await matcher.finish("请指定server参数")
 
+    keys = {
+        0: ("日", "j"),
+        1: ("国际", "g"),
+        2: ("国", "c"),
+    }
+
     server = set()
     for s in args.server:
-        if ("日" in s) or ("j" in s):
-            server.add(0)
-        elif ("国" in s) or ("g" in s):
-            server.add(1)
+        for i, k in keys.items():
+            if s in k:
+                server.add(i)
     server = list(server)
     server.sort()
 
     tasks = []
     if not args.name:
         try:
-            common = await schale_get_common()
+            common = await schale_get_config()
             for s in server:
-                raid = common["regions"][s]["current_raid"]
+                raid = common["Regions"][s]["CurrentRaid"]
                 if (r := find_current_event(raid)) and (raid := r[0]["raid"]) < 1000:
                     tasks.append(
                         db_wiki_raid(raid, [s], args.wiki, r[0].get("terrain")),

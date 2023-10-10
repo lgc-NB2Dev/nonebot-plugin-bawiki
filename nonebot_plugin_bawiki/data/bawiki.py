@@ -3,6 +3,7 @@ import datetime
 from io import BytesIO
 from typing import Any, Dict, List, Literal, Optional, cast, overload
 
+from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage
 
@@ -89,6 +90,7 @@ async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
     wiki = (await db_get_wiki_data())["raid"]
 
     if not (boss := wiki.get(str(raid_id))):
+        logger.warning(f"Raid boss {raid_id} not found")
         return "没有找到该总力战Boss"
 
     terrain_raid = None
@@ -98,11 +100,13 @@ async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
         ):
             terrain_raid = t
         else:
+            logger.warning(f"Raid boss {raid_id} terrain {terrain} not found")
             return "还没有进行过该环境的总力战"
 
     img = []
     if is_wiki:
         if not (wiki_url := boss.get("wiki")):
+            logger.warning(f"Raid boss {raid_id} wiki not found")
             return "该总力战Boss暂无机制介绍"
         img.append(wiki_url)
     else:
@@ -121,6 +125,7 @@ async def db_wiki_event(event_id):
     event_id = str(event_id)
     wiki = (await db_get_wiki_data())["event"]
     if not (ev := wiki.get(event_id)):
+        logger.warning(f"Event {event_id} not found")
         return "没有找到该活动"
     return [
         MessageSegment.image(x)
@@ -133,6 +138,7 @@ async def db_wiki_time_atk(raid_id):
         raid_id = int(raid_id / 1000)
     wiki = (await db_get_wiki_data())["time_atk"]
     if raid_id > len(wiki):
+        logger.warning(f"Time atk {raid_id} not found")
         return f"没有找到该综合战术考试（目前共有{len(wiki)}个综合战术考试）"
     raid_id -= 1
 
