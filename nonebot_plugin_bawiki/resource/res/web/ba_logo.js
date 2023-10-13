@@ -42,7 +42,7 @@ async ([textL, textR]) => {
   const c = canvas.getContext('2d');
 
   // load font
-  const font = `900 ${fontSize}px 'Ro GSan Serif Std B', 'Glow Sans SC', sans-serif`;
+  const font = `${fontSize}px 'Ro GSan Serif Std B', 'Glow Sans SC Heavy', sans-serif`;
   await document.fonts.load(font, `${textL}${textR}`);
   c.font = font;
 
