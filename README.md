@@ -28,9 +28,13 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
 ## 💬 前言
 
-诚邀各位帮忙更新插件数据源仓库！能帮这个小小插件贡献微薄之力，鄙人感激不尽！！
-
+诚邀各位帮忙更新插件数据源仓库！能帮这个小小插件贡献微薄之力，鄙人感激不尽！！  
 [点击跳转 bawiki-data 查看详细贡献说明](https://github.com/lgc2333/bawiki-data)
+
+### Tip
+
+- 本插件并不自带 `balogo` 指令需要的字体，请自行下载并安装到系统：  
+  [RoGSanSrfStd-Bd.otf](https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/bawiki/RoGSanSrfStd-Bd.otf)、[GlowSansSC-Normal-v0.93.zip](https://github.com/welai/glow-sans/releases/download/v0.93/GlowSansSC-Normal-v0.93.zip)
 
 ## 📖 介绍
 
@@ -155,6 +159,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 - 插件数据源提供
 
+### [nulla2011/Bluearchive-logo](https://github.com/nulla2011/Bluearchive-logo)
+
+- 蔚蓝档案标题生成器
+
 <!--
 ### [RainNight0](https://github.com/RainNight0)
 
@@ -179,13 +187,17 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.9.6
+
+- 新增指令 `balogo`
+
+<details>
+<summary><strong>历史更新日志（点击展开）</strong></summary>
+
 ### 0.9.5
 
 - 修复由于 SchaleDB 数据结构变动导致的一些 Bug
 - 抽卡总结图现在有半透明和圆角了
-
-<details>
-<summary><strong>历史更新日志（点击展开）</strong></summary>
 
 ### 0.9.4
 

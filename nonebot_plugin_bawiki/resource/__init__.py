@@ -39,6 +39,8 @@ RES_WEB_DIR = RES_PATH / "web"
 RES_GAMEKEE_UTIL_JS_PATH = RES_WEB_DIR / "gamekee_util.js"
 RES_SCHALE_UTIL_JS_PATH = RES_WEB_DIR / "schale_util.js"
 RES_SCHALE_UTIL_CSS_PATH = RES_WEB_DIR / "schale_util.css"
+RES_BA_LOGO_JS_PATH = RES_WEB_DIR / "ba_logo.js"
+RES_EMPTY_HTML_PATH = RES_WEB_DIR / "empty.html"
 
 GAMEKEE_UTIL_JS = RES_GAMEKEE_UTIL_JS_PATH.read_text(encoding="u8")
 SCHALE_UTIL_JS = RES_SCHALE_UTIL_JS_PATH.read_text(encoding="u8")
