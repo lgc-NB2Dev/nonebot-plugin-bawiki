@@ -187,6 +187,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.9.7
+
+- 修复 `balogo` 的 fallback 字体的字重问题
+
 ### 0.9.6
 
 - 新增指令 `balogo`

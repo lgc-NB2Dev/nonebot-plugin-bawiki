@@ -1,7 +1,6 @@
 // https://github.com/nulla2011/bluearchive-logo/blob/master/src/canvas.ts
 /** @param {[string, string]} */
-async ([textL, textR]) => {
-  const transparentBg = true;
+async ([textL, textR, transparentBg]) => {
   const fontSize = 84;
   const canvasHeight = 250;
   const canvasWidth = 50;
@@ -18,11 +17,11 @@ async ([textL, textR]) => {
 
   const halo = document.createElement('img');
   halo.id = 'halo';
-  halo.src = 'https://bawiki.res/halo.png';
+  halo.src = 'https://bawiki.res/resource/halo.png';
 
   const cross = document.createElement('img');
   cross.id = 'cross';
-  cross.src = 'https://bawiki.res/cross.png';
+  cross.src = 'https://bawiki.res/resource/cross.png';
 
   // wait images loaded
   await Promise.all(
@@ -42,7 +41,27 @@ async ([textL, textR]) => {
   const c = canvas.getContext('2d');
 
   // load font
-  const font = `${fontSize}px 'Ro GSan Serif Std B', 'Glow Sans SC Heavy', sans-serif`;
+  const fonts = [
+    { name: 'Ro GSan Serif Std' },
+    { name: 'Glow Sans SC', param: '?weight=heavy' },
+  ];
+  const fontsCss = fonts
+    .map(
+      ({ name, param }) =>
+        `@font-face {\n` +
+        `  font-family: '${name}';\n` +
+        `  src: url('https://bawiki.res/font/${name}${param ? param : ''}') ` +
+        `    format('truetype');\n` +
+        `}`
+    )
+    .join('\n');
+  const style = document.createElement('style');
+  style.innerHTML = fontsCss;
+  document.head.appendChild(style);
+
+  const font =
+    `${fontSize}px ` +
+    `${fonts.map(({ name }) => `'${name}'`).join(', ')}, sans-serif`;
   await document.fonts.load(font, `${textL}${textR}`);
   c.font = font;
 
