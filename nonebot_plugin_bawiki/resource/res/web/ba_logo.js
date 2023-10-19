@@ -1,18 +1,18 @@
 // https://github.com/nulla2011/bluearchive-logo/blob/master/src/canvas.ts
 /** @param {[string, string]} */
 async ([textL, textR, transparentBg]) => {
-  const fontSize = 84;
-  const canvasHeight = 250;
-  const canvasWidth = 50;
+  const fontSize = 168;
+  const canvasHeight = 500;
+  const canvasWidth = 200;
   const textBaseLine = 0.68;
   const horizontalTilt = -0.4;
-  const paddingX = 10;
-  const graphOffset = { X: -15, Y: 0 };
+  const paddingX = 20;
+  const graphOffset = { X: -30, Y: 0 };
   const hollowPath = [
-    [284, 136],
-    [321, 153],
-    [159, 410],
-    [148, 403],
+    [568, 272],
+    [642, 306],
+    [318, 820],
+    [296, 806],
   ];
 
   const halo = document.createElement('img');
