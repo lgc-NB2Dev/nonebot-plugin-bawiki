@@ -1,10 +1,9 @@
-import importlib.util
 import json
 from io import BytesIO
 from pathlib import Path
 from typing import Union, cast
 
-from nonebot import logger, require
+from nonebot import get_available_plugin_names, logger, require
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.internal.adapter import Message
 from nonebot.internal.matcher import Matcher
@@ -15,7 +14,10 @@ from pil_utils.fonts import get_proper_font
 from ..command import help_list
 from .const import FT_E, FT_S
 
-if importlib.util.find_spec("nonebot_plugin_PicMenu") is None:
+# import importlib.util
+# if importlib.util.find_spec("nonebot_plugin_PicMenu") is None:
+
+if "nonebot_plugin_PicMenu" not in get_available_plugin_names():
     raise ImportError
 
 require("nonebot_plugin_PicMenu")

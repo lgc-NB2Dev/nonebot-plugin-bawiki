@@ -19,7 +19,7 @@ from typing import (
 )
 from typing_extensions import Unpack
 
-from async_lru import _LRUCacheWrapper, alru_cache
+from async_lru import _LRUCacheWrapper
 from httpx import AsyncClient
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -33,11 +33,40 @@ TC = TypeVar("TC", bound=Callable)
 NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
 
 
-def wrapper_alru_cache(**kwargs: Any) -> Callable[[TC], TC]:
-    def decorator(func: TC) -> TC:
-        return cast(Any, alru_cache(**kwargs)(func))
+def wrapped_alru_cache(
+    maxsize: Optional[int] = None,
+    typed: bool = False,
+    ttl: Optional[int] = None,
+):
+    def wrapper(func: TC) -> TC:
+        # 为了让 lru cache 兼容 dict 只能这样了...
+        # 写你妈 type hint，我累了
 
-    return decorator
+        def convert_dict(obj):
+            return frozenset(obj.items()) if isinstance(obj, dict) else obj
+
+        def recover_dict(obj):
+            return dict(obj) if isinstance(obj, frozenset) else obj
+
+        def process_args(func, args, kwargs):
+            new_args = tuple(func(arg) for arg in args)
+            new_kwargs = {}
+            for k, v in kwargs.items():
+                new_kwargs[k] = func(v)
+            return new_args, new_kwargs
+
+        class CacheWrapper(_LRUCacheWrapper):  # type: ignore
+            async def __call__(self, *args, **kwargs):
+                new_args, new_kwargs = process_args(convert_dict, args, kwargs)
+                return await super().__call__(*new_args, **new_kwargs)
+
+        async def wrapped_func(*args, **kwargs):
+            new_args, new_kwargs = process_args(recover_dict, args, kwargs)
+            return await func(*new_args, **new_kwargs)
+
+        return cast(Any, CacheWrapper(wrapped_func, maxsize, typed, ttl))
+
+    return wrapper
 
 
 class RespType(Enum):
@@ -61,7 +90,7 @@ class AsyncReqKwargs(TypedDict, total=False):
     raise_for_status: bool
 
 
-@wrapper_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)
+@wrapped_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)
 async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     if not urls:
         raise ValueError("No URL specified")
@@ -100,7 +129,7 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
                 resp.raise_for_status()
 
             if resp_type == RespType.JSON:
-                return await resp.json()
+                return resp.json()
             if resp_type == RespType.TEXT:
                 return resp.text
             return resp.content

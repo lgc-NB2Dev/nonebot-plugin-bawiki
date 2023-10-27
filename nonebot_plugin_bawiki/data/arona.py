@@ -69,7 +69,7 @@ async def search_exact(name: str) -> Optional[List[ImageModel]]:
 
 async def search(name: str) -> Optional[List[ImageModel]]:
     alias_dict = json.loads(ARONA_ALIAS_PATH.read_text(encoding="u8"))
-    recovered = alias_dict[name] if name in alias_dict else None
+    recovered = alias_dict[lowered] if (lowered := name.lower()) in alias_dict else None
     if recovered and (resp := await search_exact(recovered)):
         return resp
     return await search_exact(name)

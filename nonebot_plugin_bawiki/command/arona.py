@@ -139,7 +139,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
         await matcher.finish("请老师发送纯文本消息的说")
 
     name: str = args.name.strip()
-    aliases: List[str] = [a.strip() for a in args.aliases]
+    aliases: List[str] = [a.strip().lower() for a in args.aliases]
 
     try:
         resp = await search_exact(name)
@@ -152,10 +152,12 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
 
     ret_dict = set_alias(name, aliases)
     message = "\n".join(
-        "阿罗娜已经成功帮你设置了以下别名~",
-        *(
-            (f"{k} 指向的原名已从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
-            for k, v in ret_dict.items()
+        (
+            "阿罗娜已经成功帮你设置了以下别名~",
+            *(
+                (f"成功将 {k} 指向的原名从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
+                for k, v in ret_dict.items()
+            ),
         ),
     )
     await matcher.finish(message)

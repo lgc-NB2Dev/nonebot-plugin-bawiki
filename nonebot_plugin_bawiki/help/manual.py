@@ -18,7 +18,7 @@ FT_REGEX = r"<ft(?P<args>.*?)>(?P<content>.*?)</ft>"
 
 async def t2p(text: str) -> BytesIO:
     t2i = Text2Image.from_bbcode_text(text, fontsize=32)
-    img = t2i.to_image("white", (16, 16))
+    img = t2i.to_image("white", (16, 16)).convert("RGB")
     bio = BytesIO()
     img.save(bio, format="jpeg")
     bio.seek(0)
@@ -70,7 +70,11 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
 
     if not arg:
         cmd_list = "\n".join(
-            f"▶ {k['func']} ({k['trigger_method']}：{k['trigger_condition']}) - {k['brief_des']}"
+            (
+                f"▸ [b]{k['func']}[/b] "
+                f"({k['trigger_method']}：{k['trigger_condition']}) - "
+                f"{k['brief_des']}"
+            )
             for k in help_list
         )
         msg = (
@@ -78,7 +82,7 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
             f"\n"
             f"{cmd_list}\n"
             f"\n"
-            f"Tip: 使用指令 `ba帮助 <功能名>` 查看某功能详细信息"
+            f"Tip: 使用指令 `[b]ba帮助 <功能名>[/b]` 查看某功能详细信息"
         )
         await matcher.finish(await t2pm(msg))
 
@@ -90,6 +94,7 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
             if (
                 (arg_lower in x["func"].lower())
                 or (arg_lower in x["trigger_condition"].lower())
+                or (arg_lower in x["brief_des"].lower())
             )
         ),
         None,
@@ -104,12 +109,12 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
     detail_des = "    ".join(detail_des.splitlines(keepends=True)).strip()
 
     msg = (
-        f"▶ 功能：{func['func']}\n"
+        f"▸ [b]功能：{func['func']}[/b]\n"
         f"\n"
-        f'▷ 触发方式：{func["trigger_method"]}\n'
-        f'▷ 触发条件：{func["trigger_condition"]}\n'
-        f'▷ 简要描述：{func["brief_des"]}\n'
-        f"▷ 详细描述：\n"
+        f'▹ [b]触发方式：[/b]{func["trigger_method"]}\n'
+        f'▹ [b]触发条件：[/b]{func["trigger_condition"]}\n'
+        f'▹ [b]简要描述：[/b]{func["brief_des"]}\n'
+        f"▹ [b]详细描述：[/b]\n"
         f"    {detail_des}"
     )
     await matcher.finish(await t2pm(msg))
