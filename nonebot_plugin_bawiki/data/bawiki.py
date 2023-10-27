@@ -9,14 +9,12 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pil_utils import BuildImage
 
 from ..config import config
-from ..util import AsyncReqKwargs, ResponseType, async_req, get_proxy_url, recover_alia
+from ..util import AsyncReqKwargs, RespType, async_req, recover_alia
 
 
 async def db_get(suffix: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
     kwargs["base_url"] = config.ba_bawiki_db_url
-    kwargs["proxies"] = get_proxy_url(is_oversea=True)
-
     return await async_req(suffix, **kwargs)
 
 
@@ -76,7 +74,7 @@ async def db_wiki_stu(name):
     wiki = (await db_get_wiki_data())["student"]
     if not (url := wiki.get(name)):
         return "没有找到该角色的角评，可能是学生名称错误或者插件还未收录该角色角评"
-    return MessageSegment.image(await db_get(url, response_type=ResponseType.BYTES))
+    return MessageSegment.image(await db_get(url, resp_type=RespType.BYTES))
 
 
 async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
@@ -113,7 +111,7 @@ async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
     return [
         MessageSegment.image(x)
         for x in await asyncio.gather(
-            *[db_get(x, response_type=ResponseType.BYTES) for x in img],
+            *[db_get(x, resp_type=RespType.BYTES) for x in img],
         )
     ]
 
@@ -127,7 +125,7 @@ async def db_wiki_event(event_id):
     return Message(
         MessageSegment.image(x)
         for x in await asyncio.gather(
-            *[db_get(x, response_type=ResponseType.BYTES) for x in ev],
+            *[db_get(x, resp_type=RespType.BYTES) for x in ev],
         )
     )
 
@@ -142,7 +140,7 @@ async def db_wiki_time_atk(raid_id):
     raid_id -= 1
 
     return MessageSegment.image(
-        await db_get(wiki[raid_id], response_type=ResponseType.BYTES),
+        await db_get(wiki[raid_id], resp_type=RespType.BYTES),
     )
 
 
@@ -151,7 +149,7 @@ async def db_wiki_craft():
     return [
         MessageSegment.image(x)
         for x in await asyncio.gather(
-            *[db_get(y, response_type=ResponseType.BYTES) for y in wiki],
+            *[db_get(y, resp_type=RespType.BYTES) for y in wiki],
         )
     ]
 
@@ -161,7 +159,7 @@ async def db_wiki_furniture():
     return [
         MessageSegment.image(x)
         for x in await asyncio.gather(
-            *[db_get(y, response_type=ResponseType.BYTES) for y in wiki],
+            *[db_get(y, resp_type=RespType.BYTES) for y in wiki],
         )
     ]
 
@@ -173,7 +171,7 @@ async def db_future(
     all_img: bool = False,
 ):
     data = (await db_get_wiki_data())[f"{future_type}_future"]
-    img = cast(bytes, await db_get(data["img"], response_type=ResponseType.BYTES))
+    img = cast(bytes, await db_get(data["img"], resp_type=RespType.BYTES))
 
     if all_img:
         return MessageSegment.image(img)

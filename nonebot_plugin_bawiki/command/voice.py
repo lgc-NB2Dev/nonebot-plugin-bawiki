@@ -11,7 +11,7 @@ from ..config import config
 from ..data.bawiki import recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import GameKeeVoice, game_kee_get_stu_li, game_kee_get_voice
 from ..help import FT_E, FT_S
-from ..util import ResponseType, async_req
+from ..util import RespType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -120,5 +120,5 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
             ),
         )
 
-    v_data = await async_req(v.url, response_type=ResponseType.BYTES)
+    v_data = await async_req(v.url, resp_type=RespType.BYTES)
     await matcher.finish(MessageSegment.record(v_data))

@@ -5,16 +5,13 @@ from pydantic import BaseModel, Field, HttpUrl
 
 
 class Cfg(BaseModel):
+    ba_proxy: Optional[str] = None
     ba_gacha_cool_down: int = 0
     ba_voice_use_card: bool = False
     ba_use_foward_msg: bool = True
     ba_screenshot_timeout: int = 60
     ba_disable_classic_gacha: bool = False
     ba_gacha_max: int = 200
-
-    ba_proxy: Optional[str] = Field(alias="proxy")
-    ba_cn_proxy: Optional[str] = None
-    ba_oversea_proxy: Optional[str] = None
 
     ba_gamekee_url: HttpUrl = Field("https://ba.gamekee.com/")
     ba_schale_url: HttpUrl = Field("https://schale.gg/")

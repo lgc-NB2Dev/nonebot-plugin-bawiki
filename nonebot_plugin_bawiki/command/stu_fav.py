@@ -12,7 +12,7 @@ from ..data.bawiki import db_get_extra_l2d_list, recover_stu_alia, schale_to_gam
 from ..data.gamekee import game_kee_get_stu_cid_li, game_kee_grab_l2d
 from ..data.schaledb import draw_fav_li, get_fav_li, schale_get_stu_dict
 from ..help import FT_E, FT_S
-from ..util import ResponseType, async_req
+from ..util import RespType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -100,7 +100,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         im = Message() + f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\n'
         if p := await get_l2d(await schale_to_gamekee(arg)):
             images = await asyncio.gather(
-                *[async_req(x, response_type=ResponseType.BYTES) for x in p],
+                *[async_req(x, resp_type=RespType.BYTES) for x in p],
             )
             image_seg = "L2D预览：" + Message(MessageSegment.image(x) for x in images)
 

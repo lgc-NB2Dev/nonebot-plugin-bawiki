@@ -6,7 +6,7 @@ from typing_extensions import Unpack
 from pydantic import BaseModel, Field, parse_obj_as, validator
 
 from ..config import config
-from ..util import AsyncReqKwargs, ResponseType, async_req, get_proxy_url
+from ..util import AsyncReqKwargs, RespType, async_req
 
 
 class ServerType(Enum):
@@ -94,8 +94,6 @@ class RaidChart(BaseModel):
 async def shittim_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
     kwargs["base_url"] = config.ba_shittim_chest_api_url
-    kwargs["proxies"] = get_proxy_url(is_oversea=True)
-
     resp = await async_req(url, **kwargs)
     return resp["data"]
 
@@ -145,5 +143,5 @@ async def get_student_icon(student_id: int) -> bytes:
     return await async_req(
         f"web_students_original_icon/{student_id}.png",
         base_url=config.ba_shittim_chest_data_url,
-        response_type=ResponseType.BYTES,
+        resp_type=RespType.BYTES,
     )

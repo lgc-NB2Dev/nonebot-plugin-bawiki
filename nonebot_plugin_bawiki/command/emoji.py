@@ -7,7 +7,7 @@ from nonebot.log import logger
 from nonebot.matcher import Matcher
 
 from ..data.bawiki import db_get, db_get_emoji
-from ..util import ResponseType
+from ..util import RespType
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -30,7 +30,7 @@ cmd_random_emoji = on_command("ba表情")
 async def _(matcher: Matcher):
     try:
         emojis = await db_get_emoji()
-        emo = await db_get(random.choice(emojis), response_type=ResponseType.BYTES)
+        emo = await db_get(random.choice(emojis), resp_type=RespType.BYTES)
     except Exception:
         logger.exception("获取表情失败")
         await matcher.finish("获取表情失败，请检查后台输出")

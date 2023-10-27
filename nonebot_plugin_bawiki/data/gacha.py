@@ -24,7 +24,7 @@ from ..resource import (
     GACHA_STAR_PATH,
     GACHA_STU_ERR_PATH,
 )
-from ..util import ResponseType, read_image, split_list
+from ..util import RespType, read_image, split_list
 from .schaledb import schale_get, schale_get_stu_dict
 
 GACHA_DATA_PATH = DATA_PATH / "gacha.json"
@@ -107,7 +107,7 @@ async def get_student_icon(student_id: int) -> BuildImage:
     try:
         stu_img = await schale_get(
             f"images/student/icon/{student_id}.webp",
-            response_type=ResponseType.BYTES,
+            resp_type=RespType.BYTES,
         )
         stu_img = BuildImage.open(BytesIO(stu_img))
     except Exception:
@@ -126,7 +126,7 @@ async def get_student_card(
     try:
         stu_img = await schale_get(
             f"images/student/collection/{student.id}.webp",
-            response_type=ResponseType.BYTES,
+            resp_type=RespType.BYTES,
         )
         stu_img = BuildImage.open(BytesIO(stu_img))
     except Exception:

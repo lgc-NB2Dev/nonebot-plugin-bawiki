@@ -21,9 +21,8 @@ from ..resource import (
 )
 from ..util import (
     AsyncReqKwargs,
-    ResponseType,
+    RespType,
     async_req,
-    get_proxy_url,
     img_invert_rgba,
     parse_time_delta,
     read_image,
@@ -38,8 +37,6 @@ PAGE_KWARGS = {
 async def schale_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
     kwargs["base_url"] = config.ba_schale_url
-    kwargs["proxies"] = get_proxy_url(is_oversea=True)
-
     return await async_req(url, **kwargs)
 
 
@@ -169,7 +166,7 @@ async def schale_get_calender(
                     BytesIO(
                         await schale_get(
                             f'images/student/collection/{s["Id"]}.webp',
-                            response_type=ResponseType.BYTES,
+                            resp_type=RespType.BYTES,
                         ),
                     ),
                 )
@@ -229,11 +226,11 @@ async def schale_get_calender(
         ev_bg, ev_img = await asyncio.gather(
             schale_get(
                 f"images/campaign/Campaign_Event_{ev}_Normal.png",
-                response_type=ResponseType.BYTES,
+                resp_type=RespType.BYTES,
             ),
             schale_get(
                 f"images/eventlogo/{ev}_{'Tw' if server_index else 'Jp'}.webp",
-                response_type=ResponseType.BYTES,
+                resp_type=RespType.BYTES,
             ),
         )
 
@@ -337,19 +334,19 @@ async def schale_get_calender(
 
         c_bg, c_fg, icon_def, icon_atk, icon_tr = await asyncio.gather(
             *[
-                schale_get(bg_url, response_type=ResponseType.BYTES),
-                schale_get(fg_url, response_type=ResponseType.BYTES),
+                schale_get(bg_url, resp_type=RespType.BYTES),
+                schale_get(fg_url, resp_type=RespType.BYTES),
                 schale_get(
                     "images/ui/Type_Defense_s.png",
-                    response_type=ResponseType.BYTES,
+                    resp_type=RespType.BYTES,
                 ),
                 schale_get(
                     "images/ui/Type_Attack_s.png",
-                    response_type=ResponseType.BYTES,
+                    resp_type=RespType.BYTES,
                 ),
                 schale_get(
                     f"images/ui/Terrain_{terrain}.png",
-                    response_type=ResponseType.BYTES,
+                    resp_type=RespType.BYTES,
                 ),
             ],
         )
@@ -462,7 +459,7 @@ async def schale_get_calender(
                 *[
                     schale_get(
                         f'images/student/icon/{x["Id"]}.webp',
-                        response_type=ResponseType.BYTES,
+                        resp_type=RespType.BYTES,
                     )
                     for x in birth_this_week + birth_next_week
                 ],
@@ -583,7 +580,7 @@ async def draw_fav_li(stu_li: List[dict]) -> BytesIO:
 
         ret = await schale_get(
             f"images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
-            response_type=ResponseType.BYTES,
+            resp_type=RespType.BYTES,
         )
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
         img.paste(icon_img, (left, top), alpha=True)

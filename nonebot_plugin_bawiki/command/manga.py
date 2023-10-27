@@ -18,7 +18,7 @@ from pil_utils import BuildImage
 
 from ..data.gamekee import get_manga_content, get_manga_list
 from ..help import FT_E, FT_S
-from ..util import ResponseType, async_req
+from ..util import RespType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -55,7 +55,7 @@ async def _(
     arg_msg: Message = CommandArg(),
 ):
     async def get_pic(url):
-        p = await async_req(url, response_type=ResponseType.BYTES)
+        p = await async_req(url, resp_type=RespType.BYTES)
         if url.endswith(".webp"):
             p = BuildImage.open(BytesIO(p)).save_png()
         return p

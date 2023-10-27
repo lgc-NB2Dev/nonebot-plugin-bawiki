@@ -24,9 +24,8 @@ from ..config import config
 from ..resource import CALENDER_BANNER_PATH, GAMEKEE_UTIL_JS_PATH, GRADIENT_BG_PATH
 from ..util import (
     AsyncReqKwargs,
-    ResponseType,
+    RespType,
     async_req,
-    get_proxy_url,
     i2b,
     parse_time_delta,
     read_image,
@@ -37,7 +36,6 @@ from ..util import (
 async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
     kwargs["base_url"] = config.ba_gamekee_url
-    kwargs["proxies"] = get_proxy_url(is_oversea=False)
 
     headers = kwargs.get("headers")
     if headers:
@@ -182,10 +180,7 @@ async def game_kee_get_calender_page(
         ev_pic = None
         if has_pic and (url := it.get("picture")):
             try:
-                pic_bytes = await async_req(
-                    f"https:{url}",
-                    response_type=ResponseType.BYTES,
-                )
+                pic_bytes = await async_req(f"https:{url}", resp_type=RespType.BYTES)
                 ev_pic = BuildImage.open(BytesIO(pic_bytes))
             except Exception:
                 logger.exception("下载日程表图片失败")

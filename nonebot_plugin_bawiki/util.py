@@ -5,6 +5,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import (
     Any,
+    Callable,
     Dict,
     Iterable,
     List,
@@ -14,10 +15,11 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
+    cast,
 )
 from typing_extensions import Unpack
 
-from async_lru import alru_cache
+from async_lru import _LRUCacheWrapper, alru_cache
 from httpx import AsyncClient
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -27,10 +29,18 @@ from pil_utils import BuildImage
 from .config import config
 
 T = TypeVar("T")
+TC = TypeVar("TC", bound=Callable)
 NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
 
 
-class ResponseType(Enum):
+def wrapper_alru_cache(**kwargs: Any) -> Callable[[TC], TC]:
+    def decorator(func: TC) -> TC:
+        return cast(Any, alru_cache(**kwargs)(func))
+
+    return decorator
+
+
+class RespType(Enum):
     JSON = auto()
     TEXT = auto()
     BYTES = auto()
@@ -43,16 +53,15 @@ class AsyncReqKwargs(TypedDict, total=False):
     content: Union[str, bytes, None]
     data: Optional[Dict[str, Any]]
     json: Optional[Any]
-
     base_url: str
     proxies: Optional[str]
 
-    response_type: ResponseType
+    resp_type: RespType
     retries: int
     raise_for_status: bool
 
 
-@alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)
+@wrapper_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)
 async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     if not urls:
         raise ValueError("No URL specified")
@@ -65,9 +74,9 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     json = kwargs.pop("json", None)
 
     base_url = kwargs.pop("base_url", "")
-    proxies = kwargs.pop("proxies", None)
+    proxies = kwargs.pop("proxies", config.ba_proxy)
 
-    response_type = kwargs.pop("response_type", ResponseType.JSON)
+    resp_type = kwargs.pop("resp_type", RespType.JSON)
     retries = kwargs.pop("retries", config.ba_req_retry)
     raise_for_status = kwargs.pop("raise_for_status", True)
 
@@ -90,9 +99,9 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
             if raise_for_status:
                 resp.raise_for_status()
 
-            if response_type == ResponseType.JSON:
+            if resp_type == RespType.JSON:
                 return await resp.json()
-            if response_type == ResponseType.TEXT:
+            if resp_type == RespType.TEXT:
                 return resp.text
             return resp.content
 
@@ -118,16 +127,10 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
 
 
 def clear_req_cache() -> int:
-    info = async_req.cache_info()
-    async_req.cache_clear()
+    lru_wrapper = cast(_LRUCacheWrapper[Any], async_req)
+    info = lru_wrapper.cache_info()
+    lru_wrapper.cache_clear()
     return info.currsize
-
-
-def get_proxy_url(is_oversea: bool) -> Optional[str]:
-    proxy = config.ba_oversea_proxy if is_oversea else config.ba_cn_proxy
-    if proxy is None:
-        return None
-    return proxy or None
 
 
 def format_timestamp(t: int) -> str:
