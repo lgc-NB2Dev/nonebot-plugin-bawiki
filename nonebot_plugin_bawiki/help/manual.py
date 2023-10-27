@@ -1,16 +1,68 @@
 import re
+from io import BytesIO
+from typing import Dict, Tuple
 
-from nonebot.internal.adapter import Message
-from nonebot.internal.matcher import Matcher
+from nonebot.adapters import Message
+from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
+from pil_utils import Text2Image
 
 from ..command import help_list
 
 usage = "使用指令 `ba帮助` 查询插件功能帮助"
 extra = None
 
-FT_START_REGEX = r"<ft(.*?)>"
-FT_END_REGEX = r"</ft>"
+FT_REGEX = r"<ft(?P<args>.*?)>(?P<content>.*?)</ft>"
+
+
+async def t2p(text: str) -> BytesIO:
+    t2i = Text2Image.from_bbcode_text(text, fontsize=32)
+    img = t2i.to_image("white", (16, 16))
+    bio = BytesIO()
+    img.save(bio, format="jpeg")
+    bio.seek(0)
+    return bio
+
+
+async def t2pm(text: str) -> MessageSegment:
+    bio = await t2p(text)
+    return MessageSegment.image(bio)
+
+
+def ft_args_to_bbcode(args: str) -> Tuple[str, str]:
+    def parse_color(color: str) -> str:
+        if color.startswith("(") and color.endswith(")"):
+            hex_color = "".join(f"{int(x):02x}" for x in color[1:-1].split(","))
+            return f"#{hex_color}"
+        return color
+
+    ft_args = dict(x.split("=") for x in args.strip().split())
+    bbcode_args: Dict[str, str] = {}
+
+    if "fonts" in ft_args:
+        bbcode_args["font"] = ft_args["fonts"]
+    if "size" in ft_args:
+        bbcode_args["size"] = ft_args["size"]
+    if "color" in ft_args:
+        bbcode_args["color"] = parse_color(ft_args["color"])
+
+    prefix = ""
+    suffix = ""
+    for k, v in bbcode_args.items():
+        prefix = f"[{k}={v}]{prefix}"
+        suffix = f"{suffix}[/{k}]"
+    return prefix, suffix
+
+
+def replace_ft(text: str) -> str:
+    def replace(match: re.Match) -> str:
+        args = match.group("args")
+        prefix, suffix = ft_args_to_bbcode(args)
+        content = match.group("content")
+        return f"{prefix}{content}{suffix}"
+
+    return re.sub(FT_REGEX, replace, text)
 
 
 async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
@@ -21,13 +73,14 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
             f"▶ {k['func']} ({k['trigger_method']}：{k['trigger_condition']}) - {k['brief_des']}"
             for k in help_list
         )
-        await matcher.finish(
+        msg = (
             f"目前插件支持的功能：\n"
             f"\n"
             f"{cmd_list}\n"
             f"\n"
-            f"Tip: 使用指令 `ba帮助 <功能名>` 查看某功能详细信息",
+            f"Tip: 使用指令 `ba帮助 <功能名>` 查看某功能详细信息"
         )
+        await matcher.finish(await t2pm(msg))
 
     arg_lower = arg.lower()
     func = next(
@@ -44,19 +97,19 @@ async def help_handle(matcher: Matcher, arg_msg: Message = CommandArg()):
     if not func:
         await matcher.finish(f"未找到功能 `{arg}`")
 
-    # 去掉 <ft> 富文本标签
-    detail_des = re.sub(FT_START_REGEX, "", func["detail_des"])
-    detail_des = re.sub(FT_END_REGEX, "", detail_des)
+    # ft to bbcode
+    detail_des = replace_ft(func["detail_des"])
 
     # 缩进
     detail_des = "    ".join(detail_des.splitlines(keepends=True)).strip()
 
-    await matcher.finish(
+    msg = (
         f"▶ 功能：{func['func']}\n"
         f"\n"
         f'▷ 触发方式：{func["trigger_method"]}\n'
         f'▷ 触发条件：{func["trigger_condition"]}\n'
         f'▷ 简要描述：{func["brief_des"]}\n'
         f"▷ 详细描述：\n"
-        f"    {detail_des}",
+        f"    {detail_des}"
     )
+    await matcher.finish(await t2pm(msg))

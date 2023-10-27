@@ -6,7 +6,7 @@ groups = ["default", "menu"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:4a2bb232e90fc9bde554008fb2483795b9744a802f7b4e4332c1250f25bbc93d"
+content_hash = "sha256:3ecd1ad26974687e92f16117a3a5912b97872bfd0255e74f0b7c05b561ab59db"
 
 [[package]]
 name = "aiofiles"
@@ -47,6 +47,19 @@ dependencies = [
 files = [
     {file = "APScheduler-3.10.1-py3-none-any.whl", hash = "sha256:e813ad5ada7aff36fb08cdda746b520531eaac7757832abc204868ba78e0c8f6"},
     {file = "APScheduler-3.10.1.tar.gz", hash = "sha256:0293937d8f6051a0f493359440c1a1b93e882c57daf0197afeff0e727777b96e"},
+]
+
+[[package]]
+name = "async-lru"
+version = "2.0.4"
+requires_python = ">=3.8"
+summary = "Simple LRU cache for asyncio"
+dependencies = [
+    "typing-extensions>=4.0.0; python_version < \"3.11\"",
+]
+files = [
+    {file = "async-lru-2.0.4.tar.gz", hash = "sha256:b8a59a5df60805ff63220b2a0c5b5393da5521b113cd5465a44eb037d81a5627"},
+    {file = "async_lru-2.0.4-py3-none-any.whl", hash = "sha256:ff02944ce3c288c5be660c42dbcca0742b32c3b279d6dceda655190240b99224"},
 ]
 
 [[package]]

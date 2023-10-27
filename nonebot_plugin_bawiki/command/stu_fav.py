@@ -10,9 +10,9 @@ from nonebot.params import CommandArg
 from ..config import config
 from ..data.bawiki import db_get_extra_l2d_list, recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import game_kee_get_stu_cid_li, game_kee_grab_l2d
-from ..data.schaledb import draw_fav_li, schale_get_stu_dict
+from ..data.schaledb import draw_fav_li, get_fav_li, schale_get_stu_dict
 from ..help import FT_E, FT_S
-from ..util import async_req
+from ..util import ResponseType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -54,7 +54,10 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         if r := (await db_get_extra_l2d_list()).get(stu_name):
             return [f"{config.ba_bawiki_db_url}{x}" for x in r]
 
-        return await game_kee_grab_l2d((await game_kee_get_stu_cid_li()).get(stu_name))
+        cid = (await game_kee_get_stu_cid_li()).get(stu_name)
+        if cid:
+            return await game_kee_grab_l2d(cid)
+        return None
 
     arg = cmd_arg.extract_plain_text().strip()
     if not arg:
@@ -63,18 +66,23 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     # 好感度等级
     if arg.isdigit():
         arg = int(arg)
-        if arg > 9:
-            await matcher.finish("学生解锁L2D最高只需要羁绊等级9")
-        if arg < 1:
-            await matcher.finish("学生解锁L2D最低只需要羁绊等级1")
 
         try:
-            p = await draw_fav_li(arg)
+            li = await get_fav_li(arg)
+        except Exception:
+            logger.exception("获取 SchaleDB 学生数据失败")
+            await matcher.finish("获取 SchaleDB 学生数据失败，请检查后台输出")
+
+        if not li:
+            await matcher.finish(f"没有学生在羁绊等级{arg}时解锁L2D")
+
+        try:
+            p = await draw_fav_li(li)
         except Exception:
             logger.exception("绘制图片出错")
             await matcher.finish("绘制图片出错，请检查后台输出")
 
-        await matcher.finish(p)
+        await matcher.finish(f"羁绊等级 {arg} 时解锁L2D的学生有以下这些：" + MessageSegment.image(p))
 
     # 学生名称
     arg = await recover_stu_alia(arg)
@@ -91,7 +99,9 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
         im = Message() + f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\n'
         if p := await get_l2d(await schale_to_gamekee(arg)):
-            images = await asyncio.gather(*[async_req(x, raw=True) for x in p])
+            images = await asyncio.gather(
+                *[async_req(x, response_type=ResponseType.BYTES) for x in p],
+            )
             image_seg = "L2D预览：" + Message(MessageSegment.image(x) for x in images)
 
         else:
@@ -105,9 +115,10 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
         try:
             await matcher.finish(im + image_seg)
-        except ActionFailed:
+        except ActionFailed as e:
             if image_seg:
-                await matcher.finish(im + "抱歉，L2D 图片被 tx 风控了，或许是因为太涩了……")
+                logger.warning(f"Failed to send message: ActionFailed: {e}")
+                await matcher.finish(im + "抱歉，L2D 图片被风控了，或许是因为太涩了……")
             raise
 
     await matcher.finish("未找到学生")

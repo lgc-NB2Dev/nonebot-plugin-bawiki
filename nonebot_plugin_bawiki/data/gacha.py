@@ -6,25 +6,25 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Dict, List, Optional, TypedDict, Union, cast
 
-import aiofiles
+import anyio
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage, Text2Image
 
 from ..config import config
 from ..resource import (
+    CALENDER_BANNER_PATH,
     DATA_PATH,
-    RES_CALENDER_BANNER,
-    RES_GACHA_BG,
-    RES_GACHA_BG_OLD,
-    RES_GACHA_CARD_BG,
-    RES_GACHA_CARD_MASK,
-    RES_GACHA_NEW,
-    RES_GACHA_PICKUP,
-    RES_GACHA_STAR,
-    RES_GACHA_STU_ERR,
+    GACHA_BG_OLD_PATH,
+    GACHA_BG_PATH,
+    GACHA_CARD_BG_PATH,
+    GACHA_CARD_MASK_PATH,
+    GACHA_NEW_PATH,
+    GACHA_PICKUP_PATH,
+    GACHA_STAR_PATH,
+    GACHA_STU_ERR_PATH,
 )
-from ..util import split_list
+from ..util import ResponseType, read_image, split_list
 from .schaledb import schale_get, schale_get_stu_dict
 
 GACHA_DATA_PATH = DATA_PATH / "gacha.json"
@@ -76,19 +76,14 @@ def set_gacha_cool_down(user: Union[str, int], group: Optional[Union[str, int]] 
 
 
 async def set_gacha_data(qq: str, data: GachaData):
-    async with aiofiles.open(str(GACHA_DATA_PATH), "r+", encoding="u8") as f:
-        j = json.loads(await f.read())
-        j[qq] = data
-
-        await f.seek(0)
-        await f.truncate()
-
-        await f.write(json.dumps(j))
+    path = anyio.Path(GACHA_DATA_PATH)
+    j = json.loads(await path.read_text(encoding="u8"))
+    j[qq] = data
+    await path.write_text(json.dumps(j), encoding="u8")
 
 
 async def get_gacha_data(qq: str) -> GachaData:
-    async with aiofiles.open(str(GACHA_DATA_PATH), encoding="u8") as f:
-        j = await f.read()
+    j = await anyio.Path(GACHA_DATA_PATH).read_text(encoding="u8")
 
     data: Dict[str, GachaData] = json.loads(j)
     if not (user_data := data.get(qq)):
@@ -112,12 +107,12 @@ async def get_student_icon(student_id: int) -> BuildImage:
     try:
         stu_img = await schale_get(
             f"images/student/icon/{student_id}.webp",
-            raw=True,
+            response_type=ResponseType.BYTES,
         )
         stu_img = BuildImage.open(BytesIO(stu_img))
     except Exception:
         logger.exception(f"学生数据获取失败 {student_id}")
-        stu_img = RES_GACHA_STU_ERR
+        stu_img = read_image(GACHA_STU_ERR_PATH)
 
     return stu_img.resize((64, 64), keep_ratio=True).circle()
 
@@ -126,31 +121,33 @@ async def get_student_card(
     student: GachaStudent,
     draw_count: bool = True,
 ) -> BuildImage:
-    bg = RES_GACHA_CARD_BG.copy()
+    bg = read_image(GACHA_CARD_BG_PATH)
 
     try:
         stu_img = await schale_get(
             f"images/student/collection/{student.id}.webp",
-            raw=True,
+            response_type=ResponseType.BYTES,
         )
         stu_img = BuildImage.open(BytesIO(stu_img))
     except Exception:
         logger.exception(f"学生数据获取失败 {student.id}")
-        stu_img = RES_GACHA_STU_ERR
+        stu_img = read_image(GACHA_STU_ERR_PATH)
 
-    card_img = BuildImage.new("RGBA", RES_GACHA_CARD_MASK.size, (0, 0, 0, 0))
+    mask = read_image(GACHA_CARD_MASK_PATH).convert("RGBA")
+    card_img = BuildImage.new("RGBA", mask.size, (0, 0, 0, 0))
     card_img.image.paste(
-        stu_img.resize(RES_GACHA_CARD_MASK.size, keep_ratio=True).image,
-        mask=RES_GACHA_CARD_MASK.image,
+        stu_img.resize(mask.size, keep_ratio=True).image,
+        mask=mask.image,
     )
 
     bg = bg.paste(card_img, (26, 13), alpha=True)
 
+    star_img = read_image(GACHA_STAR_PATH)
     star_x_offset = int(26 + (159 - 30 * student.star) / 2)
     star_y_offset = 198
     for i in range(student.star):
         bg = bg.paste(
-            RES_GACHA_STAR,
+            star_img,
             (star_x_offset + i * 30, star_y_offset),
             alpha=True,
         )
@@ -159,14 +156,22 @@ async def get_student_card(
     font_y_offset = 2
 
     if student.new:
-        bg = bg.paste(RES_GACHA_NEW, (font_x_offset, font_y_offset), alpha=True)
+        bg = bg.paste(
+            read_image(GACHA_NEW_PATH),
+            (font_x_offset, font_y_offset),
+            alpha=True,
+        )
         font_x_offset -= 2
         font_y_offset += 29
 
     if student.pickup:
         font_x_offset -= 4
         font_y_offset -= 4
-        bg = bg.paste(RES_GACHA_PICKUP, (font_x_offset, font_y_offset), alpha=True)
+        bg = bg.paste(
+            read_image(GACHA_PICKUP_PATH),
+            (font_x_offset, font_y_offset),
+            alpha=True,
+        )
 
     if draw_count:
         bg.draw_text(
@@ -332,7 +337,7 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
 
     banner_h = 150
     return (
-        RES_GACHA_BG.copy()
+        read_image(GACHA_BG_PATH)
         .resize(
             (
                 img_width,
@@ -340,7 +345,7 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
             ),
             keep_ratio=True,
         )
-        .paste(RES_CALENDER_BANNER.copy().resize((img_width, banner_h)))
+        .paste(read_image(CALENDER_BANNER_PATH).resize((img_width, banner_h)))
         .draw_text(
             (50, 0, 1480, 150),
             "招募总结",
@@ -372,7 +377,7 @@ async def draw_classic_gacha_img(students: List[GachaStudent]) -> BuildImage:
         ),
         line_limit,
     )
-    bg = RES_GACHA_BG_OLD.copy()
+    bg = read_image(GACHA_BG_OLD_PATH)
 
     x_gap = 10
     y_gap = 80

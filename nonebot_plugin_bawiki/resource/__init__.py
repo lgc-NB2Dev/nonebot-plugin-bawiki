@@ -2,46 +2,39 @@ import shutil
 from pathlib import Path
 
 from nonebot import logger
-from pil_utils import BuildImage
 
-RES_PATH = Path(__file__).parent / "res"
+RES_DIR = Path(__file__).parent / "res"
+
 DATA_PATH = Path.cwd() / "data" / "BAWiki"
 CACHE_PATH = DATA_PATH / "cache"
 
+for _p in (DATA_PATH, CACHE_PATH):
+    if not _p.exists():
+        _p.mkdir(parents=True)
+
+
+CALENDER_BANNER_PATH = RES_DIR / "calender_banner.png"
+GRADIENT_BG_PATH = RES_DIR / "gradient.png"
+GACHA_BG_PATH = RES_DIR / "gacha_bg.png"
+GACHA_BG_OLD_PATH = RES_DIR / "gacha_bg_old.png"
+GACHA_CARD_BG_PATH = RES_DIR / "gacha_card_bg.png"
+GACHA_CARD_MASK_PATH = RES_DIR / "gacha_card_mask.png"
+GACHA_NEW_PATH = RES_DIR / "gacha_new.png"
+GACHA_PICKUP_PATH = RES_DIR / "gacha_pickup.png"
+GACHA_STAR_PATH = RES_DIR / "gacha_star.png"
+GACHA_STU_ERR_PATH = RES_DIR / "gacha_stu_err.png"
+
+
+RES_WEB_DIR = RES_DIR / "web"
+GAMEKEE_UTIL_JS_PATH = RES_WEB_DIR / "gamekee_util.js"
+SCHALE_UTIL_JS_PATH = RES_WEB_DIR / "schale_util.js"
+SCHALE_UTIL_CSS_PATH = RES_WEB_DIR / "schale_util.css"
+BA_LOGO_JS_PATH = RES_WEB_DIR / "ba_logo.js"
+EMPTY_HTML_PATH = RES_WEB_DIR / "empty.html"
+
+
 _OLD_CACHE_FOLDER = Path.cwd() / "cache"
 _OLD_CACHE_PATH = _OLD_CACHE_FOLDER / "BAWiki"
-
-if not DATA_PATH.exists():
-    DATA_PATH.mkdir(parents=True)
-
 if _OLD_CACHE_PATH.exists():
-    logger.warning("Moving old cache to new path...")
-    shutil.move(str(_OLD_CACHE_PATH), CACHE_PATH)
-
-    if not any(_OLD_CACHE_FOLDER.iterdir()):
-        _OLD_CACHE_FOLDER.rmdir()
-
-if not CACHE_PATH.exists():
-    CACHE_PATH.mkdir(parents=True)
-
-RES_CALENDER_BANNER = BuildImage.open(RES_PATH / "calender_banner.png")
-RES_GRADIENT_BG = BuildImage.open(RES_PATH / "gradient.png")
-RES_GACHA_BG = BuildImage.open(RES_PATH / "gacha_bg.png")
-RES_GACHA_BG_OLD = BuildImage.open(RES_PATH / "gacha_bg_old.png")
-RES_GACHA_CARD_BG = BuildImage.open(RES_PATH / "gacha_card_bg.png")
-RES_GACHA_CARD_MASK = BuildImage.open(RES_PATH / "gacha_card_mask.png").convert("RGBA")
-RES_GACHA_NEW = BuildImage.open(RES_PATH / "gacha_new.png")
-RES_GACHA_PICKUP = BuildImage.open(RES_PATH / "gacha_pickup.png")
-RES_GACHA_STAR = BuildImage.open(RES_PATH / "gacha_star.png")
-RES_GACHA_STU_ERR = BuildImage.open(RES_PATH / "gacha_stu_err.png")
-
-RES_WEB_DIR = RES_PATH / "web"
-RES_GAMEKEE_UTIL_JS_PATH = RES_WEB_DIR / "gamekee_util.js"
-RES_SCHALE_UTIL_JS_PATH = RES_WEB_DIR / "schale_util.js"
-RES_SCHALE_UTIL_CSS_PATH = RES_WEB_DIR / "schale_util.css"
-RES_BA_LOGO_JS_PATH = RES_WEB_DIR / "ba_logo.js"
-RES_EMPTY_HTML_PATH = RES_WEB_DIR / "empty.html"
-
-GAMEKEE_UTIL_JS = RES_GAMEKEE_UTIL_JS_PATH.read_text(encoding="u8")
-SCHALE_UTIL_JS = RES_SCHALE_UTIL_JS_PATH.read_text(encoding="u8")
-SCHALE_UTIL_CSS = RES_SCHALE_UTIL_CSS_PATH.read_text(encoding="u8")
+    logger.warning("Deleting old cache dir...")
+    shutil.rmtree(_OLD_CACHE_PATH)

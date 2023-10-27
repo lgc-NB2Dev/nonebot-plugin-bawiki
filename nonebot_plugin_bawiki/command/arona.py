@@ -1,12 +1,14 @@
 from typing import TYPE_CHECKING, List, NoReturn
 
-from nonebot import logger, on_command
+from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
+from nonebot.exception import ParserExit
 from nonebot.internal.matcher import Matcher
-from nonebot.params import ArgPlainText, CommandArg
+from nonebot.params import ArgPlainText, CommandArg, ShellCommandArgs
+from nonebot.rule import ArgumentParser, Namespace
 from nonebot.typing import T_State
 
-from ..data.arona import ImageModel, get_image, search
+from ..data.arona import ImageModel, get_image, search, search_exact, set_alias
 from ..help import FT_E, FT_S
 
 if TYPE_CHECKING:
@@ -42,8 +44,8 @@ help_list: "HelpList" = [
     },
 ]
 
-
-cmd_arona = on_command("arona", aliases={"蓝色恶魔", "Arona", "ARONA", "阿罗娜"})
+ARONA_PREFIXES = ["arona", "蓝色恶魔", "Arona", "ARONA", "阿罗娜"]
+cmd_arona = on_command(ARONA_PREFIXES[0], aliases=set(ARONA_PREFIXES[1:]), priority=2)
 
 
 async def send_image(matcher: Matcher, img: ImageModel) -> NoReturn:
@@ -110,3 +112,50 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
         await matcher.finish("呜呜，阿罗娜在搜索结果的时候遇到了点问题 QAQ")
 
     await send_image(matcher, final_res[0])
+
+
+ARONA_SET_ALIAS_COMMANDS = [f"{p}设置别名" for p in ARONA_PREFIXES]
+cmd_arona_set_alias_parser = ArgumentParser(ARONA_SET_ALIAS_COMMANDS[0])
+cmd_arona_set_alias_parser.add_argument("name", help="原名")
+cmd_arona_set_alias_parser.add_argument("aliases", nargs="+", help="别名，可以提供多个")
+cmd_arona_set_alias = on_shell_command(
+    ARONA_SET_ALIAS_COMMANDS[0],
+    aliases=set(ARONA_SET_ALIAS_COMMANDS[1:]),
+    parser=cmd_arona_set_alias_parser,
+)
+
+
+@cmd_arona_set_alias.handle()
+async def _(matcher: Matcher, foo: ParserExit = ShellCommandArgs()):
+    await matcher.finish(foo.message)
+
+
+@cmd_arona_set_alias.handle()
+async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
+    try:
+        assert isinstance(args.name, str)
+        assert all(isinstance(a, str) for a in args.aliases)
+    except AssertionError:
+        await matcher.finish("请老师发送纯文本消息的说")
+
+    name: str = args.name.strip()
+    aliases: List[str] = [a.strip() for a in args.aliases]
+
+    try:
+        resp = await search_exact(name)
+    except Exception:
+        logger.exception(f"Arona数据源搜索失败 {args.name}")
+        await matcher.finish("阿罗娜在尝试查找原名是否存在时遇到了一点小问题……")
+
+    if (not resp) or (len(resp) > 1):
+        await matcher.finish("阿罗娜找不到老师提供的原名，请老师检查一下您提供的名称是否正确")
+
+    ret_dict = set_alias(name, aliases)
+    message = "\n".join(
+        "阿罗娜已经成功帮你设置了以下别名~",
+        *(
+            (f"{k} 指向的原名已从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
+            for k, v in ret_dict.items()
+        ),
+    )
+    await matcher.finish(message)

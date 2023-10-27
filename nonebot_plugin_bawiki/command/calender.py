@@ -1,5 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING, List, Literal, Union
+from typing import TYPE_CHECKING, List, Literal
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import (
@@ -86,13 +86,15 @@ async def _(
 
     await matcher.send("正在绘制图片，请稍等")
     try:
-        messages: Union[List[MessageSegment], str] = await task
+        pics = await task
     except Exception:
         logger.exception("绘制日程表图片出错")
         await matcher.finish("绘制日程表图片出错，请检查后台输出")
 
-    if isinstance(messages, str) or len(messages) == 1:
-        await matcher.finish(Message() + messages)
+    if not pics:
+        await matcher.finish("没有获取到日程表数据")
+
+    messages = [MessageSegment.image(x) for x in pics]
 
     try:
         forward_nodes: List[MessageSegment] = [

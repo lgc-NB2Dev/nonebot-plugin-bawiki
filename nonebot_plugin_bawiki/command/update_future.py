@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Literal, Optional
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Message
-from nonebot.internal.matcher import Matcher
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
 

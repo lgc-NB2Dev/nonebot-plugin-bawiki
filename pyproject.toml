@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-bawiki"
-version = "0.9.7.post1"
+version = "0.10.0"
 description = "A nonebot2 plugin for Blue Archive."
 authors = [{ name = "student_2333", email = "lgc2333@126.com" }]
 dependencies = [
@@ -15,6 +15,7 @@ dependencies = [
     "httpx>=0.24.1",
     "pypinyin>=0.49.0",
     "yarl>=1.9.2",
+    "async-lru>=2.0.4",
 ]
 requires-python = ">=3.8,<4.0"
 readme = "README.md"

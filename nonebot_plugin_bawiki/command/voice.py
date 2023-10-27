@@ -3,15 +3,15 @@ from typing import TYPE_CHECKING
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 
 from ..config import config
 from ..data.bawiki import recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import GameKeeVoice, game_kee_get_stu_li, game_kee_get_voice
 from ..help import FT_E, FT_S
-from ..util import async_req
+from ..util import ResponseType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -120,5 +120,5 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
             ),
         )
 
-    v_data = await async_req(v.url, raw=True)
+    v_data = await async_req(v.url, response_type=ResponseType.BYTES)
     await matcher.finish(MessageSegment.record(v_data))
