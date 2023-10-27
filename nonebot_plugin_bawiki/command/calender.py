@@ -2,21 +2,16 @@ import asyncio
 from typing import TYPE_CHECKING, List, Literal
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    ActionFailed,
-    Bot,
-    GroupMessageEvent,
-    Message,
-    MessageEvent,
-    MessageSegment,
-)
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
 from nonebot.params import CommandArg
 
+from ..config import config
 from ..data.gamekee import game_kee_calender
 from ..data.schaledb import schale_calender
 from ..help import FT_E, FT_S
+from ..util import send_forward_msg
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -96,21 +91,8 @@ async def _(
 
     messages = [MessageSegment.image(x) for x in pics]
 
-    try:
-        forward_nodes: List[MessageSegment] = [
-            MessageSegment.node_custom(int(bot.self_id), "BAWiki", Message(x))
-            for x in messages
-        ]
-        if isinstance(event, GroupMessageEvent):
-            await bot.send_group_forward_msg(
-                group_id=event.group_id,
-                messages=forward_nodes,
-            )
-        else:
-            await bot.send_private_forward_msg(
-                user_id=event.user_id,
-                messages=forward_nodes,
-            )
-    except ActionFailed:
-        logger.warning("以合并转发形式发送失败，尝试使用普通方式发送")
-        await matcher.finish(Message(messages))
+    if config.ba_use_forward_msg:
+        await send_forward_msg(bot, event, messages)
+        return
+
+    await matcher.finish(Message(messages))

@@ -8,7 +8,7 @@ class Cfg(BaseModel):
     ba_proxy: Optional[str] = None
     ba_gacha_cool_down: int = 0
     ba_voice_use_card: bool = False
-    ba_use_foward_msg: bool = True
+    ba_use_forward_msg: bool = True
     ba_screenshot_timeout: int = 60
     ba_disable_classic_gacha: bool = False
     ba_gacha_max: int = 200
@@ -21,9 +21,9 @@ class Cfg(BaseModel):
     ba_shittim_chest_api_url: HttpUrl = Field("https://api.ba.benx1n.com/")
     ba_shittim_chest_data_url: HttpUrl = Field("https://data.ba.benx1n.com/")
 
-    ba_req_retry: int = 0
+    ba_req_retry: int = 1
     ba_req_cache_ttl: int = 10800  # 3 hrs
-    ba_req_timeout: int = 10
+    ba_req_timeout: Optional[float] = 10
     ba_auto_clear_arona_cache: bool = False
 
 

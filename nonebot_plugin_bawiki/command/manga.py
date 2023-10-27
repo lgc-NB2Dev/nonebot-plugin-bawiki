@@ -1,24 +1,19 @@
 import asyncio
 import random
 from io import BytesIO
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    Bot,
-    GroupMessageEvent,
-    Message,
-    MessageEvent,
-    MessageSegment,
-)
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
 from nonebot.params import CommandArg
 from pil_utils import BuildImage
 
+from ..config import config
 from ..data.gamekee import get_manga_content, get_manga_list
 from ..help import FT_E, FT_S
-from ..util import RespType, async_req
+from ..util import RespType, async_req, send_forward_msg, split_list
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -85,30 +80,40 @@ async def _(
         logger.exception(f"获取 CID {manga.cid} 漫画失败")
         await matcher.finish("获取漫画失败，请检查后台输出")
 
+    image_sum = len(pics)
     image_seg = [MessageSegment.image(x) for x in pics]
-    if len(pics) <= 2:
-        await matcher.finish(
-            Message()
-            + (
-                f"【{manga.category}】{content.title}\n"
-                "-=-=-=-=-=-=-=-\n"
-                f"{content.content}"
-            )
-            + image_seg
-            + f"-=-=-=-=-=-=-=-\nhttps://ba.gamekee.com/{manga.cid}.html",
+    if (not config.ba_use_forward_msg) or image_sum < 2:
+        header = (
+            f"https://ba.gamekee.com/{manga.cid}.html\n"
+            f"【{manga.category}】{content.title}"
         )
+        if content.content:
+            header = f"{header}\n\n{content.content}"
+
+        sem = asyncio.Semaphore(2)
+
+        async def send(msg):
+            async with sem:
+                await matcher.send(msg)
+
+        chunks = list(split_list(image_seg, 9))
+        max_page = len(chunks)
+        tasks = []
+        for i, chunk in enumerate(chunks, 1):
+            msg = Message()
+            if i == 1:
+                msg += header
+            msg += chunk
+            if max_page > 1:
+                msg += f"第 {i} / {max_page} 页（共 {image_sum} P）"
+            tasks.append(send(msg))
+
+        await asyncio.gather(*tasks)
+        return
 
     headers = [Message() + f"【{manga.category}】{content.title}"]
     if content.content:
         headers.append(Message() + content.content)
     images = [Message(x) for x in image_seg]
     footer = Message() + f"https://ba.gamekee.com/{manga.cid}.html"
-
-    nodes: List[MessageSegment] = [
-        MessageSegment.node_custom(int(bot.self_id), "BAWiki", x)
-        for x in (*headers, *images, footer)
-    ]
-    if isinstance(event, GroupMessageEvent):
-        await bot.send_group_forward_msg(group_id=event.group_id, messages=nodes)
-    else:
-        await bot.send_private_forward_msg(user_id=event.user_id, messages=nodes)
+    await send_forward_msg(bot, event, [*headers, *images, footer])

@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Dict,
     Iterable,
+    Iterator,
     List,
     NamedTuple,
     Optional,
@@ -22,7 +23,13 @@ from typing_extensions import Unpack
 from async_lru import _LRUCacheWrapper
 from httpx import AsyncClient
 from nonebot import logger
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.adapters.onebot.v11 import (
+    Bot,
+    GroupMessageEvent,
+    Message,
+    MessageEvent,
+    MessageSegment,
+)
 from PIL import Image, ImageOps
 from pil_utils import BuildImage
 
@@ -115,6 +122,7 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
             base_url=base_url,
             proxies=proxies,
             follow_redirects=True,
+            timeout=config.ba_req_timeout,
         ) as cli:
             resp = await cli.request(
                 method,
@@ -222,17 +230,10 @@ def splice_msg(msgs: Sequence[Union[str, MessageSegment, Message]]) -> Message:
     return im
 
 
-def split_list(li: Iterable[T], length: int) -> List[List[T]]:
-    latest = []
-    tmp = []
-    for n, i in enumerate(li):
-        tmp.append(i)
-        if (n + 1) % length == 0:
-            latest.append(tmp)
-            tmp = []
-    if tmp:
-        latest.append(tmp)
-    return latest
+def split_list(lst: Sequence[T], n: int) -> Iterator[Sequence[T]]:
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
 
 
 def split_pic(pic: Image.Image, max_height: int = 4096) -> List[Image.Image]:
@@ -268,3 +269,23 @@ def read_image(path: Path) -> BuildImage:
     content = path.read_bytes()
     bio = BytesIO(content)
     return BuildImage.open(bio)
+
+
+async def send_forward_msg(
+    bot: Bot,
+    event: MessageEvent,
+    messages: Sequence[Union[str, MessageSegment, Message]],
+    user_id: Optional[int] = None,
+    nickname: Optional[str] = None,
+):
+    nodes: List[MessageSegment] = [
+        MessageSegment.node_custom(
+            int(bot.self_id) if user_id is None else user_id,
+            "BAWiki" if nickname is None else nickname,
+            Message(x),
+        )
+        for x in messages
+    ]
+    if isinstance(event, GroupMessageEvent):
+        return await bot.send_group_forward_msg(group_id=event.group_id, messages=nodes)
+    return await bot.send_private_forward_msg(user_id=event.user_id, messages=nodes)

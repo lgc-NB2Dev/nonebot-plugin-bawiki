@@ -37,9 +37,8 @@ async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
     kwargs["base_url"] = config.ba_gamekee_url
 
-    headers = kwargs.get("headers")
-    if headers:
-        headers.update({"Game-Id": "829", "Game-Alias": "ba"})
+    headers = kwargs.get("headers") or {}
+    headers.update({"Game-Id": "829", "Game-Alias": "ba"})
     kwargs["headers"] = headers
 
     resp = await async_req(url, **kwargs)
