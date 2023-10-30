@@ -75,13 +75,16 @@ async def search(name: str) -> Optional[List[ImageModel]]:
     return await search_exact(name)
 
 
-def set_alias(name: str, alias: List[str]) -> Dict[str, Optional[str]]:
+def set_alias(name: Optional[str], alias: List[str]) -> Dict[str, Optional[str]]:
     data = json.loads(ARONA_ALIAS_PATH.read_text(encoding="u8"))
     original_dict: Dict[str, Optional[str]] = {}
 
     for a in alias:
         original_dict[a] = data.get(a)
-        data[a] = name
+        if name is None:
+            data.pop(a, None)
+        else:
+            data[a] = name
 
     ARONA_ALIAS_PATH.write_text(json.dumps(data, ensure_ascii=False), encoding="u8")
     return original_dict

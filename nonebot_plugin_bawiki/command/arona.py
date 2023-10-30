@@ -24,6 +24,12 @@ help_list: "HelpList" = [
             "从Arona Bot数据源中搜索攻略图，支持模糊搜索\n"
             "感谢 diyigemt 佬的开放 API 数据源\n"
             " \n"
+            f"可以使用 {FT_S}arona设置别名{FT_E} 指令来为某关键词设置别名\n"
+            f"使用方式：{FT_S}arona设置别名 原名 别名1 别名2 ...{FT_E}\n"
+            "\n"
+            f"可以使用 {FT_S}arona删除别名{FT_E} 指令来删除已设置的关键词的别名\n"
+            f"使用方式：{FT_S}arona删除别名 别名1 别名2 ...{FT_E}\n"
+            " \n"
             "可以搜索的内容：\n"
             f"- {FT_S}学生攻略图{FT_E}（星野，白子 等）\n"
             f"- {FT_S}主线地图{FT_E}（1-1，H1-1 等）\n"
@@ -115,6 +121,8 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
 
 
 ARONA_SET_ALIAS_COMMANDS = [f"{p}设置别名" for p in ARONA_PREFIXES]
+ARONA_DEL_ALIAS_COMMANDS = [f"{p}删除别名" for p in ARONA_PREFIXES]
+
 cmd_arona_set_alias_parser = ArgumentParser(ARONA_SET_ALIAS_COMMANDS[0])
 cmd_arona_set_alias_parser.add_argument("name", help="原名")
 cmd_arona_set_alias_parser.add_argument("aliases", nargs="+", help="别名，可以提供多个")
@@ -124,8 +132,17 @@ cmd_arona_set_alias = on_shell_command(
     parser=cmd_arona_set_alias_parser,
 )
 
+cmd_aro_del_alias_parser = ArgumentParser(ARONA_DEL_ALIAS_COMMANDS[0])
+cmd_aro_del_alias_parser.add_argument("aliases", nargs="+", help="别名，可以提供多个")
+cmd_arona_del_alias = on_shell_command(
+    ARONA_DEL_ALIAS_COMMANDS[0],
+    aliases=set(ARONA_DEL_ALIAS_COMMANDS[1:]),
+    parser=cmd_aro_del_alias_parser,
+)
+
 
 @cmd_arona_set_alias.handle()
+@cmd_arona_del_alias.handle()
 async def _(matcher: Matcher, foo: ParserExit = ShellCommandArgs()):
     await matcher.finish(foo.message)
 
@@ -155,7 +172,29 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
         (
             "阿罗娜已经成功帮你设置了以下别名~",
             *(
-                (f"成功将 {k} 指向的原名从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
+                (f"成功将别名 {k} 指向的原名从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
+                for k, v in ret_dict.items()
+            ),
+        ),
+    )
+    await matcher.finish(message)
+
+
+@cmd_arona_del_alias.handle()
+async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
+    try:
+        assert all(isinstance(a, str) for a in args.aliases)
+    except AssertionError:
+        await matcher.finish("请老师发送纯文本消息的说")
+
+    aliases: List[str] = [a.strip().lower() for a in args.aliases]
+
+    ret_dict = set_alias(None, aliases)
+    message = "\n".join(
+        (
+            "阿罗娜已经成功帮你操作了以下别名~",
+            *(
+                (f"成功删除别名 {k} 指向的原名从 {v}" if v else f"已设置的别名中未找到 {k}")
                 for k, v in ret_dict.items()
             ),
         ),
