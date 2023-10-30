@@ -170,7 +170,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
     ret_dict = set_alias(name, aliases)
     message = "\n".join(
         (
-            "阿罗娜已经成功帮你设置了以下别名~",
+            "阿罗娜已经成功帮你操作了以下别名~",
             *(
                 (f"成功将别名 {k} 指向的原名从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
                 for k, v in ret_dict.items()
