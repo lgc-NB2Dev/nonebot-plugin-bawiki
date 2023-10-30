@@ -194,7 +194,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
         (
             "阿罗娜已经成功帮你操作了以下别名~",
             *(
-                (f"成功删除别名 {k} 指向的原名从 {v}" if v else f"已设置的别名中未找到 {k}")
+                (f"成功删除指向原名 {v} 的别名 {k} " if v else f"已设置的别名中未找到 {k}")
                 for k, v in ret_dict.items()
             ),
         ),
