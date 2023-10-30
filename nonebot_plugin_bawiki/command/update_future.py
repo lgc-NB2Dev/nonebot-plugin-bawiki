@@ -94,7 +94,7 @@ async def _(matcher: Matcher, state: T_State, arg: Message = CommandArg()):
         await matcher.finish(await db_future(future_type, all_img=True))
 
     args = args.split()
-    num = 1
+    num = 3
     date = None
     if (args_len := len(args)) == 1:
         if args[0].isdigit():

@@ -8,8 +8,8 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
     MessageSegment,
 )
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
 

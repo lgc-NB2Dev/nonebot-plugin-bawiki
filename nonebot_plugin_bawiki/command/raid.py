@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from nonebot import on_shell_command
 from nonebot.exception import ParserExit
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 

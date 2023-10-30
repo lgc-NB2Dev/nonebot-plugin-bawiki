@@ -2,12 +2,13 @@ from typing import TYPE_CHECKING
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 
 from ..data.gamekee import extract_content_pic, get_level_list
 from ..help import FT_E, FT_S
+from ..util import RespType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -57,5 +58,10 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     msg = Message()
     msg += f"https://ba.gamekee.com/{cid}.html\n"
-    msg += [MessageSegment.image(x) for x in imgs]
+    msg += [
+        MessageSegment.image(
+            await async_req(x, resp_type=RespType.BYTES),
+        )
+        for x in imgs
+    ]
     await matcher.finish(msg)

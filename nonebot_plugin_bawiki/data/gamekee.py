@@ -1,5 +1,4 @@
 import asyncio
-import contextlib
 import itertools
 import re
 import time
@@ -7,13 +6,11 @@ import urllib.parse
 from dataclasses import dataclass
 from datetime import datetime
 from io import BytesIO
-from typing import Any, Dict, List, Literal, NoReturn, Optional, cast
+from typing import Any, Dict, List, Literal, Optional, cast
 from typing_extensions import Unpack
 
 from bs4 import BeautifulSoup, PageElement, ResultSet, Tag
 from nonebot import logger
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
-from nonebot.internal.matcher import Matcher
 from nonebot_plugin_htmlrender import get_new_page
 from PIL import Image
 from PIL.Image import Resampling
@@ -102,11 +99,12 @@ async def game_kee_get_page(url: str) -> List[BytesIO]:
 
         await page.evaluate(GAMEKEE_UTIL_JS_PATH.read_text(encoding="u8"))
 
+        # 太长了
         # 展开折叠的语音
-        folds = await page.query_selector_all("div.fold-table-btn")
-        for i in folds:
-            with contextlib.suppress(Exception):
-                await i.click()
+        # folds = await page.query_selector_all("div.fold-table-btn")
+        # for i in folds:
+        #     with contextlib.suppress(Exception):
+        #         await i.click()
 
         element = await page.query_selector("div.wiki-detail-body")
         assert element
@@ -114,19 +112,6 @@ async def game_kee_get_page(url: str) -> List[BytesIO]:
 
     pic = Image.open(BytesIO(pic_bytes))
     return list(map(i2b, split_pic(pic)))
-
-
-async def send_wiki_page(sid: int, matcher: Matcher) -> NoReturn:
-    url = game_kee_page_url(sid)
-    await matcher.send(f"请稍等，正在截取Wiki页面……\n{url}")
-
-    try:
-        images = await game_kee_get_page(url)
-    except Exception:
-        logger.exception(f"截取wiki页面出错 {url}")
-        await matcher.finish("截取页面出错，请检查后台输出")
-
-    await matcher.finish(Message(MessageSegment.image(x) for x in images))
 
 
 async def game_kee_calender(
@@ -328,8 +313,11 @@ async def game_kee_grab_l2d(cid: int) -> List[str]:
     data_index = l2d_nav_title.parent["data-index"]
 
     assert l2d_nav_title.parent.parent
-    slide_contents = l2d_nav_title.parent.parent.next
-    assert isinstance(slide_contents, Tag)
+    slide_contents = next(
+        (x for x in l2d_nav_title.parent.parent.next_siblings if isinstance(x, Tag)),
+        None,
+    )
+    assert slide_contents
 
     l2d_content = slide_contents.find("div", attrs={"data-index": data_index})
     assert isinstance(l2d_content, Tag)
@@ -413,14 +401,10 @@ async def game_kee_get_voice(cid: int, is_chinese: bool = False) -> List[GameKee
     # 没有中配
     if is_chinese:
         return []
-    return list(
-        itertools.chain(
-            *(
-                [parse_voice_elem(x) for x in a]
-                for x in bs.select(".mould-table")
-                if (a := x.find_all("audio"))
-            ),
-        ),
+    return next(
+        [parse_voice_elem(x) for x in a]
+        for x in bs.select(".mould-table")
+        if (a := x.find_all("audio"))
     )
 
 

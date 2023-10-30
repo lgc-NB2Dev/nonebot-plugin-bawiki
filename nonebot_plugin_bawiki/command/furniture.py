@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Message
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 
 from ..data.bawiki import db_wiki_furniture
 

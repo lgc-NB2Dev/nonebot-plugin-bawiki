@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, List, NoReturn
 from nonebot import logger, on_command, on_shell_command
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
-from nonebot.internal.matcher import Matcher
+from nonebot.matcher import Matcher
 from nonebot.params import ArgPlainText, CommandArg, ShellCommandArgs
 from nonebot.rule import ArgumentParser, Namespace
 from nonebot.typing import T_State

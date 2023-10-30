@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from nonebot import on_command
-from nonebot.internal.matcher import Matcher
+from nonebot.matcher import Matcher
 from nonebot.permission import SUPERUSER
 
 from ..help import FT_E, FT_S

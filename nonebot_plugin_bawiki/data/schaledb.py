@@ -9,7 +9,7 @@ from typing_extensions import Unpack
 from nonebot_plugin_htmlrender import get_new_page
 from PIL import Image, ImageFilter
 from PIL.Image import Resampling
-from pil_utils import BuildImage, text2image
+from pil_utils import BuildImage, Text2Image, text2image
 from playwright.async_api import Page, ViewportSize
 
 from ..config import config
@@ -26,6 +26,7 @@ from ..util import (
     img_invert_rgba,
     parse_time_delta,
     read_image,
+    split_list,
 )
 
 PAGE_KWARGS = {
@@ -424,30 +425,41 @@ async def schale_get_calender(
         birth_this_week = []
         birth_next_week = []
         for s in [x for x in students.values() if x["IsReleased"][server_index]]:
-            birth = time.mktime(
-                time.strptime(f'{now.year}/{s["BirthDay"]}', "%Y/%m/%d"),
-            )
+            try:
+                birth = time.mktime(
+                    time.strptime(f'{now.year}/{s["BirthDay"]}', "%Y/%m/%d"),
+                )
+            except ValueError:
+                continue
             if this_week_t <= birth < next_week_t:
                 birth_this_week.append(s)
             elif next_week_t <= birth <= next_next_week_t:
                 birth_next_week.append(s)
 
-        sort_key = lambda x: x["BirthDay"].split("/")  # noqa: E731
+        if (not birth_this_week) and (not birth_next_week):
+            return None
+
+        img_per_line = 7
+        sort_key = lambda x: tuple(  # noqa: E731
+            f"{x:0>2}" for x in cast(str, x["BirthDay"]).split("/")
+        )
         p_h = 0
         if birth_this_week:
             birth_this_week.sort(key=sort_key)
-            p_h += 180
+            p_h += 70 + 220 * math.ceil(len(birth_this_week) / img_per_line)
 
         if birth_next_week:
             birth_next_week.sort(key=sort_key)
-            p_h += 180
+            p_h += 70 + 220 * math.ceil(len(birth_next_week) / img_per_line)
             if birth_this_week:
-                p_h += 10
+                p_h += 25
 
-        if not p_h:
-            return None
-
-        pic = pic_bg.copy().draw_text(
+        padding = 25
+        min_height = 640
+        title_h = 125
+        height = max(padding * 3 + title_h + p_h, min_height)
+        width = 1400
+        pic = BuildImage.new("RGBA", (width, height), (255, 255, 255, 70)).draw_text(
             (25, 25, 1375, 150),
             "学生生日",
             weight="bold",
@@ -465,44 +477,38 @@ async def schale_get_calender(
                 ],
             )
         ]
-        y_index = int((415 - p_h) / 2) + 125
+
+        y_offset = title_h + padding
+        if height >= min_height:
+            y_offset += (height - (padding // 2) - title_h - p_h) // 2
+
+        def draw_birth_stu(title: str, students: List[dict]):
+            nonlocal y_offset
+
+            subtitle = Text2Image.from_text(title, fontsize=45)
+            subtitle.draw_on_image(pic.image, ((width - subtitle.width) // 2, y_offset))
+            y_offset += 70
+
+            for line in split_list(students, img_per_line):
+                x_offset = (width - (190 * len(line))) // 2
+                for stu in line:
+                    pic.paste(
+                        stu_pics.pop(0),
+                        (x_offset, y_offset),
+                        alpha=True,
+                    ).draw_text(
+                        (x_offset, y_offset + 180, x_offset + 180, y_offset + 220),
+                        stu["BirthDay"],
+                    )
+                    x_offset += 190
+                y_offset += 220
+
         if birth_this_week:
-            x_index = int((1400 - (len(birth_this_week) * (180 + 10) - 10)) / 2) + 75
-            pic = pic.draw_text(
-                (x_index - 165, y_index, x_index, y_index + 180),
-                "本周",
-                max_fontsize=50,
-            )
-            for s in birth_this_week:
-                pic.paste(
-                    stu_pics.pop(0),
-                    (x_index, y_index),
-                    alpha=True,
-                ).draw_text(
-                    (x_index, y_index + 180, x_index + 180, y_index + 220),
-                    s["BirthDay"],
-                )
-                x_index += 180 + 10
+            draw_birth_stu("本周", birth_this_week)
+            y_offset += 25
 
         if birth_next_week:
-            if birth_this_week:
-                y_index += 220 + 10
-            x_index = int((1400 - (len(birth_next_week) * (180 + 10) - 10)) / 2) + 75
-            pic = pic.draw_text(
-                (x_index - 165, y_index, x_index, y_index + 180),
-                "下周",
-                max_fontsize=50,
-            )
-            for s in birth_next_week:
-                pic.paste(
-                    stu_pics.pop(0),
-                    (x_index, y_index),
-                    alpha=True,
-                ).draw_text(
-                    (x_index, y_index + 180, x_index + 180, y_index + 220),
-                    s["BirthDay"],
-                )
-                x_index += 180 + 10
+            draw_birth_stu("下周", birth_next_week)
 
         return pic
 
@@ -574,12 +580,12 @@ async def draw_fav_li(stu_li: List[dict]) -> BytesIO:
         resample=Resampling.NEAREST,
     )
 
-    async def draw_stu(name_: str, dev_name_: str, line_: int, index_: int):
+    async def draw_stu(name_: str, stu_id_: int, line_: int, index_: int):
         left = index_ * icon_w
         top = line_ * icon_h + 5
 
         ret = await schale_get(
-            f"images/student/lobby/Lobbyillust_Icon_{dev_name_}_01.png",
+            f"images/student/lobby/{stu_id_}.webp",
             resp_type=RespType.BYTES,
         )
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
@@ -598,7 +604,7 @@ async def draw_fav_li(stu_li: List[dict]) -> BytesIO:
         if i == line_max_icon:
             i = 0
             line += 1
-        task_li.append(draw_stu(stu["Name"], stu["DevName"], line, i))
+        task_li.append(draw_stu(stu["Name"], stu["Id"], line, i))
         i += 1
     await asyncio.gather(*task_li)
 

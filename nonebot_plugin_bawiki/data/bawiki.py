@@ -121,7 +121,7 @@ async def db_wiki_event(event_id):
     wiki = (await db_get_wiki_data())["event"]
     if not (ev := wiki.get(event_id)):
         logger.warning(f"Event {event_id} not found")
-        return "没有找到该活动"
+        return f"没有找到 ID 为 {event_id} 的活动"
     return Message(
         MessageSegment.image(x)
         for x in await asyncio.gather(

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from enum import Enum, auto
-from functools import lru_cache, partial
+from functools import partial
 from io import BytesIO
 from pathlib import Path
 from typing import (
@@ -136,6 +136,8 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
             if raise_for_status:
                 resp.raise_for_status()
 
+            if method.upper() == "HEAD":
+                return resp.headers
             if resp_type == RespType.JSON:
                 return resp.json()
             if resp_type == RespType.TEXT:
@@ -264,7 +266,6 @@ def i2b(image: Image.Image, img_format: str = "JPEG") -> BytesIO:
     return buf
 
 
-@lru_cache(maxsize=8)
 def read_image(path: Path) -> BuildImage:
     content = path.read_bytes()
     bio = BytesIO(content)

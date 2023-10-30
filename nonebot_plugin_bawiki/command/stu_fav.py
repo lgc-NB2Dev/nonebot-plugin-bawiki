@@ -1,10 +1,11 @@
 import asyncio
 from typing import TYPE_CHECKING
 
+from httpx import Headers
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 
 from ..config import config
@@ -50,13 +51,29 @@ cmd_fav = on_command(
 
 @cmd_fav.handle()
 async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
+    async def check_size(url: str) -> bool:
+        headers: Headers = await async_req(url, method="HEAD")
+        size = headers.get("Content-Length", 0)
+        if not size:
+            logger.debug(f"HEAD {url} resp header has no Content-Length")
+            return True
+        ok = int(size) < 1024 * 1024 * 10
+        if not ok:
+            logger.warning(f"{url} size too large ({size * 1024:.2f} KB > 10240 KB)")
+        return ok
+
     async def get_l2d(stu_name):
         if r := (await db_get_extra_l2d_list()).get(stu_name):
             return [f"{config.ba_bawiki_db_url}{x}" for x in r]
 
         cid = (await game_kee_get_stu_cid_li()).get(stu_name)
         if cid:
-            return await game_kee_grab_l2d(cid)
+            l2d_list = await game_kee_grab_l2d(cid)
+            checked_resp = await asyncio.gather(
+                *(check_size(x) for x in l2d_list),
+            )
+            return [x for x, y in zip(l2d_list, checked_resp) if y]
+
         return None
 
     arg = cmd_arg.extract_plain_text().strip()
@@ -97,11 +114,21 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         if not (lvl := stu["MemoryLobby"]):
             await matcher.finish("该学生没有L2D")
 
+        try:
+            pics = await get_l2d(await schale_to_gamekee(arg))
+        except Exception:
+            logger.exception("下载 L2D 图片出错")
+            await matcher.finish("获取 L2D 图片列表出错，请检查后台输出")
+
         im = Message() + f'{stu["Name"]} 在羁绊等级 {lvl[0]} 时即可解锁L2D\n'
-        if p := await get_l2d(await schale_to_gamekee(arg)):
-            images = await asyncio.gather(
-                *[async_req(x, resp_type=RespType.BYTES) for x in p],
-            )
+        if pics:
+            try:
+                images = await asyncio.gather(
+                    *[async_req(x, resp_type=RespType.BYTES) for x in pics],
+                )
+            except Exception:
+                logger.exception("下载 L2D 图片出错")
+                await matcher.finish("下载 L2D 图片出错，请检查后台输出")
             image_seg = "L2D预览：" + Message(MessageSegment.image(x) for x in images)
 
         else:

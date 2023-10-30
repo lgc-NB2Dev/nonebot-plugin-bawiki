@@ -216,9 +216,11 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
     regular_collected.sort(key=lambda x: x.student.star, reverse=True)
     regular_collected.sort(key=lambda x: x.student.pickup, reverse=True)
 
-    important_pics: List[List[BuildImage]] = split_list(
-        await asyncio.gather(*[get_student_card(x) for x in important_result]),
-        5,
+    important_pics = list(
+        split_list(
+            await asyncio.gather(*[get_student_card(x) for x in important_result]),
+            5,
+        ),
     )
     regular_icons: List[BuildImage] = await asyncio.gather(
         *[get_student_icon(x.student.id) for x in regular_collected],
@@ -371,12 +373,10 @@ async def draw_classic_gacha_img(students: List[GachaStudent]) -> BuildImage:
     line_limit = 5
     card_w, card_h = (256, 256)
 
-    stu_cards: List[List[BuildImage]] = split_list(
-        await asyncio.gather(
-            *(get_student_card(student, draw_count=False) for student in students),
-        ),
-        line_limit,
+    org_stu_cards = await asyncio.gather(
+        *(get_student_card(student, draw_count=False) for student in students),
     )
+    stu_cards = list(split_list(org_stu_cards, line_limit))
     bg = read_image(GACHA_BG_OLD_PATH)
 
     x_gap = 10

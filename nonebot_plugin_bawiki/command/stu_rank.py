@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Message
-from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
+from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 
 from ..data.bawiki import db_wiki_stu, recover_stu_alia
