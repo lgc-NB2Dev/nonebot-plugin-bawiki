@@ -209,6 +209,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   - 添加 `BA_SHITTIM_CHEST_API_URL`
   - 添加 `BA_SHITTIM_CHEST_DATA_URL`
   - 删除 `BA_CLEAR_REQ_CACHE_INTERVAL`
+- 更新主线攻略查询地址
 - 其他代码重构，Bug 修复
 
 <details>
