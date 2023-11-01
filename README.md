@@ -176,7 +176,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ### `bawiki-data` 数据源贡献列表
 
-- 见 [bawiki-data](http://github.com/lgc2333/bawiki-data)
+- 见 [bawiki-data](https://github.com/lgc-NB2Dev/bawiki-data)
 
 ## 💰 赞助
 
@@ -201,6 +201,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 - `ba学生wiki` 指令现在不显示学生语音列表了
 - 修改了 SchaleDB 的学生生日展示样式
 - 内置帮助指令以图片方式展示结果
+- 更新主线攻略查询地址
 - 配置项更改：
   - 添加 `BA_USE_FORWARD_MSG`
   - 添加 `BA_REQ_RETRY`
@@ -209,7 +210,6 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   - 添加 `BA_SHITTIM_CHEST_API_URL`
   - 添加 `BA_SHITTIM_CHEST_DATA_URL`
   - 删除 `BA_CLEAR_REQ_CACHE_INTERVAL`
-- 更新主线攻略查询地址
 - 其他代码重构，Bug 修复
 
 <details>
