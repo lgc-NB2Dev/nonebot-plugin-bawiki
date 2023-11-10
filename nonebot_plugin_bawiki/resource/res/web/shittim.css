@@ -1,0 +1,289 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: grey;
+  background-image: url('https://bawiki.res/resource/BG_AronaRoom_In-13396f5f.webp');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f3f3f380;
+  z-index: -1;
+}
+
+.main {
+  flex: 1;
+  width: 800px;
+  margin: 20px;
+  padding: 20px;
+  background-color: #ffffff8f;
+  border-radius: 4px;
+  border: solid 1px #dcdfe6;
+}
+
+.segmentation {
+  height: 20px;
+}
+
+.content {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.title.small {
+  font-size: 18px;
+  padding-bottom: 6px;
+}
+
+.split-line {
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: center;
+  align-items: center;
+  text-align: center;
+  margin: 0px 0.25rem 0.5rem;
+  padding: 0.125em 0;
+  background-color: #344b6f;
+  color: #fff;
+  width: calc(100% - 0.5rem);
+  transform: skew(-10deg);
+  border-radius: 0.2em;
+}
+
+.split-line .text {
+  transform: skew(10deg);
+}
+
+.grade-line {
+  padding: 5px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.grade {
+  text-align: center;
+}
+
+.grade img {
+  width: 40px;
+}
+
+.grade .score {
+  font-weight: 700;
+}
+
+.grade .time {
+  font-style: italic;
+  color: #000000de;
+}
+
+.grade .title {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -1px;
+  color: #2d4664;
+  border: 1px solid #2d4664;
+  border-radius: 6px;
+  padding: 2px 10px;
+  margin-bottom: 4px;
+}
+
+.grade .title.extreme {
+  background-color: rgb(252, 222, 253);
+}
+
+.grade .title.hardcore {
+  background-color: rgb(254, 210, 225);
+}
+
+.grade .title.normal {
+  background-color: rgb(253, 255, 210);
+}
+
+.grade .number {
+  color: #2d4664;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+table {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: fit-content;
+  background-color: #ffffff;
+  font-size: 14px;
+  overflow: hidden;
+  box-sizing: border-box;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-radius: 4px;
+}
+
+table thead th,
+table tbody td {
+  position: relative;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ebeef5;
+  text-align: left;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 23px;
+  vertical-align: middle;
+  z-index: 1;
+}
+
+table thead th {
+  color: #909399;
+  font-weight: 600;
+}
+
+table tbody td {
+  color: #606266;
+}
+
+table tbody :nth-last-child(1) td {
+  border-bottom: none;
+}
+
+.cust-head {
+  width: 70px;
+  height: 60px;
+  position: relative;
+}
+
+.cust-head .head {
+  width: 60px;
+  position: absolute;
+}
+
+.cust-head .rank {
+  width: 30px;
+  position: absolute;
+  right: 3px;
+  bottom: 0;
+}
+
+.cust-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cust-info .info-left {
+  display: flex;
+  align-items: center;
+}
+
+.cust-info .info-left .infos .info-line {
+  display: flex;
+  align-items: center;
+}
+
+.cust-info .info-left .infos .info-line .left {
+  width: 30px;
+  padding-left: 5px;
+  font-weight: 600;
+}
+
+.cust-info .info-left .infos .info-lie .right {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cust-info .info-right {
+  text-align: right;
+}
+
+.cust-info .info-right .rank {
+  font-size: 18px;
+  font-weight: bold;
+  padding-top: 2px;
+}
+
+.cust-info .info-right .score {
+  font-size: 16px;
+  font-weight: normal;
+  padding-top: 0px;
+}
+
+.character-head {
+  max-width: 70px;
+  width: 10vw;
+  max-height: 70px;
+  height: 10vw;
+  position: relative;
+}
+
+.character-head .head {
+  max-width: 70px;
+  width: 10vw;
+  position: absolute;
+}
+
+.character-head .frame {
+  top: -1px;
+  max-width: 70px;
+  width: 10vw;
+  height: 10vw;
+  max-height: 69px;
+  position: absolute;
+}
+
+.character-head .role-types {
+  position: absolute;
+  width: 20px;
+  right: 6px;
+  bottom: 12px;
+}
+
+.character-head .star {
+  position: absolute;
+  width: 18px;
+  left: 2px;
+  bottom: 9px;
+}
+
+.character-head .asist {
+  position: absolute;
+  width: 15px;
+  right: 5px;
+}
+
+.character-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cust-character {
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cust-character p {
+  font-weight: 600;
+}

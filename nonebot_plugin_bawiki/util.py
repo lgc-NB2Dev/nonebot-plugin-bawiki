@@ -80,6 +80,7 @@ class RespType(Enum):
     JSON = auto()
     TEXT = auto()
     BYTES = auto()
+    RESPONSE = auto()
 
 
 class AsyncReqKwargs(TypedDict, total=False):
@@ -142,7 +143,9 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
                 return resp.json()
             if resp_type == RespType.TEXT:
                 return resp.text
-            return resp.content
+            if resp_type == RespType.BYTES:
+                return resp.content
+            return resp
 
     except Exception as e:
         recursive_func = partial(async_req, **kwargs)
