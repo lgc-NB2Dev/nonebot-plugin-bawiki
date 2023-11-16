@@ -209,8 +209,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   - 添加 `BA_REQ_RETRY`
   - 添加 `BA_REQ_CACHE_TTL`
   - 添加 `BA_REQ_TIMEOUT`
-  - 添加 `BA_SHITTIM_CHEST_API_URL`
-  - 添加 `BA_SHITTIM_CHEST_DATA_URL`
+  - 添加 `BA_SHITTIM_API_URL`
+  - 添加 `BA_SHITTIM_DATA_URL`
+  - 添加 `BA_SHITTIM_KEY`
+  - 添加 `BA_SHITTIM_DEBUG_MODE`
   - 删除 `BA_CLEAR_REQ_CACHE_INTERVAL`
 - 其他代码重构，Bug 修复
 
