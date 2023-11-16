@@ -233,11 +233,14 @@ async def shittim_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs["headers"] = headers
 
     if config.ba_shittim_debug_mode:
-        async with request_lock:
-            resp = await async_req(url, **kwargs)
-            await asyncio.sleep(1)
-    else:
+        kwargs["sleep"] = 1
+        await request_lock.acquire()
+
+    try:
         resp = await async_req(url, **kwargs)
+    finally:
+        if config.ba_shittim_debug_mode:
+            request_lock.release()
 
     return resp["data"]
 

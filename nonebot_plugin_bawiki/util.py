@@ -1,3 +1,4 @@
+import asyncio
 import itertools
 from datetime import datetime, timedelta
 from enum import Enum, auto
@@ -94,12 +95,13 @@ class AsyncReqKwargs(TypedDict, total=False):
     content: Union[str, bytes, None]
     data: Optional[Dict[str, Any]]
     json: Optional[Any]
-    base_urls: Union[str, List[str]]
     proxies: Optional[str]
 
+    base_urls: Union[str, List[str]]
     resp_type: RespType
     retries: int
     raise_for_status: bool
+    sleep: float
 
     no_cache: bool
 
@@ -115,13 +117,13 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     content = kwargs.pop("content", None)
     data = kwargs.pop("data", None)
     json = kwargs.pop("json", None)
-
-    base_urls = kwargs.pop("base_urls", [])
     proxies = kwargs.pop("proxies", config.ba_proxy)
 
+    base_urls = kwargs.pop("base_urls", [])
     resp_type = kwargs.pop("resp_type", RespType.JSON)
     retries = kwargs.pop("retries", config.ba_req_retry)
     raise_for_status = kwargs.pop("raise_for_status", True)
+    sleep = kwargs.pop("sleep", 0)
 
     if base_urls:
         if not isinstance(base_urls, list):
@@ -161,7 +163,7 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     while True:
         url, *rest = urls
         try:
-            return await do_request(url)
+            resp = await do_request(url)
         except Exception as e:
             e_sfx = f"because error occurred while requesting {url}: {e!r}"
             if retries > 0:
@@ -173,6 +175,12 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
                 logger.error(f"Requesting next url ({rest[0]}) {e_sfx}")
                 url, *rest = rest
             logger.opt(exception=e).debug("Error Stack")
+        else:
+            break
+
+    if sleep:
+        await asyncio.sleep(sleep)
+    return resp
 
 
 def clear_req_cache() -> int:
