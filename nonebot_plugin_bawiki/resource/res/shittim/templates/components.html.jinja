@@ -56,10 +56,11 @@ Args:
 -#}
 <table>
   <colgroup>
-    <col width="75" />
-    <col width="330" />
+    <col width="74" />
+    <col width="300" />
     <col width="65" />
-    <col width="320" />
+    <col width="290" />
+    <col width="59" />
   </colgroup>
 
   <thead>
@@ -68,6 +69,7 @@ Args:
       <th>分数</th>
       <th>难度</th>
       <th>用时</th>
+      <th>刀数</th>
     </tr>
   </thead>
 
@@ -80,6 +82,7 @@ Args:
         <div class="grade-title {{ rank.hard_fullname | lower }}">{{ rank.hard }}</div>
       </td>
       <td>{{ rank.battle_time }}</td>
+      <td>{{ rank.try_number_infos | length }}</td>
     </tr>
     {%- endfor -%}
   </tbody>
