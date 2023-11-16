@@ -7,16 +7,16 @@ import anyio
 from pydantic import BaseModel
 
 from ..config import config
-from ..resource import CACHE_PATH, DATA_PATH
+from ..resource import CACHE_DIR, DATA_DIR
 from ..util import RespType, async_req
 
-ARONA_CACHE_DIR = CACHE_PATH / "arona"
-if config.ba_auto_clear_arona_cache and ARONA_CACHE_DIR.exists():
+ARONA_CACHE_DIR = CACHE_DIR / "arona"
+if config.ba_auto_clear_cache_path and ARONA_CACHE_DIR.exists():
     shutil.rmtree(ARONA_CACHE_DIR)
 if not ARONA_CACHE_DIR.exists():
     ARONA_CACHE_DIR.mkdir(parents=True)
 
-ARONA_ALIAS_PATH = DATA_PATH / "arona_alias.json"  # {"alias": "name"}
+ARONA_ALIAS_PATH = DATA_DIR / "arona_alias.json"  # {"alias": "name"}
 if not ARONA_ALIAS_PATH.exists():
     ARONA_ALIAS_PATH.write_text("{}", encoding="u8")
 
@@ -45,7 +45,7 @@ async def get_image(path: str, hash_str: Optional[str] = None) -> bytes:
 
     content = await async_req(
         f"image{path}",
-        base_url=config.ba_arona_cdn_url,
+        base_urls=config.ba_arona_cdn_url,
         resp_type=RespType.BYTES,
     )
 
@@ -61,7 +61,7 @@ async def get_image(path: str, hash_str: Optional[str] = None) -> bytes:
 async def search_exact(name: str) -> Optional[List[ImageModel]]:
     resp: dict = await async_req(
         "api/v1/image",
-        base_url=config.ba_arona_api_url,
+        base_urls=config.ba_arona_api_url,
         params={"name": name},
     )
     return ImageAPIResult(**resp).data

@@ -6,7 +6,7 @@ from nonebot.matcher import Matcher
 from nonebot.permission import SUPERUSER
 
 from ..help import FT_E, FT_S
-from ..resource import CACHE_PATH
+from ..resource import CACHE_DIR
 from ..util import clear_req_cache
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ def clear_cache_dir() -> int:
                 p.unlink()
                 counter += 1
 
-    run(CACHE_PATH)
+    run(CACHE_DIR)
     return counter
 
 

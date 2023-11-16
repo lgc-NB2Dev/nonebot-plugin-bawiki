@@ -2,12 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    GroupMessageEvent,
-    Message,
-    MessageEvent,
-    MessageSegment,
-)
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
@@ -177,10 +172,9 @@ async def _(
     event: MessageEvent,
     cmd_arg: Message = CommandArg(),
 ):
-    user_id = event.user_id
-    group_id = event.group_id if isinstance(event, GroupMessageEvent) else None
+    session_id = event.get_session_id()
 
-    if cool_down := get_gacha_cool_down(user_id, group_id):
+    if cool_down := get_gacha_cool_down(session_id):
         await matcher.finish(f"你先别急，先等 {cool_down} 秒再来抽吧qwq")
 
     gacha_times = 10
@@ -209,7 +203,7 @@ async def _(
         pool_obj = STATIC_POOL
         gacha_pool_index[qq] = STATIC_POOL
 
-    set_gacha_cool_down(user_id, group_id)
+    set_gacha_cool_down(session_id)
     try:
         img = await gacha(qq, gacha_times, gacha_data, pool_obj.pool)
     except Exception:

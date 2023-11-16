@@ -4,17 +4,18 @@ import random
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Dict, List, Optional, TypedDict, Union, cast
+from typing import Any, Dict, List, Optional, cast
 
 import anyio
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pil_utils import BuildImage, Text2Image
+from pydantic import BaseModel, Field
 
 from ..config import config
 from ..resource import (
     CALENDER_BANNER_PATH,
-    DATA_PATH,
+    DATA_DIR,
     GACHA_BG_OLD_PATH,
     GACHA_BG_PATH,
     GACHA_CARD_BG_PATH,
@@ -27,17 +28,16 @@ from ..resource import (
 from ..util import RespType, read_image, split_list
 from .schaledb import schale_get, schale_get_stu_dict
 
-GACHA_DATA_PATH = DATA_PATH / "gacha.json"
+GACHA_DATA_PATH = DATA_DIR / "gacha.json"
 if not GACHA_DATA_PATH.exists():
     GACHA_DATA_PATH.write_text("{}")
 
 
-DEFAULT_GACHA_DATA: "GachaData" = {"collected": []}
 COOL_DOWN_DICT: Dict[str, float] = {}
 
 
-class GachaData(TypedDict):
-    collected: List[int]
+class GachaData(BaseModel):
+    collected: List[int] = Field(default_factory=list)
 
 
 @dataclass()
@@ -56,41 +56,33 @@ class RegularGachaInfo:
     counts: List[int]
 
 
-def get_gacha_cool_down(
-    user: Union[str, int],
-    group: Optional[Union[str, int]] = None,
-) -> int:
-    key = f"{group}.{user}" if group else f"{user}"
+def get_gacha_cool_down(session_id: str) -> int:
     now = time.time()
 
-    if last := COOL_DOWN_DICT.get(key):
+    if last := COOL_DOWN_DICT.get(session_id):
         remain = config.ba_gacha_cool_down - round(now - last)
         return remain if remain >= 0 else 0
 
     return 0
 
 
-def set_gacha_cool_down(user: Union[str, int], group: Optional[Union[str, int]] = None):
-    key = f"{group}.{user}" if group else f"{user}"
-    COOL_DOWN_DICT[key] = time.time()
+def set_gacha_cool_down(session_id: str):
+    COOL_DOWN_DICT[session_id] = time.time()
 
 
-async def set_gacha_data(qq: str, data: GachaData):
+async def set_gacha_data(user_id: str, data: GachaData):
     path = anyio.Path(GACHA_DATA_PATH)
     j = json.loads(await path.read_text(encoding="u8"))
-    j[qq] = data
+    j[user_id] = data.dict()
     await path.write_text(json.dumps(j), encoding="u8")
 
 
-async def get_gacha_data(qq: str) -> GachaData:
+async def get_gacha_data(user_id: str) -> GachaData:
     j = await anyio.Path(GACHA_DATA_PATH).read_text(encoding="u8")
-
-    data: Dict[str, GachaData] = json.loads(j)
-    if not (user_data := data.get(qq)):
-        user_data = DEFAULT_GACHA_DATA.copy()
-        await set_gacha_data(qq, user_data)
-
-    return user_data
+    data: Dict[str, Any] = json.loads(j)
+    if not (user_data := data.get(user_id)):
+        return GachaData()
+    return GachaData(**user_data)
 
 
 def format_count(count: int) -> str:
@@ -112,7 +104,7 @@ async def get_student_icon(student_id: int) -> BuildImage:
         stu_img = BuildImage.open(BytesIO(stu_img))
     except Exception:
         logger.exception(f"学生数据获取失败 {student_id}")
-        stu_img = read_image(GACHA_STU_ERR_PATH)
+        stu_img = await read_image(GACHA_STU_ERR_PATH)
 
     return stu_img.resize((64, 64), keep_ratio=True).circle()
 
@@ -121,7 +113,7 @@ async def get_student_card(
     student: GachaStudent,
     draw_count: bool = True,
 ) -> BuildImage:
-    bg = read_image(GACHA_CARD_BG_PATH)
+    bg = await read_image(GACHA_CARD_BG_PATH)
 
     try:
         stu_img = await schale_get(
@@ -131,9 +123,9 @@ async def get_student_card(
         stu_img = BuildImage.open(BytesIO(stu_img))
     except Exception:
         logger.exception(f"学生数据获取失败 {student.id}")
-        stu_img = read_image(GACHA_STU_ERR_PATH)
+        stu_img = await read_image(GACHA_STU_ERR_PATH)
 
-    mask = read_image(GACHA_CARD_MASK_PATH).convert("RGBA")
+    mask = (await read_image(GACHA_CARD_MASK_PATH)).convert("RGBA")
     card_img = BuildImage.new("RGBA", mask.size, (0, 0, 0, 0))
     card_img.image.paste(
         stu_img.resize(mask.size, keep_ratio=True).image,
@@ -142,7 +134,7 @@ async def get_student_card(
 
     bg = bg.paste(card_img, (26, 13), alpha=True)
 
-    star_img = read_image(GACHA_STAR_PATH)
+    star_img = await read_image(GACHA_STAR_PATH)
     star_x_offset = int(26 + (159 - 30 * student.star) / 2)
     star_y_offset = 198
     for i in range(student.star):
@@ -157,7 +149,7 @@ async def get_student_card(
 
     if student.new:
         bg = bg.paste(
-            read_image(GACHA_NEW_PATH),
+            await read_image(GACHA_NEW_PATH),
             (font_x_offset, font_y_offset),
             alpha=True,
         )
@@ -168,7 +160,7 @@ async def get_student_card(
         font_x_offset -= 4
         font_y_offset -= 4
         bg = bg.paste(
-            read_image(GACHA_PICKUP_PATH),
+            await read_image(GACHA_PICKUP_PATH),
             (font_x_offset, font_y_offset),
             alpha=True,
         )
@@ -339,7 +331,7 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
 
     banner_h = 150
     return (
-        read_image(GACHA_BG_PATH)
+        (await read_image(GACHA_BG_PATH))
         .resize(
             (
                 img_width,
@@ -347,7 +339,7 @@ async def draw_summary_gacha_img(result: List[GachaStudent]) -> BuildImage:
             ),
             keep_ratio=True,
         )
-        .paste(read_image(CALENDER_BANNER_PATH).resize((img_width, banner_h)))
+        .paste((await read_image(CALENDER_BANNER_PATH)).resize((img_width, banner_h)))
         .draw_text(
             (50, 0, 1480, 150),
             "招募总结",
@@ -377,7 +369,7 @@ async def draw_classic_gacha_img(students: List[GachaStudent]) -> BuildImage:
         *(get_student_card(student, draw_count=False) for student in students),
     )
     stu_cards = list(split_list(org_stu_cards, line_limit))
-    bg = read_image(GACHA_BG_OLD_PATH)
+    bg = await read_image(GACHA_BG_OLD_PATH)
 
     x_gap = 10
     y_gap = 80
@@ -405,7 +397,7 @@ async def draw_classic_gacha_img(students: List[GachaStudent]) -> BuildImage:
 
 
 async def do_gacha(
-    qq: str,
+    user_id: str,
     times: int,
     gacha_data_json: dict,
     up_pool: Optional[List[int]] = None,
@@ -442,7 +434,7 @@ async def do_gacha(
         up_2_chance = gacha_data_json["up"]["2"]["chance"]
         star_2_chance -= up_2_chance
 
-    gacha_data = await get_gacha_data(qq)
+    gacha_data = await get_gacha_data(user_id)
     gacha_result: List[GachaStudent] = []
 
     for i in range(1, times + 1):
@@ -467,7 +459,7 @@ async def do_gacha(
 
         is_3star_pickup = char in up_3_li
         is_pickup = is_3star_pickup or (char in up_2_li)
-        is_new = char not in gacha_data["collected"]
+        is_new = char not in gacha_data.collected
         char_info = stu_li[char]
         gacha_result.append(
             GachaStudent(
@@ -481,19 +473,19 @@ async def do_gacha(
         )
 
         if is_new:
-            gacha_data["collected"].append(char)
+            gacha_data.collected.append(char)
 
-    await set_gacha_data(qq, gacha_data)
+    await set_gacha_data(user_id, gacha_data)
     return gacha_result
 
 
 async def gacha(
-    qq: str,
+    user_id: str,
     times: int,
     gacha_data_json: dict,
     up_pool: Optional[List[int]] = None,
 ) -> MessageSegment:
-    result = await do_gacha(qq, times, gacha_data_json, up_pool)
+    result = await do_gacha(user_id, times, gacha_data_json, up_pool)
     img = (
         (await draw_summary_gacha_img(result))
         if (times > 10) or (config.ba_disable_classic_gacha)

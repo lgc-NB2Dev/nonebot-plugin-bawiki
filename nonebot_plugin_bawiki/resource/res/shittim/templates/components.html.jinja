@@ -1,0 +1,87 @@
+{%- macro title(title) -%}
+<div class="title">{{ title }}</div>
+{%- endmacro -%}
+
+{%- macro segmentation() -%}
+<div class="segmentation"></div>
+{%- endmacro -%}
+
+{%- macro split_line(content) -%}
+<div class="split-line">
+  <div class="text">{{ content }}</div>
+</div>
+{%- endmacro -%}
+
+{%- macro grade_line_top(summaries) -%}
+{#-
+Args:
+- summaries: List[RankSummary]
+-#}
+<div class="content grade-line">
+  {%- for rank in summaries -%}
+  <div class="grade">
+    {%- if loop.index == 1 -%}
+    <img src="/shittim/assets/diamond.webp" />
+    {%- elif loop.index == 2 -%}
+    <img src="/shittim/assets/gold.webp" />
+    {%- else -%}
+    <img src="/shittim/assets/silver.webp" />
+    {%- endif -%}
+    <div class="score">{{ rank.best_ranking_point }}</div>
+    <div class="time">{{ rank.hard }} {{ rank.battle_time }}</div>
+  </div>
+  {%- endfor -%}
+</div>
+{%- endmacro -%}
+
+{%- macro grade_line_by_last_rank(summaries) -%}
+{#-
+Args:
+- summaries: List[RankSummary]
+-#}
+<div class="content grade-line">
+  {%- for rank in summaries -%}
+  <div class="grade">
+    <div class="grade-title {{ rank.hard_fullname | lower }}">{{ rank.hard_fullname }}</div>
+    <div class="number">{{ rank.rank }}</div>
+  </div>
+  {%- endfor -%}
+</div>
+{%- endmacro -%}
+
+{%- macro rank_table(rank_list) -%}
+{#-
+Args:
+- rank_list: List[RankRecord]
+-#}
+<table>
+  <colgroup>
+    <col width="75" />
+    <col width="330" />
+    <col width="65" />
+    <col width="320" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th>排名</th>
+      <th>分数</th>
+      <th>难度</th>
+      <th>用时</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {%- for rank in rank_list -%}
+    <tr>
+      <td>{{ rank.rank }}</td>
+      <td>{{ rank.best_ranking_point }}</td>
+      <td>
+        <div class="grade-title {{ rank.hard_fullname | lower }}">{{ rank.hard }}</div>
+      </td>
+      <td>{{ rank.battle_time }}</td>
+    </tr>
+    {%- endfor -%}
+  </tbody>
+</table>
+{%- endmacro -%}

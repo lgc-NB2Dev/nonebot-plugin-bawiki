@@ -32,7 +32,7 @@ from ..util import (
 
 async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
-    kwargs["base_url"] = config.ba_gamekee_url
+    kwargs["base_urls"] = config.ba_gamekee_url
 
     headers = kwargs.get("headers") or {}
     headers.update({"Game-Id": "829", "Game-Alias": "ba"})
@@ -239,12 +239,12 @@ async def game_kee_get_calender_page(
         img.paste(remain_p, (60, ii), alpha=True)
         return img
 
-    def draw_list(li: List[BuildImage], title: str) -> BuildImage:
+    async def draw_list(li: List[BuildImage], title: str) -> BuildImage:
         bg_w = 1500
         bg_h = 200 + sum([x.height + 50 for x in li])
         bg = (
             BuildImage.new("RGBA", (bg_w, bg_h))
-            .paste(read_image(CALENDER_BANNER_PATH).resize((1500, 150)))
+            .paste((await read_image(CALENDER_BANNER_PATH)).resize((1500, 150)))
             .draw_text(
                 (50, 0, 1480, 150),
                 title,
@@ -254,7 +254,7 @@ async def game_kee_get_calender_page(
                 halign="left",
             )
             .paste(
-                read_image(GRADIENT_BG_PATH).resize(
+                (await read_image(GRADIENT_BG_PATH)).resize(
                     (1500, bg_h - 150),
                     resample=Resampling.NEAREST,
                 ),
@@ -291,12 +291,14 @@ async def game_kee_get_calender_page(
 
     title_prefix = "GameKee丨活动日程"
     if len(pics) == 1:
-        images = [draw_list(pics[0], title_prefix)]
+        images = await asyncio.gather(*(draw_list(pics[0], title_prefix)))
     else:
         if len(pics[-1]) < 3:
             extra = pics.pop()
             pics[-1].extend(extra)
-        images = [draw_list(x, f"{title_prefix}丨P{i}") for i, x in enumerate(pics, 1)]
+        images = await asyncio.gather(
+            *(draw_list(x, f"{title_prefix}丨P{i}") for i, x in enumerate(pics, 1)),
+        )
 
     return [x.convert("RGB").save_jpg() for x in images]
 

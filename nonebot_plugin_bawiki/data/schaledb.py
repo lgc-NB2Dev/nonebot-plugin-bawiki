@@ -37,7 +37,7 @@ PAGE_KWARGS = {
 
 async def schale_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs = kwargs.copy()
-    kwargs["base_url"] = config.ba_schale_url
+    kwargs["base_urls"] = config.ba_schale_url
     return await async_req(url, **kwargs)
 
 
@@ -528,7 +528,7 @@ async def schale_get_calender(
     bg_h = 200 + sum([x.height + 50 for x in img])
     bg = (
         BuildImage.new("RGBA", (bg_w, bg_h))
-        .paste(read_image(CALENDER_BANNER_PATH).resize((1500, 150)))
+        .paste((await read_image(CALENDER_BANNER_PATH)).resize((1500, 150)))
         .draw_text(
             (50, 0, 1480, 150),
             f"SchaleDB丨活动日程丨{localization['ServerName'][str(server_index)]}",
@@ -538,7 +538,7 @@ async def schale_get_calender(
             halign="left",
         )
         .paste(
-            read_image(GRADIENT_BG_PATH).resize(
+            (await read_image(GRADIENT_BG_PATH)).resize(
                 (1500, bg_h - 150),
                 resample=Resampling.NEAREST,
             ),
@@ -575,7 +575,7 @@ async def draw_fav_li(stu_li: List[dict]) -> BytesIO:
         line = math.ceil(li_len / line_max_icon)
         length = line_max_icon
 
-    img = read_image(GRADIENT_BG_PATH).resize(
+    img = (await read_image(GRADIENT_BG_PATH)).resize(
         (icon_w * length, icon_h * line + 5),
         resample=Resampling.NEAREST,
     )

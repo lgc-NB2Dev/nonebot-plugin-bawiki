@@ -1,6 +1,6 @@
+import itertools
 from datetime import datetime, timedelta
 from enum import Enum, auto
-from functools import partial
 from io import BytesIO
 from pathlib import Path
 from typing import (
@@ -19,8 +19,10 @@ from typing import (
     cast,
 )
 from typing_extensions import Unpack
+from urllib.parse import urljoin
 
-from async_lru import _LRUCacheWrapper
+import anyio
+from async_lru import _LRUCacheWrapper, alru_cache
 from httpx import AsyncClient
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import (
@@ -38,6 +40,7 @@ from .config import config
 T = TypeVar("T")
 TC = TypeVar("TC", bound=Callable)
 NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
+PathType = Union[str, Path, anyio.Path]
 
 
 def wrapped_alru_cache(
@@ -64,6 +67,8 @@ def wrapped_alru_cache(
 
         class CacheWrapper(_LRUCacheWrapper):  # type: ignore
             async def __call__(self, *args, **kwargs):
+                if kwargs.pop("no_cache", False):
+                    return await func(*args, **kwargs)
                 new_args, new_kwargs = process_args(convert_dict, args, kwargs)
                 return await super().__call__(*new_args, **new_kwargs)
 
@@ -80,7 +85,6 @@ class RespType(Enum):
     JSON = auto()
     TEXT = auto()
     BYTES = auto()
-    RESPONSE = auto()
 
 
 class AsyncReqKwargs(TypedDict, total=False):
@@ -90,12 +94,14 @@ class AsyncReqKwargs(TypedDict, total=False):
     content: Union[str, bytes, None]
     data: Optional[Dict[str, Any]]
     json: Optional[Any]
-    base_url: str
+    base_urls: Union[str, List[str]]
     proxies: Optional[str]
 
     resp_type: RespType
     retries: int
     raise_for_status: bool
+
+    no_cache: bool
 
 
 @wrapped_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)
@@ -103,31 +109,37 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     if not urls:
         raise ValueError("No URL specified")
 
-    method = kwargs.pop("method", "GET")
+    method = kwargs.pop("method", "GET").upper()
     params = kwargs.pop("params", None)
     headers = kwargs.pop("headers", None)
     content = kwargs.pop("content", None)
     data = kwargs.pop("data", None)
     json = kwargs.pop("json", None)
 
-    base_url = kwargs.pop("base_url", "")
+    base_urls = kwargs.pop("base_urls", [])
     proxies = kwargs.pop("proxies", config.ba_proxy)
 
     resp_type = kwargs.pop("resp_type", RespType.JSON)
     retries = kwargs.pop("retries", config.ba_req_retry)
     raise_for_status = kwargs.pop("raise_for_status", True)
 
-    url, rest = urls[0], urls[1:]
-    try:
+    if base_urls:
+        if not isinstance(base_urls, list):
+            base_urls = [base_urls]
+        urls = tuple(
+            urljoin(base_url, url)
+            for base_url, url in itertools.product(base_urls, urls)
+        )
+
+    async def do_request(current_url: str):
         async with AsyncClient(
-            base_url=base_url,
             proxies=proxies,
             follow_redirects=True,
             timeout=config.ba_req_timeout,
         ) as cli:
             resp = await cli.request(
                 method,
-                url,
+                current_url,
                 params=params,
                 headers=headers,
                 content=content,
@@ -137,35 +149,30 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
             if raise_for_status:
                 resp.raise_for_status()
 
-            if method.upper() == "HEAD":
+            if method == "HEAD":
                 return resp.headers
             if resp_type == RespType.JSON:
                 return resp.json()
             if resp_type == RespType.TEXT:
                 return resp.text
-            if resp_type == RespType.BYTES:
-                return resp.content
-            return resp
+            # if resp_type == RespType.BYTES:
+            return resp.content
 
-    except Exception as e:
-        recursive_func = partial(async_req, **kwargs)
-
-        if retries <= 0:
-            if not rest:
-                raise
-
-            logger.error(
-                f"Requesting next url because error occurred while requesting {url}: {e!r}",
-            )
+    while True:
+        url, *rest = urls
+        try:
+            return await do_request(url)
+        except Exception as e:
+            e_sfx = f"because error occurred while requesting {url}: {e!r}"
+            if retries > 0:
+                retries -= 1
+                logger.error(f"Retrying ({retries} left) {e_sfx}")
+            else:
+                if not rest:
+                    raise ConnectionError("All retries failed") from e
+                logger.error(f"Requesting next url ({rest[0]}) {e_sfx}")
+                url, *rest = rest
             logger.opt(exception=e).debug("Error Stack")
-            return await recursive_func(*rest)
-
-        retries -= 1
-        logger.error(
-            f"Retrying ({retries} left) because error occurred while requesting {url}: {e!r}",
-        )
-        logger.opt(exception=e).debug("Error Stack")
-        return await recursive_func(*urls)
 
 
 def clear_req_cache() -> int:
@@ -269,8 +276,15 @@ def i2b(image: Image.Image, img_format: str = "JPEG") -> BytesIO:
     return buf
 
 
-def read_image(path: Path) -> BuildImage:
-    content = path.read_bytes()
+@alru_cache()
+async def read_file_cached(path: PathType) -> bytes:
+    if not isinstance(path, anyio.Path):
+        path = anyio.Path(path)
+    return await path.read_bytes()
+
+
+async def read_image(path: PathType) -> BuildImage:
+    content = await read_file_cached(path)
     bio = BytesIO(content)
     return BuildImage.open(bio)
 
@@ -293,3 +307,11 @@ async def send_forward_msg(
     if isinstance(event, GroupMessageEvent):
         return await bot.send_group_forward_msg(group_id=event.group_id, messages=nodes)
     return await bot.send_private_forward_msg(user_id=event.user_id, messages=nodes)
+
+
+def camel_case(string: str, upper_first: bool = False) -> str:
+    pfx, *rest = string.split("_")
+    if upper_first:
+        pfx = pfx.capitalize()
+    sfx = "".join(x.capitalize() for x in rest)
+    return f"{pfx}{sfx}"

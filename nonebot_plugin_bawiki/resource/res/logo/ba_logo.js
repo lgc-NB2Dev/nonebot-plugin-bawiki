@@ -17,11 +17,11 @@ async ([textL, textR, transparentBg]) => {
 
   const halo = document.createElement('img');
   halo.id = 'halo';
-  halo.src = 'https://bawiki.res/resource/halo.png';
+  halo.src = '/logo/halo.png';
 
   const cross = document.createElement('img');
   cross.id = 'cross';
-  cross.src = 'https://bawiki.res/resource/cross.png';
+  cross.src = '/logo/cross.png';
 
   // wait images loaded
   await Promise.all(
@@ -43,14 +43,14 @@ async ([textL, textR, transparentBg]) => {
   // load font
   const fonts = [
     { name: 'Ro GSan Serif Std' },
-    { name: 'Glow Sans SC', param: '?weight=heavy' },
+    { name: 'Glow Sans SC', param: 'weight=heavy' },
   ];
   const fontsCss = fonts
     .map(
       ({ name, param }) =>
         `@font-face {\n` +
         `  font-family: '${name}';\n` +
-        `  src: url('https://bawiki.res/font/${name}${param ? param : ''}') ` +
+        `  src: url('/font/${name}${`?${param}` ? param : ''}') ` +
         `    format('truetype');\n` +
         `}`
     )
@@ -181,6 +181,6 @@ async ([textL, textR, transparentBg]) => {
     );
   }
 
-  const b64 = outputCanvas.toDataURL().replace(/^data:image\/png;base64,/, '');
+  const b64 = outputCanvas.toDataURL().replace(/^data:(.+?);base64,/, '');
   return `base64://${b64}`;
 };

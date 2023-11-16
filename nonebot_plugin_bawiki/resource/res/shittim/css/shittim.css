@@ -1,12 +1,11 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: grey;
-  background-image: url('https://bawiki.res/resource/BG_AronaRoom_In.webp');
+  background-image: url('/shittim/assets/BG_AronaRoom_In.webp');
   background-repeat: no-repeat;
   background-position: center;
+  background-attachment: local;
   background-size: cover;
-  background-attachment: fixed;
 }
 
 .mask {
@@ -91,7 +90,13 @@ body {
   color: #000000de;
 }
 
-.grade .title {
+.grade .number {
+  color: #2d4664;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.grade-title {
   position: relative;
   display: inline-block;
   font-size: 14px;
@@ -102,24 +107,34 @@ body {
   border-radius: 6px;
   padding: 2px 10px;
   margin-bottom: 4px;
+  font-weight: 700;
+  text-align: center;
 }
 
-.grade .title.extreme {
+.grade-title.extreme {
   background-color: rgb(252, 222, 253);
 }
 
-.grade .title.hardcore {
+.grade-title.hardcore {
   background-color: rgb(254, 210, 225);
 }
 
-.grade .title.normal {
+.grade-title.veryhard {
+  background-color: rgb(214, 251, 254);
+}
+
+.grade-title.hard {
+  background-color: rgb(241, 255, 201);
+}
+
+.grade-title.normal {
   background-color: rgb(253, 255, 210);
 }
 
-.grade .number {
-  color: #2d4664;
-  font-size: 14px;
-  font-weight: 700;
+td .grade-title {
+  font-size: 12px;
+  line-height: 18px;
+  padding: 2px 10px 2px 9px;
 }
 
 table {
@@ -286,4 +301,9 @@ table tbody :nth-last-child(1) td {
 
 .cust-character p {
   font-weight: 600;
+}
+
+.footer {
+  font-style: italic;
+  text-align: right;
 }
