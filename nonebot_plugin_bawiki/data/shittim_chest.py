@@ -2,7 +2,6 @@ import asyncio
 import shutil
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
 from typing import (
     Any,
     AsyncIterable,
@@ -361,7 +360,7 @@ async def render_raid_rank(server: ServerType, season: Season) -> bytes:
         rank_list_by_last_rank=rank_list_by_last_rank,
         rank_list=rank_list,
     )
-    Path("debug.html").write_text(html, encoding="u8")
+    # Path("debug.html").write_text(html, encoding="u8")
     return await render_html(html)
 
 
