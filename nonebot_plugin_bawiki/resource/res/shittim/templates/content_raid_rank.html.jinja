@@ -4,6 +4,7 @@
 {#-
 Args:
 - server_name: str
+- data_type_name: str
 - season: Season
 - rank_list_top: List[RankSummary]
 - rank_list_by_last_rank: List[RankSummary]
@@ -11,7 +12,7 @@ Args:
 -#}
 
 {%- block content -%}
-{{ c.title("总力战档线") }}
+{{ c.title("总力战" + data_type_name) }}
 {{ c.segmentation() }}
 
 <div class="content">

@@ -103,6 +103,10 @@ def iter_pagination_func(**kwargs: Unpack[IterPFKwargs]):
     return decorator
 
 
+async def async_iter_all(iterator: AsyncIterable[T]) -> List[T]:
+    return [x async for x in iterator]
+
+
 # endregion
 
 
@@ -217,6 +221,7 @@ class RaidChart(CamelAliasModel):
 
 # region api
 
+
 request_lock = asyncio.Lock()
 
 
@@ -232,15 +237,19 @@ async def shittim_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     headers["Authorization"] = f"ba-token {config.ba_shittim_key}"
     kwargs["headers"] = headers
 
-    if config.ba_shittim_debug_mode:
-        kwargs["sleep"] = 1
+    limit_qps = config.ba_shittim_request_delay > 0
+    if limit_qps:
+        kwargs["sleep"] = config.ba_shittim_request_delay
         await request_lock.acquire()
 
     try:
         resp = await async_req(url, **kwargs)
     finally:
-        if config.ba_shittim_debug_mode:
+        if limit_qps and request_lock.locked():
             request_lock.release()
+
+    # if ((code := resp.get("code")) is not None) and (code != 200):
+    #     raise ValueError(f"Shittim API returned an error response: {resp}")
 
     return resp["data"]
 
@@ -251,7 +260,7 @@ async def get_season_list() -> List[Season]:
 
 def get_rank_list(
     server: ServerType,
-    date_type: RankDataType,
+    data_type: RankDataType,
     season: int,
     **pf_kwargs: Unpack[IterPFKwargs],
 ) -> AsyncIterable[RankRecord]:
@@ -260,11 +269,11 @@ def get_rank_list(
         ret = parse_obj_as(
             Rank,
             await shittim_get(
-                f"api/rank/list/{server.value}/{date_type.value}/{season}",
+                f"api/rank/list/{server.value}/{data_type.value}/{season}",
                 params={"page": page, "size": size},
             ),
         )
-        return ret.records, ret.last_page
+        return ret.records, True if (not ret.records) else ret.last_page
 
     return iterator()
 
@@ -340,6 +349,7 @@ async def get_student_icon(student_id: int) -> bytes:
 
 
 async def render_html(html: str) -> bytes:
+    # Path("debug.html").write_text(html, encoding="u8")
     async with get_routed_page(viewport=ViewportSize(width=840, height=800)) as page:
         await page.set_content(html)
         main_elem = await page.query_selector(".main")
@@ -347,23 +357,23 @@ async def render_html(html: str) -> bytes:
         return await main_elem.screenshot(type="jpeg")
 
 
-async def render_raid_rank(server: ServerType, season: Season) -> bytes:
-    server_name = SERVER_NAME_MAP[server.value]
-    rank_list_top = await get_rank_list_top(ServerType.Official, season.season)
-    rank_list_by_last_rank = await get_rank_list_by_last_rank(server, season.season)
-    rank_list = [
-        x async for x in get_rank_list(server, RankDataType.Rank, season.season)
-    ]
-
+async def render_raid_rank(
+    server_name: str,
+    data_type_name: str,
+    season: Season,
+    rank_list_top: List[RankSummary],
+    rank_list_by_last_rank: List[RankSummary],
+    rank_list: List[RankRecord],
+) -> bytes:
     template = template_env.get_template("content_raid_rank.html.jinja")
     html = await template.render_async(
         server_name=server_name,
+        data_type_name=data_type_name,
         season=season,
         rank_list_top=rank_list_top,
         rank_list_by_last_rank=rank_list_by_last_rank,
         rank_list=rank_list,
     )
-    # Path("debug.html").write_text(html, encoding="u8")
     return await render_html(html)
 
 

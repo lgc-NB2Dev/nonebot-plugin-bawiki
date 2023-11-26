@@ -23,7 +23,7 @@ class Cfg(BaseModel):
     ba_shittim_data_url: HttpUrl = Field("https://data.ba.benx1n.com/")
 
     ba_shittim_key: Optional[str] = None
-    ba_shittim_debug_mode: bool = False
+    ba_shittim_request_delay: float = 0
 
     ba_req_retry: int = 1
     ba_req_cache_ttl: int = 10800  # 3 hrs

@@ -125,7 +125,7 @@ plugins = [
 |    `BA_SHITTIM_API_URL`    |  否  |   ...   |                       什亭之匣 API 地址                        |
 |   `BA_SHITTIM_DATA_URL`    |  否  |   ...   |                        什亭之匣数据地址                        |
 |      `BA_SHITTIM_KEY`      |  否  | `None`  | 什亭之匣 API Key（获取途径 [看这里](https://arona.icu/about)） |
-|  `BA_SHITTIM_DEBUG_MODE`   |  否  | `False` |       是否使用什亭之匣 API 测试模式，限制插件的 QPS 为 1       |
+| `BA_SHITTIM_REQUEST_DELAY` |  否  |   `0`   |       请求什亭之匣 API 后的等待时间，用于测试时限制 QPS        |
 |       `BA_REQ_RETRY`       |  否  |   `1`   |   是否在插件每次加载时自动清理从 Arona Bot 数据源缓存的图片    |
 |     `BA_REQ_CACHE_TTL`     |  否  | `10800` |                   请求缓存的过期时间，单位秒                   |
 |      `BA_REQ_TIMEOUT`      |  否  | `10.0`  |            请求超时，单位秒，为 `None` 表示永不超时            |
@@ -212,7 +212,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   - 添加 `BA_SHITTIM_API_URL`
   - 添加 `BA_SHITTIM_DATA_URL`
   - 添加 `BA_SHITTIM_KEY`
-  - 添加 `BA_SHITTIM_DEBUG_MODE`
+  - 添加 `BA_SHITTIM_REQUEST_DELAY`
   - 删除 `BA_CLEAR_REQ_CACHE_INTERVAL`
 - 其他代码重构，Bug 修复
 

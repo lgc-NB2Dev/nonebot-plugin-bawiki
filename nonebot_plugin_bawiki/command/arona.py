@@ -21,7 +21,7 @@ help_list: "HelpList" = [
         "trigger_condition": "arona",
         "brief_des": "从 Arona Bot 数据源中搜索攻略图",
         "detail_des": (
-            "从Arona Bot数据源中搜索攻略图，支持模糊搜索\n"
+            "从 Arona Bot 数据源中搜索攻略图，支持模糊搜索\n"
             "感谢 diyigemt 佬的开放 API 数据源\n"
             " \n"
             f"可以使用 {FT_S}arona设置别名{FT_E} 指令来为某关键词设置别名\n"
