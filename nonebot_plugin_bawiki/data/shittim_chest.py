@@ -1,8 +1,11 @@
 import asyncio
 import shutil
+from base64 import b64encode
 from datetime import datetime
 from enum import Enum
+from io import BytesIO
 from typing import (
+    TYPE_CHECKING,
     Any,
     AsyncIterable,
     Callable,
@@ -14,19 +17,35 @@ from typing import (
     Tuple,
     TypedDict,
     TypeVar,
+    Union,
 )
 from typing_extensions import Unpack
+from urllib.parse import urljoin
 
 import anyio
 import jinja2
+import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
+from matplotlib import pyplot
 from nonebot import logger
-from playwright.async_api import ViewportSize
+from nonebot_plugin_htmlrender import get_new_page
+from playwright.async_api import Route, ViewportSize
 from pydantic import BaseModel, Field, parse_obj_as, validator
+from yarl import URL
 
 from ..config import config
-from ..resource import CACHE_DIR, RES_SHITTIM_TEMPLATES_DIR
+from ..resource import (
+    CACHE_DIR,
+    RES_SHITTIM_TEMPLATES_DIR,
+    SHITTIM_UTIL_CSS_PATH,
+    SHITTIM_UTIL_JS_PATH,
+)
 from ..util import AsyncReqKwargs, RespType, async_req, camel_case
-from .playwright import get_routed_page
+from .playwright import RES_ROUTE_URL, bawiki_router, get_template_renderer
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 if not config.ba_shittim_key:
     logger.warning("API Key 未配置，关于什亭之匣的功能将会不可用！")
@@ -48,7 +67,6 @@ template_env = jinja2.Environment(
     enable_async=True,
 )
 
-
 SERVER_NAME_MAP = {
     1: "官服",
     2: "B服",
@@ -65,6 +83,7 @@ HARD_FULLNAME_MAP = {
     "N": "Normal",
 }
 
+RAID_ANALYSIS_URL = urljoin(config.ba_shittim_url, "raidAnalyse")
 
 # region Pagination
 
@@ -216,6 +235,11 @@ class RaidChart(CamelAliasModel):
     time: List[datetime]
 
 
+class ParticipationChart(CamelAliasModel):
+    key: List[datetime]
+    value: List[int]
+
+
 # endregion
 
 
@@ -229,7 +253,6 @@ async def shittim_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     if not config.ba_shittim_key:
         raise ValueError("`BA_SHITTIM_KEY` not set")
 
-    kwargs = kwargs.copy()
     kwargs["base_urls"] = config.ba_shittim_api_url
     kwargs["proxies"] = config.ba_shittim_proxy
 
@@ -248,8 +271,11 @@ async def shittim_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
         if limit_qps and request_lock.locked():
             request_lock.release()
 
-    # if ((code := resp.get("code")) is not None) and (code != 200):
-    #     raise ValueError(f"Shittim API returned an error response: {resp}")
+    if (code := resp.get("code")) != 200:
+        params = kwargs.get("params")
+        logger.warning(
+            f"Shittim API `{url}` returned error code {code}, {params=}, {resp=}",
+        )
 
     return resp["data"]
 
@@ -311,21 +337,34 @@ async def get_raid_chart_data(server: ServerType, season: int) -> RaidChart:
     )
 
 
+async def get_participation_chart_data(
+    server: ServerType,
+    season: int,
+) -> ParticipationChart:
+    return parse_obj_as(
+        ParticipationChart,
+        await shittim_get(
+            "api/rank/season/lastRank/charts",
+            params={"server": server.value, "season": season},
+        ),
+    )
+
+
 async def get_alice_friends(server: ServerType) -> Dict[int, RankRecord]:
     return parse_obj_as(
         Dict[int, RankRecord],
-        await shittim_get("api/rank/list_20001", params={"server": server}),
+        await shittim_get("api/rank/list_20001", params={"server": server.value}),
     )
 
 
-async def get_involute_dogs(server: ServerType) -> Dict[int, RankRecord]:
+async def get_diligent_achievers(server: ServerType) -> Dict[int, RankRecord]:
     return parse_obj_as(
         Dict[int, RankRecord],
-        await shittim_get("api/rank/list_1", params={"server": server}),
+        await shittim_get("api/rank/list_1", params={"server": server.value}),
     )
 
 
-async def get_student_icon(student_id: int) -> bytes:
+async def get_student_icon(student_id: Union[int, str]) -> bytes:
     filename = f"{student_id}.png"
     path = anyio.Path(SHITTIM_CACHE_DIR / filename)
 
@@ -347,14 +386,81 @@ async def get_student_icon(student_id: int) -> bytes:
 
 # region render
 
+VIEWPORT_SIZE = ViewportSize(width=880, height=1080)
 
-async def render_html(html: str) -> bytes:
-    # Path("debug.html").write_text(html, encoding="u8")
-    async with get_routed_page(viewport=ViewportSize(width=840, height=800)) as page:
-        await page.set_content(html)
-        main_elem = await page.query_selector(".main")
-        assert main_elem
-        return await main_elem.screenshot(type="jpeg")
+CHART_SHOW_RANKS = [1, 1000, 2000, 4000, 8000, 20000]
+CHART_W = 760
+CHART_H = 480
+DATE_FORMAT = "%m-%d %H:%M"
+NUM_FORMAT = "{x:,.0f}"
+DATE_FORMATTER = mdates.DateFormatter(DATE_FORMAT)
+NUM_FORMATTER = mticker.StrMethodFormatter(NUM_FORMAT)
+
+
+def get_figure() -> "Figure":
+    figure = pyplot.figure()
+    figure.set_size_inches(CHART_W / figure.dpi, CHART_H / figure.dpi)
+    return figure
+
+
+def save_figure(figure: "Figure") -> bytes:
+    bio = BytesIO()
+    figure.savefig(bio, transparent=True, format="png")
+    return bio.getvalue()
+
+
+def ax_settings(ax: "Axes") -> None:
+    ax.grid()
+    ax.legend(loc="lower right")
+    ax.xaxis.set_major_formatter(DATE_FORMATTER)
+    ax.yaxis.set_major_formatter(NUM_FORMATTER)
+    ax.tick_params(axis="x", labelrotation=15)
+
+
+def render_raid_chart(data: RaidChart) -> bytes:
+    figure = get_figure()
+
+    ax = figure.add_subplot()
+    for key in CHART_SHOW_RANKS:
+        if (key not in data.data) or (not (y := data.data[key])):
+            continue
+        x = data.time[: len(y)]
+        ax.plot(
+            x,
+            y,
+            label=(
+                f"{' ' * (10 - (len(str(key)) * 2))}{key} | "
+                f"{x[-1].strftime(DATE_FORMAT)} | "
+                f"{NUM_FORMAT.format(x=y[-1])}"
+            ),
+        )
+    ax_settings(ax)
+
+    figure.tight_layout()
+    return save_figure(figure)
+
+
+def render_participation_chart(data: ParticipationChart) -> bytes:
+    figure = get_figure()
+
+    ax = figure.add_subplot()
+    ax.plot(
+        data.key,
+        data.value,
+        label=(
+            "Participants | "
+            f"{data.key[-1].strftime(DATE_FORMAT)} | "
+            f"{NUM_FORMAT.format(x=data.value[-1])}"
+        ),
+    )
+    ax_settings(ax)
+
+    figure.tight_layout()
+    return save_figure(figure)
+
+
+def to_b64_url(data: bytes) -> str:
+    return f"data:image/png;base64,{b64encode(data).decode()}"
 
 
 async def render_raid_rank(
@@ -364,17 +470,69 @@ async def render_raid_rank(
     rank_list_top: List[RankSummary],
     rank_list_by_last_rank: List[RankSummary],
     rank_list: List[RankRecord],
+    raid_chart: RaidChart,
+    participation_chart: ParticipationChart,
 ) -> bytes:
     template = template_env.get_template("content_raid_rank.html.jinja")
-    html = await template.render_async(
+    raid_chart_url = to_b64_url(render_raid_chart(raid_chart))
+    participation_chart_url = to_b64_url(
+        render_participation_chart(participation_chart),
+    )
+    return await get_template_renderer(
+        template,
+        selector=".wrapper",
+        viewport=VIEWPORT_SIZE,
+    )(
         server_name=server_name,
         data_type_name=data_type_name,
         season=season,
         rank_list_top=rank_list_top,
         rank_list_by_last_rank=rank_list_by_last_rank,
         rank_list=rank_list,
+        raid_chart_url=raid_chart_url,
+        participation_chart_url=participation_chart_url,
+        shittim_url=config.ba_shittim_url,
     )
-    return await render_html(html)
+
+
+async def render_rank_detail(
+    title: str,
+    season_list: List[Season],
+    rank_list: Dict[int, RankRecord],
+) -> bytes:
+    template = template_env.get_template("content_rank_detail.html.jinja")
+    return await get_template_renderer(
+        template,
+        selector=".wrapper",
+        viewport=VIEWPORT_SIZE,
+    )(
+        title=title,
+        season_list=season_list,
+        rank_list=sorted(rank_list.items(), key=lambda x: x[0], reverse=True),
+        shittim_url=config.ba_shittim_url,
+    )
+
+
+async def render_raid_analysis() -> bytes:
+    async with get_new_page(viewport=VIEWPORT_SIZE) as page:
+        await page.goto(RAID_ANALYSIS_URL, wait_until="networkidle")
+
+        await page.evaluate(SHITTIM_UTIL_JS_PATH.read_text(encoding="u8"))
+        await page.add_style_tag(content=SHITTIM_UTIL_CSS_PATH.read_text(encoding="u8"))
+
+        elem = await page.query_selector(".content")
+        assert elem
+        return await elem.screenshot(type="jpeg")
 
 
 # endregion
+
+
+RES_TYPE_SHITTIM_STUDENT_ICON = "shittim_student_icon"
+
+
+@bawiki_router(rf"^{RES_ROUTE_URL}/{RES_TYPE_SHITTIM_STUDENT_ICON}/(\d+)$")
+async def _(url: URL, route: Route, **_):
+    student_id = url.parts[-1]
+    icon = await get_student_icon(student_id)
+    return await route.fulfill(body=icon, content_type="image/png")

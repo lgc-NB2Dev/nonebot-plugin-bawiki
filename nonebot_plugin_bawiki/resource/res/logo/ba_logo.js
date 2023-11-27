@@ -3,7 +3,7 @@
 async ([textL, textR, transparentBg]) => {
   const fontSize = 168;
   const canvasHeight = 500;
-  const canvasWidth = 200;
+  const canvasWidth = 900;
   const textBaseLine = 0.68;
   const horizontalTilt = -0.4;
   const paddingX = 20;
@@ -43,15 +43,14 @@ async ([textL, textR, transparentBg]) => {
   // load font
   const fonts = [
     { name: 'Ro GSan Serif Std' },
-    { name: 'Glow Sans SC', param: 'weight=heavy' },
+    { name: 'Glow Sans SC', param: '?weight=heavy' },
   ];
   const fontsCss = fonts
     .map(
       ({ name, param }) =>
         `@font-face {\n` +
         `  font-family: '${name}';\n` +
-        `  src: url('/font/${name}${`?${param}` ? param : ''}') ` +
-        `    format('truetype');\n` +
+        `  src: url('/font/${name}${param ?? ''}') format('truetype');\n` +
         `}`
     )
     .join('\n');

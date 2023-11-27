@@ -36,7 +36,6 @@ PAGE_KWARGS = {
 
 
 async def schale_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
-    kwargs = kwargs.copy()
     kwargs["base_urls"] = config.ba_schale_url
     return await async_req(url, **kwargs)
 

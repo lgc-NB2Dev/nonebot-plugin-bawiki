@@ -31,7 +31,6 @@ from ..util import (
 
 
 async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
-    kwargs = kwargs.copy()
     kwargs["base_urls"] = config.ba_gamekee_url
 
     headers = kwargs.get("headers") or {}

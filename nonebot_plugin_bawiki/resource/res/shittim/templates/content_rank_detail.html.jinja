@@ -1,0 +1,23 @@
+{%- extends "base.html.jinja" -%}
+{%- import "components.html.jinja" as c -%}
+
+{#-
+Args:
+- title: str
+- season_list: List[Season]
+- rank_list: List[List[int, RankRecord]]
+-#}
+
+{%- block content -%}
+
+{%- call c.title() -%}{{ title }}{%- endcall -%}
+{{ c.segmentation() }}
+
+{%- for i, record in rank_list -%}
+{% set season = season_list[i] %}
+{%- call c.small_title() -%}第{{ i }}期 {{ season.season_map.value }} {{ season.boss }}{%- endcall -%}
+{{ c.rank_record(record) }}
+{%- if not loop.last -%}{{ c.segmentation() }}{%- endif -%}
+{%- endfor -%}
+
+{%- endblock -%}

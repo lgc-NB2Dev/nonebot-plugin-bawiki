@@ -123,6 +123,7 @@ plugins = [
 |     `BA_ARONA_API_URL`     |  否  |   ...   |                     Arona Bot 数据源的地址                     |
 |     `BA_ARONA_CDN_URL`     |  否  |   ...   |                    Arona Bot 图片 CDN 地址                     |
 |    `BA_SHITTIM_API_URL`    |  否  |   ...   |                       什亭之匣 API 地址                        |
+|      `BA_SHITTIM_URL`      |  否  |   ...   |                          什亭之匣网址                          |
 |   `BA_SHITTIM_DATA_URL`    |  否  |   ...   |                        什亭之匣数据地址                        |
 |      `BA_SHITTIM_KEY`      |  否  | `None`  | 什亭之匣 API Key（获取途径 [看这里](https://arona.icu/about)） |
 | `BA_SHITTIM_REQUEST_DELAY` |  否  |   `0`   |       请求什亭之匣 API 后的等待时间，用于测试时限制 QPS        |
@@ -194,7 +195,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
-### 0.10.0（未发布）
+### 0.10.0
 
 - 新增 [什亭之匣](https://arona.icu/) 相关内容（开发中）
 - 为 Arona 指令添加了添加、删除别名功能
@@ -209,12 +210,27 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   - 添加 `BA_REQ_RETRY`
   - 添加 `BA_REQ_CACHE_TTL`
   - 添加 `BA_REQ_TIMEOUT`
+  - 添加 `BA_SHITTIM_URL`
   - 添加 `BA_SHITTIM_API_URL`
   - 添加 `BA_SHITTIM_DATA_URL`
   - 添加 `BA_SHITTIM_KEY`
   - 添加 `BA_SHITTIM_REQUEST_DELAY`
   - 删除 `BA_CLEAR_REQ_CACHE_INTERVAL`
+  - 重命名 `BA_AUTO_CLEAR_ARONA_CACHE` -> `BA_AUTO_CLEAR_CACHE_PATH`
 - 其他代码重构，Bug 修复
+
+<details>
+<summary><strong>未来将更新（点击展开）</strong></summary>
+
+### 1.0.0
+
+- 使用 `nonebot-plugin-alconna` 实现多适配器支持
+
+### 0.11.0
+
+- 使用 `playwright` 重构现有的 Pillow 绘图
+
+</details>
 
 <details>
 <summary><strong>历史更新日志（点击展开）</strong></summary>

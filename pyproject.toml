@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-bawiki"
-version = "0.10.0.dev2"
+dynamic = ["version"]
 description = "A nonebot2 plugin for Blue Archive."
 authors = [{ name = "student_2333", email = "lgc2333@126.com" }]
 dependencies = [
@@ -16,6 +16,7 @@ dependencies = [
     "pypinyin>=0.49.0",
     "yarl>=1.9.2",
     "async-lru>=2.0.4",
+    "matplotlib>=3.7.4",
 ]
 requires-python = ">=3.8,<4.0"
 readme = "README.md"
@@ -41,6 +42,10 @@ homepage = "https://github.com/lgc2333/nonebot-plugin-bawiki/"
 
 [project.optional-dependencies]
 menu = ["nonebot-plugin-PicMenu>=0.2"]
+
+[tool.pdm.version]
+source = "file"
+path = "nonebot_plugin_bawiki/__init__.py"
 
 [tool.pdm.build]
 includes = []

@@ -1,0 +1,30 @@
+/* 魔改页面方便截图 */
+
+body {
+  height: auto !important;
+  overflow: auto !important;
+}
+
+.app {
+  height: auto !important;
+}
+
+.layout {
+  display: block !important;
+  height: auto !important;
+}
+
+.body {
+  display: block !important;
+  height: auto !important;
+}
+
+.content {
+  width: fit-content !important;
+  padding: 20px !important;
+  margin: 0 auto !important;
+}
+
+.module {
+  margin: 0 !important;
+}

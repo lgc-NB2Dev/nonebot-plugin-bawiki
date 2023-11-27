@@ -1,15 +1,31 @@
-{%- macro title(title) -%}
-<div class="title">{{ title }}</div>
+{%- macro title() -%}
+<div class="title">{{ caller() }}</div>
+{%- endmacro -%}
+
+{%- macro chart_title() -%}
+<div class="title chart">{{ caller() }}</div>
+{%- endmacro -%}
+
+{%- macro small_title() -%}
+<div class="title small">{{ caller() }}</div>
 {%- endmacro -%}
 
 {%- macro segmentation() -%}
 <div class="segmentation"></div>
 {%- endmacro -%}
 
-{%- macro split_line(content) -%}
+{%- macro content() -%}
+<div class="content">{{ caller() }}</div>
+{%- endmacro -%}
+
+{%- macro split_line() -%}
 <div class="split-line">
-  <div class="text">{{ content }}</div>
+  <div class="text">{{ caller() }}</div>
 </div>
+{%- endmacro -%}
+
+{%- macro footer() -%}
+<div class="footer">{{ caller() }}</div>
 {%- endmacro -%}
 
 {%- macro grade_line_top(summaries) -%}
@@ -27,7 +43,7 @@ Args:
     {%- else -%}
     <img src="/shittim/assets/silver.webp" />
     {%- endif -%}
-    <div class="score">{{ rank.best_ranking_point }}</div>
+    <div class="score">{{ "{:,}".format(rank.best_ranking_point) }}</div>
     <div class="time">{{ rank.hard }} {{ rank.battle_time }}</div>
   </div>
   {%- endfor -%}
@@ -77,7 +93,7 @@ Args:
     {%- for rank in rank_list -%}
     <tr>
       <td>{{ rank.rank }}</td>
-      <td>{{ rank.best_ranking_point }}</td>
+      <td>{{ "{:,}".format(rank.best_ranking_point) }}</td>
       <td>
         <div class="grade-title {{ rank.hard_fullname | lower }}">{{ rank.hard }}</div>
       </td>
@@ -87,4 +103,60 @@ Args:
     {%- endfor -%}
   </tbody>
 </table>
+{%- endmacro -%}
+
+{%- macro char_head(char) -%}
+<div class="character-head">
+  <img class="head" src="/shittim/assets/Card_Bg.png" />
+  <img class="head" src="/shittim_student_icon/{{ char.unique_id }}" />
+  <img class="frame" src="/shittim/assets/frame/{{ char.bullet_type }}.png" />
+  {%- if char.is_assist -%}<img class="asist" src="/shittim/assets/Common_Icon_Asist.png" />{%- endif -%}
+  <img class="role-types" src="/shittim/assets/role/{{ char.tactic_role }}.png" />
+  <img class="star" src="/shittim/assets/star/{{ char.star_grade }}.png" />
+</div>
+{%- endmacro -%}
+
+{%- macro rank_record(record) -%}
+{#-
+Args:
+- record: RankRecord
+-#}
+<div class="content">
+  <div class="team-div">
+    <div class="cust-info">
+      <div class="info-left">
+        <div class="cust-head">
+          <img class="head" src="/shittim/assets/Card_Bg.png" />
+          <img class="head" src="/shittim_student_icon/{{ record.represent_character_unique_id }}" />
+          <img class="rank" src="/shittim/assets/{% if record.rank < 20000 %}diamond{% else %}gold{% endif %}.webp" />
+        </div>
+        <div class="infos">
+          <div class="info-line">
+            <div class="left">ID</div>
+            <div class="right">{{ record.nickname }}</div>
+          </div>
+          <div class="info-line">
+            <div class="left">Lv</div>
+            <div class="right">Lv.{{ record.level }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-right">
+        <div class="rank">第 {{ record.rank }} 名</div>
+        <div class="score">{{ "{:,}".format(record.best_ranking_point) }}</div>
+      </div>
+    </div>
+    {%- for info in record.try_number_infos -%}
+    <div class="cust-character">
+      <p>第 {{ info.try_number }} 刀</p>
+      <div class="character-line">
+        {%- for char in info.main_characters -%}{{ char_head(char) }}{%- endfor -%}
+        <div style="width: 16px;"></div>
+        {%- for char in info.support_characters -%}{{ char_head(char) }}{%- endfor -%}
+      </div>
+    </div>
+    {%- endfor -%}
+  </div>
+</div>
 {%- endmacro -%}

@@ -9,26 +9,40 @@ Args:
 - rank_list_top: List[RankSummary]
 - rank_list_by_last_rank: List[RankSummary]
 - rank_list: List[RankRecord]
+- raid_chart_url: str
+- participation_chart_url: str
 -#}
 
 {%- block content -%}
-{{ c.title("总力战" + data_type_name) }}
+
+{%- call c.title() -%}总力战{{ data_type_name }}{%- endcall -%}
 {{ c.segmentation() }}
 
-<div class="content">
-  {{ server_name }} |
-  第{{ season.season }}期 {{ season.season_map.value }} {{ season.boss }} |
-  更新时间：{{ rank_list[0].record_time.strftime("%Y-%m-%d %H:%M:%S") }}
-</div>
+{%- call c.content() -%}
+{{ server_name }} |
+第{{ season.season }}期 {{ season.season_map.value }} {{ season.boss }} |
+更新时间：{{ rank_list[0].record_time.strftime("%Y-%m-%d %H:%M:%S") }}
+{%- endcall -%}
 {{ c.segmentation() }}
 
-{{ c.split_line("各档线分数") }}
+{%- call c.split_line() -%}各档线分数{%- endcall -%}
 {{ c.grade_line_top(rank_list_top) }}
 {{ c.segmentation() }}
 
-{{ c.split_line("各难度最低排名") }}
+{%- call c.split_line() -%}各难度最低排名{%- endcall -%}
 {{ c.grade_line_by_last_rank(rank_list_by_last_rank) }}
 {{ c.segmentation() }}
 
 {{ c.rank_table(rank_list) }}
+{{ c.segmentation() }}
+
+{%- call c.content() -%}
+{%- call c.chart_title() -%}档线数据时间变化{%- endcall -%}
+<img src="{{ raid_chart_url }}" />
+{{ c.segmentation() }}
+
+{%- call c.chart_title() -%}参与人数时间变化{%- endcall -%}
+<img src="{{ participation_chart_url }}" />
+{%- endcall -%}
+
 {%- endblock -%}

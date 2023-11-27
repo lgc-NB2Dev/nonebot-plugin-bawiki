@@ -19,6 +19,7 @@ class Cfg(BaseModel):
     ba_bawiki_db_url: HttpUrl = Field("https://bawiki.lgc2333.top/")
     ba_arona_api_url: HttpUrl = Field("https://arona.diyigemt.com/")
     ba_arona_cdn_url: HttpUrl = Field("https://arona.cdn.diyigemt.com/")
+    ba_shittim_url: HttpUrl = Field("https://arona.icu/")
     ba_shittim_api_url: HttpUrl = Field("https://api.arona.icu/")
     ba_shittim_data_url: HttpUrl = Field("https://data.ba.benx1n.com/")
 

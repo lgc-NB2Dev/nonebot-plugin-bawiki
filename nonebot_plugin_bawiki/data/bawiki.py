@@ -13,7 +13,6 @@ from ..util import AsyncReqKwargs, RespType, async_req, recover_alia
 
 
 async def db_get(suffix: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
-    kwargs = kwargs.copy()
     kwargs["base_urls"] = config.ba_bawiki_db_url
     return await async_req(suffix, **kwargs)
 
