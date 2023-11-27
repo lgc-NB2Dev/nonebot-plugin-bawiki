@@ -197,7 +197,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ### 0.10.0
 
-- 新增 [什亭之匣](https://arona.icu/) 相关内容（开发中）
+- 新增 [什亭之匣](https://arona.icu/) 相关内容
 - 为 Arona 指令添加了添加、删除别名功能
 - 前瞻图默认列表个数改为 `3`
 - 为 `ba语音` 和 `ba漫画` 指令加上了列表选择
@@ -217,7 +217,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   - 添加 `BA_SHITTIM_REQUEST_DELAY`
   - 删除 `BA_CLEAR_REQ_CACHE_INTERVAL`
   - 重命名 `BA_AUTO_CLEAR_ARONA_CACHE` -> `BA_AUTO_CLEAR_CACHE_PATH`
-- 其他代码重构，Bug 修复
+- 其他代码重构，Bug 修复 ~~，新增了一些 Bug（可能）~~
 
 <details>
 <summary><strong>未来将更新（点击展开）</strong></summary>
