@@ -14,8 +14,8 @@ for _p in (DATA_DIR, CACHE_DIR):
 RES_DIR = Path(__file__).parent / "res"
 
 RES_GACHA_DIR = RES_DIR / "gacha"
-GACHA_BG_PATH = RES_GACHA_DIR / "gacha_bg.png"
-GACHA_BG_OLD_PATH = RES_GACHA_DIR / "gacha_bg_old.png"
+GACHA_BG_PATH = RES_GACHA_DIR / "gacha_bg.webp"
+GACHA_BG_OLD_PATH = RES_GACHA_DIR / "gacha_bg_old.webp"
 GACHA_CARD_BG_PATH = RES_GACHA_DIR / "gacha_card_bg.png"
 GACHA_CARD_MASK_PATH = RES_GACHA_DIR / "gacha_card_mask.png"
 GACHA_NEW_PATH = RES_GACHA_DIR / "gacha_new.png"
@@ -28,7 +28,7 @@ GAMEKEE_UTIL_JS_PATH = RES_GAMEKEE_DIR / "gamekee_util.js"
 
 RES_GENERAL_DIR = RES_DIR / "general"
 CALENDER_BANNER_PATH = RES_GENERAL_DIR / "calender_banner.png"
-GRADIENT_BG_PATH = RES_GENERAL_DIR / "gradient.png"
+GRADIENT_BG_PATH = RES_GENERAL_DIR / "gradient.webp"
 
 RES_LOGO_DIR = RES_DIR / "logo"
 BA_LOGO_JS_PATH = RES_LOGO_DIR / "ba_logo.js"
