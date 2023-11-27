@@ -39,7 +39,7 @@ help_list: "HelpList" = [
     {
         "func": "国服总力数据",
         "trigger_method": "指令",
-        "trigger_condition": "ba帮助 什亭之匣",
+        "trigger_condition": "ba帮助 国服总力",
         "brief_des": "从什亭之匣查询国服总力相关数据",
         "detail_des": (
             "查询国服总力相关数据\n"
