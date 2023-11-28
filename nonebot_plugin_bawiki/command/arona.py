@@ -10,6 +10,7 @@ from nonebot.typing import T_State
 
 from ..data.arona import ImageModel, get_image, search, search_exact, set_alias
 from ..help import FT_E, FT_S
+from ..util import illegal_limit
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -74,6 +75,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 async def _(matcher: Matcher, state: T_State, param: str = ArgPlainText()):
     param = param.strip()
     if not param:
+        await illegal_limit(finish_message="老师真是的，我不帮你搜了！哼~")
         await matcher.reject("老师真是的，快给我发送你想要搜索的内容吧！")
 
     try:
@@ -104,6 +106,7 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
         await matcher.finish("OK，阿罗娜已经取消老师的选择了~")
 
     if not index_str.isdigit():
+        await illegal_limit(finish_message="老师真是的，我不帮你搜了！哼~")
         await matcher.reject("不要再逗我了，老师！快发送你要选择的序号吧quq")
     index = int(index_str)
     if not (0 <= index <= len(res)):

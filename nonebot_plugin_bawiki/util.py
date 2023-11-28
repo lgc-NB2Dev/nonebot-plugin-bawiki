@@ -33,6 +33,7 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
     MessageSegment,
 )
+from nonebot.matcher import current_matcher
 from PIL import Image, ImageOps
 from pil_utils import BuildImage
 
@@ -323,3 +324,17 @@ def camel_case(string: str, upper_first: bool = False) -> str:
         pfx = pfx.capitalize()
     sfx = "".join(x.capitalize() for x in rest)
     return f"{pfx}{sfx}"
+
+
+async def illegal_limit(
+    count: int = config.ba_illegal_limit,
+    finish_message: Union[Message, MessageSegment, str] = "老师太坏了，阿罗娜不和你玩了~",
+):
+    if count <= 0:
+        return
+    matcher = current_matcher.get()
+    state = matcher.state
+    count = state.get("illegal_count", 0) + 1
+    if count >= config.ba_illegal_limit:
+        await matcher.finish(finish_message)
+    state["illegal_count"] = count

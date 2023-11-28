@@ -115,6 +115,7 @@ plugins = [
 |    `BA_VOICE_USE_CARD`     |  否  | `False` |                          是否使用自定义音乐卡片发送角色语音                           |
 |    `BA_USE_FORWARD_MSG`    |  否  | `True`  |                             是否使用合并转发发送部分消息                              |
 |  `BA_SCREENSHOT_TIMEOUT`   |  否  |  `60`   |                                 网页截图超时，单位秒                                  |
+|     `BA_ILLEGAL_LIMIT`     |  否  |   `3`   |             用户在进行操作时输入了多少次非法指令后直接退出操作，填 `0` 以禁用此功能       |
 | `BA_DISABLE_CLASSIC_GACHA` |  否  | `False` |                      抽卡次数 10 次以下时是否不使用经典抽卡样式                       |
 |       `BA_GACHA_MAX`       |  否  |  `200`  |                                   单次抽卡最大次数                                    |
 |      `BA_GAMEKEE_URL`      |  否  |   ...   |                                 GameKee 数据源的地址                                  |
