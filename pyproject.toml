@@ -17,6 +17,7 @@ dependencies = [
     "yarl>=1.9.2",
     "async-lru>=2.0.4",
     "matplotlib>=3.7.4",
+    "pytz>=2023.3.post1",
 ]
 requires-python = ">=3.8,<4.0"
 readme = "README.md"

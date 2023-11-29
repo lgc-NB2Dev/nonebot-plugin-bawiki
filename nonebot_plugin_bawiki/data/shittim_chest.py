@@ -5,7 +5,6 @@ from datetime import datetime
 from enum import Enum
 from io import BytesIO
 from typing import (
-    TYPE_CHECKING,
     Any,
     AsyncIterable,
     Callable,
@@ -26,7 +25,10 @@ import anyio
 import jinja2
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
+import pytz
 from matplotlib import pyplot
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from nonebot import logger
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Route, ViewportSize
@@ -42,10 +44,6 @@ from ..resource import (
 )
 from ..util import AsyncReqKwargs, RespType, async_req, camel_case
 from .playwright import RES_ROUTE_URL, bawiki_router, get_template_renderer
-
-if TYPE_CHECKING:
-    from matplotlib.axes import Axes
-    from matplotlib.figure import Figure
 
 if not config.ba_shittim_key:
     logger.warning("API Key 未配置，关于什亭之匣的功能将会不可用！")
@@ -84,6 +82,7 @@ HARD_FULLNAME_MAP = {
 }
 
 RAID_ANALYSIS_URL = urljoin(config.ba_shittim_url, "raidAnalyse")
+TIMEZONE_SHANGHAI = pytz.timezone("Asia/Shanghai")
 
 # region Pagination
 
@@ -148,11 +147,19 @@ class RankDataType(Enum):
 # region models
 
 
-def time_validator(v: str):
+def validator_time(v: str):
     try:
-        return datetime.strptime(v, "%Y-%m-%d %H:%M")
+        return (
+            datetime.strptime(v, "%Y-%m-%d %H:%M")
+            .replace(tzinfo=TIMEZONE_SHANGHAI)
+            .astimezone()
+        )
     except ValueError as e:
         raise ValueError(f"Time `{v}` format error") from e
+
+
+def validator_time_as_local(v: datetime) -> datetime:
+    return v.astimezone()
 
 
 class CamelAliasModel(BaseModel):
@@ -185,7 +192,7 @@ class Season(CamelAliasModel):
         "end_time",
         pre=True,
         allow_reuse=True,
-    )(time_validator)
+    )(validator_time)
 
 
 class Character(CamelAliasModel):
@@ -225,6 +232,11 @@ class RankRecord(RankSummary):
     try_number_infos: List[TryNumberInfo]
     record_time: datetime
 
+    _validator_time = validator(
+        "record_time",
+        allow_reuse=True,
+    )(validator_time_as_local)
+
 
 class Rank(PaginationModel):
     records: List[RankRecord]
@@ -234,10 +246,22 @@ class RaidChart(CamelAliasModel):
     data: Dict[int, List[int]]
     time: List[datetime]
 
+    _validator_time = validator(
+        "time",
+        each_item=True,
+        allow_reuse=True,
+    )(validator_time_as_local)
+
 
 class ParticipationChart(CamelAliasModel):
     key: List[datetime]
     value: List[int]
+
+    _validator_time = validator(
+        "key",
+        each_item=True,
+        allow_reuse=True,
+    )(validator_time_as_local)
 
 
 # endregion
@@ -403,13 +427,13 @@ def get_figure() -> "Figure":
     return figure
 
 
-def save_figure(figure: "Figure") -> bytes:
+def save_figure(figure: Figure) -> bytes:
     bio = BytesIO()
     figure.savefig(bio, transparent=True, format="png")
     return bio.getvalue()
 
 
-def ax_settings(ax: "Axes") -> None:
+def ax_settings(ax: Axes) -> None:
     ax.grid()
     ax.legend(loc="lower right")
     ax.xaxis.set_major_formatter(DATE_FORMATTER)
