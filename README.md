@@ -237,7 +237,6 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 ### 0.11.0
 
 - 使用 `playwright` 重构现有的 Pillow 绘图
-- 添加配置项 `BA_ILLEGAL_LIMIT`
 
 </details>
 
