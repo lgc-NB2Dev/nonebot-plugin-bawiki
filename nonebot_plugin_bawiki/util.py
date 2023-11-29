@@ -172,6 +172,10 @@ async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
             follow_redirects=True,
             timeout=config.ba_req_timeout,
         ) as cli:
+            logger.debug(
+                f"{method} `{current_url}`, "
+                f"{params=}, {headers=}, {content=}, {data=}, {json=}",
+            )
             resp = await cli.request(
                 method,
                 current_url,
@@ -198,14 +202,14 @@ async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
         try:
             resp = await do_request(url)
         except Exception as e:
-            e_sfx = f"because error occurred while requesting {url}: {e!r}"
+            e_sfx = f"because error occurred while requesting `{url}`: {e!r}"
             if retries > 0:
                 retries -= 1
                 logger.error(f"Retrying ({retries} left) {e_sfx}")
             else:
                 if not rest:
                     raise ConnectionError("All retries failed") from e
-                logger.error(f"Requesting next url ({rest[0]}) {e_sfx}")
+                logger.error(f"Requesting next url `{rest[0]}` {e_sfx}")
                 url, *rest = rest
             logger.opt(exception=e).debug("Error Stack")
         else:
