@@ -201,8 +201,9 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 ### 0.10.1
 
 - 修复 `ba总力档线` 指令返回图片中更新时间显示时区错误的问题
-- 向国服总力数据功能中的指令新增几个别名，详情请看帮助
 - 新增配置项 `BA_ILLEGAL_LIMIT`、`BA_ARONA_SET_ALIAS_ONLY_SU`、`BA_SHITTIM_REQ_CACHE_TTL`
+
+<!-- - 向国服总力数据功能中的指令新增几个别名，详情请看帮助 -->
 
 ### 0.10.0
 
