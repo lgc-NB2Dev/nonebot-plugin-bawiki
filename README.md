@@ -131,7 +131,7 @@ plugins = [
 |  `BA_SHITTIM_REQUEST_DELAY`  |  否  |   `0`   |                   请求什亭之匣 API 后的等待时间，用于测试时限制 QPS                   |
 |        `BA_REQ_RETRY`        |  否  |   `1`   | 每次请求的重试次数<br />当值为 `1` 时，总共会请求两次（请求一次，重试一次），以此类推 |
 |      `BA_REQ_CACHE_TTL`      |  否  | `10800` |                              请求缓存的过期时间，单位秒                               |
-|  `BA_SHITTIM_REQ_CACHE_TTL`  |  否  | `10800` |                        什亭之匣相关请求缓存的过期时间，单位秒                         |
+|  `BA_SHITTIM_REQ_CACHE_TTL`  |  否  |  `600`  |                        什亭之匣相关请求缓存的过期时间，单位秒                         |
 |       `BA_REQ_TIMEOUT`       |  否  | `10.0`  |                       请求超时，单位秒，为 `None` 表示永不超时                        |
 |  `BA_AUTO_CLEAR_CACHE_PATH`  |  否  | `False` |                        是否在插件每次加载时自动清理缓存文件夹                         |
 
