@@ -116,6 +116,7 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
 
     index = int(index_str)
     if not (0 <= index <= len(res)):
+        await illegal_finisher()
         await matcher.reject("抱歉，阿罗娜找不到老师发送的序号哦，请老师重新发送一下吧")
 
     param = res[index - 1].name
