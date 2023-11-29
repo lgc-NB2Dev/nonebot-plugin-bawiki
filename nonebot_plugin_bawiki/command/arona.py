@@ -10,6 +10,7 @@ from nonebot.typing import T_State
 
 from ..data.arona import ImageModel, get_image, search, search_exact, set_alias
 from ..help import FT_E, FT_S
+from ..util import illegal_limit
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -74,6 +75,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 async def _(matcher: Matcher, state: T_State, param: str = ArgPlainText()):
     param = param.strip()
     if not param:
+        await illegal_limit(finish_message="老师真是的，我不帮你搜了！哼~")
         await matcher.reject("老师真是的，快给我发送你想要搜索的内容吧！")
 
     try:
@@ -91,7 +93,7 @@ async def _(matcher: Matcher, state: T_State, param: str = ArgPlainText()):
     state["res"] = res
     list_txt = "\n".join(f"{i}. {r.name}" for i, r in enumerate(res, 1))
     await matcher.pause(
-        f"阿罗娜找到了多个可能的结果，请老师发送序号来选择吧~\n{list_txt}\nTip：发送 0 取消选择",
+        f"老师！阿罗娜帮您找到了多个可能的结果，请发送序号来选择吧~\n{list_txt}\nTip：发送 0 取消选择",
     )
 
 
@@ -104,10 +106,11 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
         await matcher.finish("OK，阿罗娜已经取消老师的选择了~")
 
     if not index_str.isdigit():
+        await illegal_limit(finish_message="老师真是的，我不帮你搜了！哼~")
         await matcher.reject("不要再逗我了，老师！快发送你要选择的序号吧quq")
     index = int(index_str)
     if not (0 <= index <= len(res)):
-        await matcher.reject("阿罗娜找不到老师发送的序号哦，请老师重新发送一下吧")
+        await matcher.reject("抱歉，阿罗娜找不到老师发送的序号哦，请老师重新发送一下吧")
 
     param = res[index - 1].name
     try:
@@ -162,15 +165,15 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
         resp = await search_exact(name)
     except Exception:
         logger.exception(f"Arona数据源搜索失败 {args.name}")
-        await matcher.finish("阿罗娜在尝试查找原名是否存在时遇到了一点小问题……")
+        await matcher.finish("抱歉，阿罗娜在尝试查找原名是否存在时遇到了一点小问题……")
 
     if (not resp) or (len(resp) > 1):
-        await matcher.finish("阿罗娜找不到老师提供的原名，请老师检查一下您提供的名称是否正确")
+        await matcher.finish("啊咧？阿罗娜找不到老师提供的原名，请老师检查一下您提供的名称是否正确")
 
     ret_dict = set_alias(name, aliases)
     message = "\n".join(
         (
-            "阿罗娜已经成功帮你操作了以下别名~",
+            "好的，阿罗娜已经成功帮你操作了以下别名~",
             *(
                 (f"成功将别名 {k} 指向的原名从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
                 for k, v in ret_dict.items()
@@ -192,7 +195,7 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
     ret_dict = set_alias(None, aliases)
     message = "\n".join(
         (
-            "阿罗娜已经成功帮你操作了以下别名~",
+            "好的，阿罗娜已经成功帮你操作了以下别名~",
             *(
                 (f"成功删除指向原名 {v} 的别名 {k} " if v else f"已设置的别名中未找到 {k}")
                 for k, v in ret_dict.items()
