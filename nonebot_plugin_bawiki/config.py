@@ -30,6 +30,7 @@ class Cfg(BaseModel):
 
     ba_req_retry: int = 1
     ba_req_cache_ttl: int = 10800  # 3 hrs
+    ba_shittim_req_cache_ttl: int = 600  # 10 mins
     ba_req_timeout: Optional[float] = 10.0
     ba_auto_clear_cache_path: bool = False
 

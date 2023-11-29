@@ -42,15 +42,18 @@ from ..resource import (
     SHITTIM_UTIL_CSS_PATH,
     SHITTIM_UTIL_JS_PATH,
 )
-from ..util import AsyncReqKwargs, RespType, async_req, camel_case
+from ..util import (
+    AsyncReqKwargs,
+    RespType,
+    base_async_req,
+    camel_case,
+    wrapped_alru_cache,
+)
 from .playwright import RES_ROUTE_URL, bawiki_router, get_template_renderer
 
 if not config.ba_shittim_key:
     logger.warning("API Key 未配置，关于什亭之匣的功能将会不可用！")
     logger.warning("请访问 https://arona.icu/about 查看获取 API Key 的方式！")
-
-
-T = TypeVar("T")
 
 
 SHITTIM_CACHE_DIR = CACHE_DIR / "shittim"
@@ -60,10 +63,7 @@ if not SHITTIM_CACHE_DIR.exists():
     SHITTIM_CACHE_DIR.mkdir(parents=True)
 
 
-template_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(RES_SHITTIM_TEMPLATES_DIR),
-    enable_async=True,
-)
+T = TypeVar("T")
 
 SERVER_NAME_MAP = {
     1: "官服",
@@ -80,9 +80,17 @@ HARD_FULLNAME_MAP = {
     "H": "Hard",
     "N": "Normal",
 }
-
 RAID_ANALYSIS_URL = urljoin(config.ba_shittim_url, "raidAnalyse")
 TIMEZONE_SHANGHAI = pytz.timezone("Asia/Shanghai")
+
+async_req = wrapped_alru_cache(ttl=config.ba_shittim_req_cache_ttl, maxsize=None)(
+    base_async_req,
+)
+template_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(RES_SHITTIM_TEMPLATES_DIR),
+    enable_async=True,
+)
+
 
 # region Pagination
 

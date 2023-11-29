@@ -7,7 +7,7 @@ from nonebot.permission import SUPERUSER
 
 from ..help import FT_E, FT_S
 from ..resource import CACHE_DIR
-from ..util import clear_req_cache
+from ..util import clear_wrapped_alru_cache
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -51,6 +51,6 @@ cmd_clear_cache = on_command("ba清空缓存", aliases={"ba清除缓存"}, permi
 
 @cmd_clear_cache.handle()
 async def _(matcher: Matcher):
-    req_count = clear_req_cache()
+    req_count = clear_wrapped_alru_cache()
     cache_count = clear_cache_dir()
     await matcher.finish(f"已清除 {req_count} 项请求缓存与 {cache_count} 项文件缓存～")

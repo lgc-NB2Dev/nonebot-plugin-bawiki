@@ -7,20 +7,24 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
+    Coroutine,
     Dict,
+    Generic,
     Iterable,
     Iterator,
     List,
     NamedTuple,
     Optional,
     Sequence,
+    Tuple,
     TypedDict,
     TypeVar,
     Union,
     cast,
 )
-from typing_extensions import Unpack
+from typing_extensions import ParamSpec, Unpack
 from urllib.parse import urljoin
+from weakref import WeakSet
 
 import anyio
 from async_lru import _LRUCacheWrapper, alru_cache
@@ -40,48 +44,76 @@ from pil_utils import BuildImage
 from .config import config
 
 T = TypeVar("T")
+R = TypeVar("R")
+K = TypeVar("K")
+V = TypeVar("V")
 TC = TypeVar("TC", bound=Callable)
+P = ParamSpec("P")
 NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
 PathType = Union[str, Path, anyio.Path]
 SendableType = Union[Message, MessageSegment, str]
 
 KEY_ILLEGAL_COUNT = "_ba_illegal_count"
 
+wrapped_cache_functions: WeakSet["SupportDictCacheWrapper"] = WeakSet()
+
+
+class SupportDictCacheWrapper(Generic[P, R], _LRUCacheWrapper[R]):  # type: ignore  # ignore final class
+    def __init__(
+        self,
+        fn: Callable[P, Coroutine[Any, Any, R]],
+        maxsize: Optional[int] = 128,
+        typed: bool = False,
+        ttl: Optional[float] = None,
+    ) -> None:
+        async def wrapped_func(*args, **kwargs):
+            new_args, new_kwargs = self._recover_args(args, kwargs)
+            return await cast(Callable, fn)(*new_args, **new_kwargs)
+
+        super().__init__(wrapped_func, maxsize, typed, ttl)
+
+    def _process_args(
+        self,
+        func: Callable[[Any], Any],
+        args: Tuple,
+        kwargs: Dict,
+    ) -> Tuple[Tuple, Dict]:
+        new_args = tuple(func(arg) for arg in args)
+        new_kwargs = {}
+        for k, v in kwargs.items():
+            new_kwargs[k] = func(v)
+        return new_args, new_kwargs
+
+    def _convert_args(self, args: Tuple, kwargs: Dict) -> Tuple[Tuple, Dict]:
+        return self._process_args(
+            lambda obj: frozenset(obj.items()) if isinstance(obj, dict) else obj,
+            args,
+            kwargs,
+        )
+
+    def _recover_args(self, args: Tuple, kwargs: Dict) -> Tuple[Tuple, Dict]:
+        return self._process_args(
+            lambda obj: dict(obj) if isinstance(obj, frozenset) else obj,
+            args,
+            kwargs,
+        )
+
+    async def __call__(self, *args: P.args, **kwargs: P.kwargs) -> R:
+        new_args, new_kwargs = self._convert_args(args, kwargs)
+        return await super().__call__(*new_args, **new_kwargs)
+
 
 def wrapped_alru_cache(
-    maxsize: Optional[int] = None,
+    maxsize: Optional[int] = 128,
     typed: bool = False,
     ttl: Optional[int] = None,
 ):
-    def wrapper(func: TC) -> TC:
-        # 为了让 lru cache 兼容 dict 只能这样了...
-        # 写你妈 type hint，我累了
-
-        def convert_dict(obj):
-            return frozenset(obj.items()) if isinstance(obj, dict) else obj
-
-        def recover_dict(obj):
-            return dict(obj) if isinstance(obj, frozenset) else obj
-
-        def process_args(func, args, kwargs):
-            new_args = tuple(func(arg) for arg in args)
-            new_kwargs = {}
-            for k, v in kwargs.items():
-                new_kwargs[k] = func(v)
-            return new_args, new_kwargs
-
-        class CacheWrapper(_LRUCacheWrapper):  # type: ignore
-            async def __call__(self, *args, **kwargs):
-                if kwargs.pop("no_cache", False):
-                    return await func(*args, **kwargs)
-                new_args, new_kwargs = process_args(convert_dict, args, kwargs)
-                return await super().__call__(*new_args, **new_kwargs)
-
-        async def wrapped_func(*args, **kwargs):
-            new_args, new_kwargs = process_args(recover_dict, args, kwargs)
-            return await func(*new_args, **new_kwargs)
-
-        return cast(Any, CacheWrapper(wrapped_func, maxsize, typed, ttl))
+    def wrapper(
+        func: Callable[P, Coroutine[Any, Any, R]],
+    ) -> SupportDictCacheWrapper[P, R]:
+        wrapped = SupportDictCacheWrapper(func, maxsize, typed, ttl)
+        wrapped_cache_functions.add(wrapped)
+        return wrapped
 
     return wrapper
 
@@ -107,11 +139,8 @@ class AsyncReqKwargs(TypedDict, total=False):
     raise_for_status: bool
     sleep: float
 
-    no_cache: bool
 
-
-@wrapped_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)
-async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
+async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     if not urls:
         raise ValueError("No URL specified")
 
@@ -187,11 +216,18 @@ async def async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     return resp
 
 
-def clear_req_cache() -> int:
-    lru_wrapper = cast(_LRUCacheWrapper[Any], async_req)
-    info = lru_wrapper.cache_info()
-    lru_wrapper.cache_clear()
-    return info.currsize
+async_req = wrapped_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)(
+    base_async_req,
+)
+
+
+def clear_wrapped_alru_cache() -> int:
+    cleared = 0
+    for wrapped in wrapped_cache_functions:
+        size = wrapped.cache_info().currsize
+        wrapped.cache_clear()
+        cleared += size
+    return cleared
 
 
 def format_timestamp(t: int) -> str:
