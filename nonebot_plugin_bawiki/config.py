@@ -14,6 +14,7 @@ class Cfg(BaseModel):
     ba_disable_classic_gacha: bool = False
     ba_gacha_max: int = 200
     ba_illegal_limit: int = 3
+    ba_arona_set_alias_only_su: bool = False
 
     ba_gamekee_url: HttpUrl = Field("https://ba.gamekee.com/")
     ba_schale_url: HttpUrl = Field("https://schale.gg/")

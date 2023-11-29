@@ -12,7 +12,7 @@ from ..config import config
 from ..data.bawiki import recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import GameKeeVoice, game_kee_get_stu_li, game_kee_get_voice
 from ..help import FT_E, FT_S
-from ..util import RespType, async_req
+from ..util import IllegalOperationFinisher, RespType, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -47,6 +47,7 @@ KEY_VOICE_TYPE = "voice_type"
 KEY_ORIGINAL_STU_NAME = "original_stu_name"
 KEY_STU_ICON = "stu_icon"
 
+illegal_finisher = IllegalOperationFinisher("非法操作次数过多，已退出选择")
 
 cmd_voice = on_command("ba语音")
 
@@ -131,6 +132,7 @@ async def _(matcher: Matcher, state: T_State, message: Message = EventMessage())
     index = int(arg) if arg.isdigit() else None
     voice_list: List[GameKeeVoice] = state[KEY_VOICE_LIST]
     if (not index) or (index > len(voice_list)):
+        await illegal_finisher()
         await matcher.finish("序号错误，请重新选择")
 
     state[KEY_SELECTED_VOICE] = voice_list[index - 1]

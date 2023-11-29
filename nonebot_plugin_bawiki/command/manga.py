@@ -1,7 +1,7 @@
 import asyncio
 import random
 from io import BytesIO
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
@@ -14,7 +14,13 @@ from pil_utils import BuildImage
 from ..config import config
 from ..data.gamekee import MangaMetadata, get_manga_content, get_manga_list
 from ..help import FT_E, FT_S
-from ..util import RespType, async_req, send_forward_msg, split_list
+from ..util import (
+    IllegalOperationFinisher,
+    RespType,
+    async_req,
+    send_forward_msg,
+    split_list,
+)
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -41,6 +47,8 @@ help_list: "HelpList" = [
 
 KEY_MANGA_LIST = "manga_list"
 KEY_SELECTED_MANGA = "selected_manga"
+
+illegal_finisher = IllegalOperationFinisher("非法操作次数过多，已退出选择")
 
 cmd_random_manga = on_command("ba漫画")
 
@@ -94,6 +102,7 @@ async def _(matcher: Matcher, state: T_State, message: Message = EventMessage())
     index = int(arg) if arg.isdigit() else None
     manga_list: List[MangaMetadata] = state[KEY_MANGA_LIST]
     if (not index) or (index > len(manga_list)):
+        await illegal_finisher()
         await matcher.reject("请输入正确的序号")
 
     state[KEY_SELECTED_MANGA] = manga_list[index - 1]
@@ -133,17 +142,14 @@ async def _(
 
         chunks = list(split_list(image_seg, 9))
         max_page = len(chunks)
-        last_task: Optional[asyncio.Task] = None
         for i, chunk in enumerate(chunks, 1):
-            if last_task and (not last_task.done()):
-                await last_task
             msg = Message()
             if i == 1:
                 msg += header
             msg += chunk
             if max_page > 1:
                 msg += f"第 {i} / {max_page} 页（共 {image_sum} P）"
-            last_task = asyncio.create_task(matcher.send(msg))
+            await matcher.send(msg)
         return
 
     headers = [Message() + f"【{manga.category}】{content.title}"]

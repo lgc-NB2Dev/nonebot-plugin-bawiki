@@ -43,6 +43,9 @@ T = TypeVar("T")
 TC = TypeVar("TC", bound=Callable)
 NestedIterable = Iterable[Union[T, Iterable["NestedIterable[T]"]]]
 PathType = Union[str, Path, anyio.Path]
+SendableType = Union[Message, MessageSegment, str]
+
+KEY_ILLEGAL_COUNT = "_ba_illegal_count"
 
 
 def wrapped_alru_cache(
@@ -326,15 +329,28 @@ def camel_case(string: str, upper_first: bool = False) -> str:
     return f"{pfx}{sfx}"
 
 
-async def illegal_limit(
-    count: int = config.ba_illegal_limit,
-    finish_message: Union[Message, MessageSegment, str] = "老师太坏了，阿罗娜不和你玩了~",
-):
-    if count <= 0:
-        return
-    matcher = current_matcher.get()
-    state = matcher.state
-    count = state.get("illegal_count", 0) + 1
-    if count >= config.ba_illegal_limit:
-        await matcher.finish(finish_message)
-    state["illegal_count"] = count
+class IllegalOperationFinisher:
+    def __init__(
+        self,
+        finish_message: Optional[SendableType] = None,
+        limit: int = config.ba_illegal_limit,
+    ):
+        self.finish_message = finish_message
+        self.limit = limit
+
+    async def __call__(
+        self,
+        finish_message: Union[SendableType, None] = Ellipsis,  # type: ignore
+    ):
+        if self.limit <= 0:
+            return
+        matcher = current_matcher.get()
+        state = matcher.state
+
+        count = state.get(KEY_ILLEGAL_COUNT, 0) + 1
+        if count >= config.ba_illegal_limit:
+            await matcher.finish(
+                self.finish_message if finish_message is Ellipsis else finish_message,
+            )
+
+        state[KEY_ILLEGAL_COUNT] = count

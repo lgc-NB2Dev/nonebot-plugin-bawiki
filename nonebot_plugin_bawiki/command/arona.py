@@ -5,12 +5,14 @@ from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.matcher import Matcher
 from nonebot.params import ArgPlainText, CommandArg, ShellCommandArgs
+from nonebot.permission import SUPERUSER
 from nonebot.rule import ArgumentParser, Namespace
 from nonebot.typing import T_State
 
+from ..config import config
 from ..data.arona import ImageModel, get_image, search, search_exact, set_alias
 from ..help import FT_E, FT_S
-from ..util import illegal_limit
+from ..util import IllegalOperationFinisher
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -51,6 +53,9 @@ help_list: "HelpList" = [
     },
 ]
 
+
+illegal_finisher = IllegalOperationFinisher("坏老师，一直逗我，不理你了，哼！")
+
 ARONA_PREFIXES = ["arona", "蓝色恶魔", "Arona", "ARONA", "阿罗娜"]
 cmd_arona = on_command(ARONA_PREFIXES[0], aliases=set(ARONA_PREFIXES[1:]), priority=2)
 
@@ -75,7 +80,7 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 async def _(matcher: Matcher, state: T_State, param: str = ArgPlainText()):
     param = param.strip()
     if not param:
-        await illegal_limit(finish_message="老师真是的，我不帮你搜了！哼~")
+        await illegal_finisher()
         await matcher.reject("老师真是的，快给我发送你想要搜索的内容吧！")
 
     try:
@@ -106,8 +111,9 @@ async def _(event: MessageEvent, matcher: Matcher, state: T_State):
         await matcher.finish("OK，阿罗娜已经取消老师的选择了~")
 
     if not index_str.isdigit():
-        await illegal_limit(finish_message="老师真是的，我不帮你搜了！哼~")
-        await matcher.reject("不要再逗我了，老师！快发送你要选择的序号吧quq")
+        await illegal_finisher()
+        await matcher.reject("不要再逗我了，老师！快发送你要选择的序号吧 quq")
+
     index = int(index_str)
     if not (0 <= index <= len(res)):
         await matcher.reject("抱歉，阿罗娜找不到老师发送的序号哦，请老师重新发送一下吧")
@@ -133,6 +139,7 @@ cmd_arona_set_alias = on_shell_command(
     ARONA_SET_ALIAS_COMMANDS[0],
     aliases=set(ARONA_SET_ALIAS_COMMANDS[1:]),
     parser=cmd_arona_set_alias_parser,
+    permission=SUPERUSER if config.ba_arona_set_alias_only_su else None,
 )
 
 cmd_aro_del_alias_parser = ArgumentParser(ARONA_DEL_ALIAS_COMMANDS[0])
@@ -141,6 +148,7 @@ cmd_arona_del_alias = on_shell_command(
     ARONA_DEL_ALIAS_COMMANDS[0],
     aliases=set(ARONA_DEL_ALIAS_COMMANDS[1:]),
     parser=cmd_aro_del_alias_parser,
+    permission=SUPERUSER if config.ba_arona_set_alias_only_su else None,
 )
 
 

@@ -108,30 +108,31 @@ plugins = [
 
 在 nonebot2 项目的 `.env` 文件中添加下表中的配置
 
-|           配置项           | 必填 | 默认值  |                                         说明                                          |
-| :------------------------: | :--: | :-----: | :-----------------------------------------------------------------------------------: |
-|         `BA_PROXY`         |  否  | `None`  |                              访问各种数据源时使用的代理                               |
-|    `BA_GACHA_COOL_DOWN`    |  否  |   `0`   |                              每群每人的抽卡冷却，单位秒                               |
-|    `BA_VOICE_USE_CARD`     |  否  | `False` |                          是否使用自定义音乐卡片发送角色语音                           |
-|    `BA_USE_FORWARD_MSG`    |  否  | `True`  |                             是否使用合并转发发送部分消息                              |
-|  `BA_SCREENSHOT_TIMEOUT`   |  否  |  `60`   |                                 网页截图超时，单位秒                                  |
-|     `BA_ILLEGAL_LIMIT`     |  否  |   `3`   |             用户在进行操作时输入了多少次非法指令后直接退出操作，填 `0` 以禁用此功能       |
-| `BA_DISABLE_CLASSIC_GACHA` |  否  | `False` |                      抽卡次数 10 次以下时是否不使用经典抽卡样式                       |
-|       `BA_GACHA_MAX`       |  否  |  `200`  |                                   单次抽卡最大次数                                    |
-|      `BA_GAMEKEE_URL`      |  否  |   ...   |                                 GameKee 数据源的地址                                  |
-|      `BA_SCHALE_URL`       |  否  |   ...   |                              SchaleDB Json 数据源的地址                               |
-|     `BA_BAWIKI_DB_URL`     |  否  |   ...   |                                  bawiki-data 的地址                                   |
-|     `BA_ARONA_API_URL`     |  否  |   ...   |                                Arona Bot 数据源的地址                                 |
-|     `BA_ARONA_CDN_URL`     |  否  |   ...   |                                Arona Bot 图片 CDN 地址                                |
-|    `BA_SHITTIM_API_URL`    |  否  |   ...   |                                   什亭之匣 API 地址                                   |
-|      `BA_SHITTIM_URL`      |  否  |   ...   |                                     什亭之匣网址                                      |
-|   `BA_SHITTIM_DATA_URL`    |  否  |   ...   |                                   什亭之匣数据地址                                    |
-|      `BA_SHITTIM_KEY`      |  否  | `None`  |            什亭之匣 API Key（获取途径 [看这里](https://arona.icu/about)）             |
-| `BA_SHITTIM_REQUEST_DELAY` |  否  |   `0`   |                   请求什亭之匣 API 后的等待时间，用于测试时限制 QPS                   |
-|       `BA_REQ_RETRY`       |  否  |   `1`   | 每次请求的重试次数<br />当值为 `1` 时，总共会请求两次（请求一次，重试一次），以此类推 |
-|     `BA_REQ_CACHE_TTL`     |  否  | `10800` |                              请求缓存的过期时间，单位秒                               |
-|      `BA_REQ_TIMEOUT`      |  否  | `10.0`  |                       请求超时，单位秒，为 `None` 表示永不超时                        |
-| `BA_AUTO_CLEAR_CACHE_PATH` |  否  | `False` |                        是否在插件每次加载时自动清理缓存文件夹                         |
+|            配置项            | 必填 | 默认值  |                                         说明                                          |
+| :--------------------------: | :--: | :-----: | :-----------------------------------------------------------------------------------: |
+|          `BA_PROXY`          |  否  | `None`  |                              访问各种数据源时使用的代理                               |
+|     `BA_GACHA_COOL_DOWN`     |  否  |   `0`   |                              每群每人的抽卡冷却，单位秒                               |
+|     `BA_VOICE_USE_CARD`      |  否  | `False` |                          是否使用自定义音乐卡片发送角色语音                           |
+|     `BA_USE_FORWARD_MSG`     |  否  | `True`  |                             是否使用合并转发发送部分消息                              |
+|   `BA_SCREENSHOT_TIMEOUT`    |  否  |  `60`   |                                 网页截图超时，单位秒                                  |
+|  `BA_DISABLE_CLASSIC_GACHA`  |  否  | `False` |                      抽卡次数 10 次以下时是否不使用经典抽卡样式                       |
+|        `BA_GACHA_MAX`        |  否  |  `200`  |                                   单次抽卡最大次数                                    |
+|      `BA_ILLEGAL_LIMIT`      |  否  |   `3`   |            用户在长对话中非法操作多少次后直接结束对话，填 `0` 以禁用此功能            |
+| `BA_ARONA_SET_ALIAS_ONLY_SU` |  否  | `False` |                    是否只有超级用户才能修改 `arona` 指令所用的别名                    |
+|       `BA_GAMEKEE_URL`       |  否  |   ...   |                                 GameKee 数据源的地址                                  |
+|       `BA_SCHALE_URL`        |  否  |   ...   |                              SchaleDB Json 数据源的地址                               |
+|      `BA_BAWIKI_DB_URL`      |  否  |   ...   |                                  bawiki-data 的地址                                   |
+|      `BA_ARONA_API_URL`      |  否  |   ...   |                                Arona Bot 数据源的地址                                 |
+|      `BA_ARONA_CDN_URL`      |  否  |   ...   |                                Arona Bot 图片 CDN 地址                                |
+|     `BA_SHITTIM_API_URL`     |  否  |   ...   |                                   什亭之匣 API 地址                                   |
+|       `BA_SHITTIM_URL`       |  否  |   ...   |                                     什亭之匣网址                                      |
+|    `BA_SHITTIM_DATA_URL`     |  否  |   ...   |                                   什亭之匣数据地址                                    |
+|       `BA_SHITTIM_KEY`       |  否  | `None`  |            什亭之匣 API Key（获取途径 [看这里](https://arona.icu/about)）             |
+|  `BA_SHITTIM_REQUEST_DELAY`  |  否  |   `0`   |                   请求什亭之匣 API 后的等待时间，用于测试时限制 QPS                   |
+|        `BA_REQ_RETRY`        |  否  |   `1`   | 每次请求的重试次数<br />当值为 `1` 时，总共会请求两次（请求一次，重试一次），以此类推 |
+|      `BA_REQ_CACHE_TTL`      |  否  | `10800` |                              请求缓存的过期时间，单位秒                               |
+|       `BA_REQ_TIMEOUT`       |  否  | `10.0`  |                       请求超时，单位秒，为 `None` 表示永不超时                        |
+|  `BA_AUTO_CLEAR_CACHE_PATH`  |  否  | `False` |                        是否在插件每次加载时自动清理缓存文件夹                         |
 
 <!--
 由于 CDN 可能并不给力，如果有条件的话本人推荐使用代理直接访问原地址，下面是对应 `.env` 配置：
@@ -195,6 +196,12 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
   </details>
 
 ## 📝 更新日志
+
+### 0.10.1
+
+- 修复 `ba总力档线` 指令返回图片中更新时间显示时区错误的问题
+- 向国服总力数据功能中的指令新增几个别名，详情请看帮助
+- 新增配置项 `BA_ILLEGAL_LIMIT`、`BA_ARONA_SET_ALIAS_ONLY_SU`
 
 ### 0.10.0
 
