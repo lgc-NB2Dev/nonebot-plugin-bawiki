@@ -8,7 +8,8 @@ from nonebot.params import CommandArg
 
 from ..data.gamekee import extract_content_pic, get_level_list
 from ..help import FT_E, FT_S
-from ..util import RespType, async_req
+from ..util import RespType as Rt
+from ..util import async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -58,10 +59,5 @@ async def _(matcher: Matcher, arg: Message = CommandArg()):
 
     msg = Message()
     msg += f"https://ba.gamekee.com/{cid}.html\n"
-    msg += [
-        MessageSegment.image(
-            await async_req(x, resp_type=RespType.BYTES),
-        )
-        for x in imgs
-    ]
+    msg += [MessageSegment.image(await async_req(x, resp_type=Rt.BYTES)) for x in imgs]
     await matcher.finish(msg)

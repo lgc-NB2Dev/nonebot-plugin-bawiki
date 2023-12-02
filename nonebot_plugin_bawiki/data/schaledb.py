@@ -21,13 +21,13 @@ from ..resource import (
 )
 from ..util import (
     AsyncReqKwargs,
-    RespType,
     async_req,
     img_invert_rgba,
     parse_time_delta,
     read_image,
     split_list,
 )
+from ..util import RespType as Rt
 
 PAGE_KWARGS = {
     "is_mobile": True,
@@ -35,9 +35,13 @@ PAGE_KWARGS = {
 }
 
 
-async def schale_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
+async def schale_get(
+    url: str,
+    resp_type: Rt = Rt.JSON,
+    **kwargs: Unpack[AsyncReqKwargs],
+) -> Any:
     kwargs["base_urls"] = config.ba_schale_url
-    return await async_req(url, **kwargs)
+    return await async_req(url, resp_type=resp_type, **kwargs)
 
 
 async def schale_get_stu_data(loc: str = "cn") -> List[Dict[str, Any]]:
@@ -166,7 +170,7 @@ async def schale_get_calender(
                     BytesIO(
                         await schale_get(
                             f'images/student/collection/{s["Id"]}.webp',
-                            resp_type=RespType.BYTES,
+                            resp_type=Rt.BYTES,
                         ),
                     ),
                 )
@@ -226,11 +230,11 @@ async def schale_get_calender(
         ev_bg, ev_img = await asyncio.gather(
             schale_get(
                 f"images/campaign/Campaign_Event_{ev}_Normal.png",
-                resp_type=RespType.BYTES,
+                resp_type=Rt.BYTES,
             ),
             schale_get(
                 f"images/eventlogo/{ev}_{'Tw' if server_index else 'Jp'}.webp",
-                resp_type=RespType.BYTES,
+                resp_type=Rt.BYTES,
             ),
         )
 
@@ -333,22 +337,13 @@ async def schale_get_calender(
         def_color = color_map[c_ri["ArmorType"]]
 
         c_bg, c_fg, icon_def, icon_atk, icon_tr = await asyncio.gather(
-            *[
-                schale_get(bg_url, resp_type=RespType.BYTES),
-                schale_get(fg_url, resp_type=RespType.BYTES),
-                schale_get(
-                    "images/ui/Type_Defense_s.png",
-                    resp_type=RespType.BYTES,
-                ),
-                schale_get(
-                    "images/ui/Type_Attack_s.png",
-                    resp_type=RespType.BYTES,
-                ),
-                schale_get(
-                    f"images/ui/Terrain_{terrain}.png",
-                    resp_type=RespType.BYTES,
-                ),
-            ],
+            *(
+                schale_get(bg_url, resp_type=Rt.BYTES),
+                schale_get(fg_url, resp_type=Rt.BYTES),
+                schale_get("images/ui/Type_Defense_s.png", resp_type=Rt.BYTES),
+                schale_get("images/ui/Type_Attack_s.png", resp_type=Rt.BYTES),
+                schale_get(f"images/ui/Terrain_{terrain}.png", resp_type=Rt.BYTES),
+            ),
         )
 
         icon_def = (
@@ -467,13 +462,13 @@ async def schale_get_calender(
         stu_pics = [
             BuildImage.open(BytesIO(x)).convert("RGBA").resize_height(180).circle()
             for x in await asyncio.gather(
-                *[
+                *(
                     schale_get(
                         f'images/student/icon/{x["Id"]}.webp',
-                        resp_type=RespType.BYTES,
+                        resp_type=Rt.BYTES,
                     )
                     for x in birth_this_week + birth_next_week
-                ],
+                ),
             )
         ]
 
@@ -585,7 +580,7 @@ async def draw_fav_li(stu_li: List[dict]) -> BytesIO:
 
         ret = await schale_get(
             f"images/student/lobby/{stu_id_}.webp",
-            resp_type=RespType.BYTES,
+            resp_type=Rt.BYTES,
         )
         icon_img = Image.open(BytesIO(ret)).convert("RGBA")
         img.paste(icon_img, (left, top), alpha=True)

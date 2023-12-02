@@ -55,6 +55,12 @@ SendableType = Union[Message, MessageSegment, str]
 
 KEY_ILLEGAL_COUNT = "_ba_illegal_count"
 
+
+# region async_req
+# 这玩意真的太不优雅了
+# 有必要重新写一个 request cache，可以参考 hishel
+
+
 wrapped_cache_functions: WeakSet["SupportDictCacheWrapper"] = WeakSet()
 
 
@@ -122,6 +128,7 @@ class RespType(Enum):
     JSON = auto()
     TEXT = auto()
     BYTES = auto()
+    HEADERS = auto()
 
 
 class AsyncReqKwargs(TypedDict, total=False):
@@ -188,19 +195,21 @@ async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
             if raise_for_status:
                 resp.raise_for_status()
 
-            if method == "HEAD":
-                return resp.headers
-            if resp_type == RespType.JSON:
-                return resp.json()
+            if sleep:
+                await asyncio.sleep(sleep)
+
             if resp_type == RespType.TEXT:
                 return resp.text
-            # if resp_type == RespType.BYTES:
-            return resp.content
+            if resp_type == RespType.BYTES:
+                return resp.content
+            if resp_type == RespType.HEADERS:
+                return resp.headers
+            return resp.json()  # default RespType.JSON:
 
     while True:
         url, *rest = urls
         try:
-            resp = await do_request(url)
+            return await do_request(url)
         except Exception as e:
             e_sfx = f"because error occurred while requesting `{url}`: {e!r}"
             if retries > 0:
@@ -212,12 +221,6 @@ async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
                 logger.error(f"Requesting next url `{rest[0]}` {e_sfx}")
                 url, *rest = rest
             logger.opt(exception=e).debug("Error Stack")
-        else:
-            break
-
-    if sleep:
-        await asyncio.sleep(sleep)
-    return resp
 
 
 async_req = wrapped_alru_cache(ttl=config.ba_req_cache_ttl, maxsize=None)(
@@ -232,6 +235,9 @@ def clear_wrapped_alru_cache() -> int:
         wrapped.cache_clear()
         cleared += size
     return cleared
+
+
+# endregion
 
 
 def format_timestamp(t: int) -> str:

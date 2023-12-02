@@ -14,13 +14,8 @@ from pil_utils import BuildImage
 from ..config import config
 from ..data.gamekee import MangaMetadata, get_manga_content, get_manga_list
 from ..help import FT_E, FT_S
-from ..util import (
-    IllegalOperationFinisher,
-    RespType,
-    async_req,
-    send_forward_msg,
-    split_list,
-)
+from ..util import IllegalOperationFinisher, async_req, send_forward_msg, split_list
+from ..util import RespType as Rt
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -118,7 +113,7 @@ async def _(
     manga: MangaMetadata = state[KEY_SELECTED_MANGA]
 
     async def get_pic(url):
-        p = await async_req(url, resp_type=RespType.BYTES)
+        p = await async_req(url, resp_type=Rt.BYTES)
         if url.endswith(".webp"):
             p = BuildImage.open(BytesIO(p)).save_png()
         return p

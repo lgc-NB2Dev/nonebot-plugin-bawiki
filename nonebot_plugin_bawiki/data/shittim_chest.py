@@ -97,7 +97,12 @@ template_env = jinja2.Environment(
 
 class PaginationCallable(Protocol, Generic[T]):
     # (resp, is_last_page)
-    async def __call__(self, page: int, size: int) -> Tuple[Optional[List[T]], bool]:
+    async def __call__(
+        self,
+        page: int,
+        size: int,
+        delay: float,
+    ) -> Tuple[Optional[List[T]], bool]:
         ...
 
 
@@ -115,14 +120,12 @@ def iter_pagination_func(**kwargs: Unpack[IterPFKwargs]):
     def decorator(func: PaginationCallable[T]) -> Callable[[], AsyncIterable[T]]:
         async def wrapper():
             while True:
-                resp, last_page = await func(page, size)
+                resp, last_page = await func(page, size, delay)
                 if resp:
                     for x in resp:
                         yield x
                 if last_page:
                     break
-                if delay:
-                    await asyncio.sleep(delay)
 
         return wrapper
 
@@ -237,7 +240,7 @@ class RankRecord(RankSummary):
     represent_character_unique_id: int
     tier: int
     boss_id: int
-    try_number_infos: List[TryNumberInfo]
+    try_number_infos: Optional[List[TryNumberInfo]]
     record_time: datetime
 
     _validator_time = validator(
@@ -323,12 +326,13 @@ def get_rank_list(
     **pf_kwargs: Unpack[IterPFKwargs],
 ) -> AsyncIterable[RankRecord]:
     @iter_pagination_func(**pf_kwargs)
-    async def iterator(page: int, size: int):
+    async def iterator(page: int, size: int, delay: float):
         ret = parse_obj_as(
             Rank,
             await shittim_get(
                 f"api/rank/list/{server.value}/{data_type.value}/{season}",
                 params={"page": page, "size": size},
+                sleep=delay,
             ),
         )
         return ret.records, True if (not ret.records) else ret.last_page

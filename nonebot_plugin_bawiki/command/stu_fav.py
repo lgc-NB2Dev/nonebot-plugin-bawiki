@@ -1,7 +1,6 @@
 import asyncio
 from typing import TYPE_CHECKING
 
-from httpx import Headers
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import ActionFailed, Message, MessageSegment
 from nonebot.log import logger
@@ -13,7 +12,8 @@ from ..data.bawiki import db_get_extra_l2d_list, recover_stu_alia, schale_to_gam
 from ..data.gamekee import game_kee_get_stu_cid_li, game_kee_grab_l2d
 from ..data.schaledb import draw_fav_li, get_fav_li, schale_get_stu_dict
 from ..help import FT_E, FT_S
-from ..util import RespType, async_req
+from ..util import RespType as Rt
+from ..util import async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -52,7 +52,7 @@ cmd_fav = on_command(
 @cmd_fav.handle()
 async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
     async def check_size(url: str) -> bool:
-        headers: Headers = await async_req(url, method="HEAD")
+        headers = await async_req(url, method="HEAD", resp_type=Rt.HEADERS)
         size = headers.get("Content-Length", 0)
         if not size:
             logger.debug(f"HEAD {url} resp header has no Content-Length")
@@ -124,7 +124,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         if pics:
             try:
                 images = await asyncio.gather(
-                    *[async_req(x, resp_type=RespType.BYTES) for x in pics],
+                    *(async_req(x, resp_type=Rt.BYTES) for x in pics),
                 )
             except Exception:
                 logger.exception("下载 L2D 图片出错")

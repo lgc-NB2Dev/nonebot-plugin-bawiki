@@ -21,23 +21,27 @@ from ..config import config
 from ..resource import CALENDER_BANNER_PATH, GAMEKEE_UTIL_JS_PATH, GRADIENT_BG_PATH
 from ..util import (
     AsyncReqKwargs,
-    RespType,
     async_req,
     i2b,
     parse_time_delta,
     read_image,
     split_pic,
 )
+from ..util import RespType as Rt
 
 
-async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
+async def game_kee_request(
+    url: str,
+    resp_type: Rt = Rt.JSON,
+    **kwargs: Unpack[AsyncReqKwargs],
+) -> Any:
     kwargs["base_urls"] = config.ba_gamekee_url
 
     headers = kwargs.get("headers") or {}
     headers.update({"Game-Id": "829", "Game-Alias": "ba"})
     kwargs["headers"] = headers
 
-    resp = await async_req(url, **kwargs)
+    resp = await async_req(url, resp_type=resp_type, **kwargs)
     if resp["code"] != 0:
         raise ValueError(resp["msg"])
     return resp["data"]
@@ -163,7 +167,7 @@ async def game_kee_get_calender_page(
         ev_pic = None
         if has_pic and (url := it.get("picture")):
             try:
-                pic_bytes = await async_req(f"https:{url}", resp_type=RespType.BYTES)
+                pic_bytes = await async_req(f"https:{url}", resp_type=Rt.BYTES)
                 ev_pic = BuildImage.open(BytesIO(pic_bytes))
             except Exception:
                 logger.exception("下载日程表图片失败")

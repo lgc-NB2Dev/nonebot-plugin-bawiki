@@ -53,10 +53,6 @@ help_list: "HelpList" = [
             f"- {FT_S}ba总力档线{FT_E}\n"
             f"- {FT_S}ba档线{FT_E}\n"
             " \n"
-            "使用以下指令查询总力排名：（可选参数：服务器名称、期数序号）\n"
-            f"- {FT_S}ba总力排名{FT_E}\n"
-            f"- {FT_S}ba排名{FT_E}\n"
-            " \n"
             "使用以下指令查询总力统计概览：（无参数）\n"
             f"- {FT_S}ba总力统计{FT_E}\n"
             " \n"
@@ -123,11 +119,6 @@ async def _(matcher: Matcher):
     )
 
 
-cmd_raid_rank = on_command(
-    "ba总力排名",
-    aliases={"ba排名"},
-    state={"data_type": RankDataType.Rank},
-)
 cmd_raid_score = on_command(
     "ba总力档线",
     aliases={"ba档线"},
@@ -135,7 +126,6 @@ cmd_raid_score = on_command(
 )
 
 
-@cmd_raid_rank.handle()
 @cmd_raid_score.handle()
 async def _(matcher: Matcher, state: T_State, arg_msg: Message = CommandArg()):
     try:

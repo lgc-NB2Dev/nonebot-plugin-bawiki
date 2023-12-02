@@ -8,7 +8,8 @@ from pydantic import BaseModel
 
 from ..config import config
 from ..resource import CACHE_DIR, DATA_DIR
-from ..util import RespType, async_req
+from ..util import RespType as Rt
+from ..util import async_req
 
 ARONA_CACHE_DIR = CACHE_DIR / "arona"
 if config.ba_auto_clear_cache_path and ARONA_CACHE_DIR.exists():
@@ -46,7 +47,7 @@ async def get_image(path: str, hash_str: Optional[str] = None) -> bytes:
     content = await async_req(
         f"image{path}",
         base_urls=config.ba_arona_cdn_url,
-        resp_type=RespType.BYTES,
+        resp_type=Rt.BYTES,
     )
 
     if not hash_str:

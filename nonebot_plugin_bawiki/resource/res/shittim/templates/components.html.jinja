@@ -34,17 +34,23 @@ Args:
 - summaries: List[RankSummary]
 -#}
 <div class="content grade-line">
-  {%- for rank in summaries -%}
+  {%- for i in range(3) -%}
   <div class="grade">
-    {%- if loop.index == 1 -%}
+    {%- if i == 0 -%}
     <img src="/shittim/assets/diamond.webp" />
-    {%- elif loop.index == 2 -%}
+    {%- elif i == 1 -%}
     <img src="/shittim/assets/gold.webp" />
     {%- else -%}
     <img src="/shittim/assets/silver.webp" />
     {%- endif -%}
+    {%- set rank = summaries[i] -%}
+    {%- if rank -%}
     <div class="score">{{ "{:,}".format(rank.best_ranking_point) }}</div>
     <div class="time">{{ rank.hard }} {{ rank.battle_time }}</div>
+    {%- else -%}
+    <div class="score">暂无数据</div>
+    <div class="time">-- --:--.---</div>
+    {%- endif -%}
   </div>
   {%- endfor -%}
 </div>
@@ -98,7 +104,7 @@ Args:
         <div class="grade-title {{ rank.hard_fullname | lower }}">{{ rank.hard }}</div>
       </td>
       <td>{{ rank.battle_time }}</td>
-      <td>{{ rank.try_number_infos | length }}</td>
+      <td>{%- if rank.try_number_infos -%}{{ rank.try_number_infos | length }}{%- else -%}未知{%- endif -%}</td>
     </tr>
     {%- endfor -%}
   </tbody>
@@ -147,6 +153,7 @@ Args:
         <div class="score">{{ record.hard }} {{ "{:,}".format(record.best_ranking_point) }}</div>
       </div>
     </div>
+    {%- if record.try_number_infos -%}
     {%- for info in record.try_number_infos -%}
     <div class="cust-character">
       <p>第 {{ info.try_number }} 刀</p>
@@ -157,6 +164,7 @@ Args:
       </div>
     </div>
     {%- endfor -%}
+    {%- endif -%}
   </div>
 </div>
 {%- endmacro -%}
