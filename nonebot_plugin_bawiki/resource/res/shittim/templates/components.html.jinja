@@ -144,7 +144,7 @@ Args:
 
       <div class="info-right">
         <div class="rank">第 {{ record.rank }} 名</div>
-        <div class="score">{{ "{:,}".format(record.best_ranking_point) }}</div>
+        <div class="score">{{ rank.hard }} {{ "{:,}".format(record.best_ranking_point) }}</div>
       </div>
     </div>
     {%- for info in record.try_number_infos -%}

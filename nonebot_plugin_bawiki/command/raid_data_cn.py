@@ -45,17 +45,19 @@ help_list: "HelpList" = [
             "查询国服总力相关数据\n"
             f"数据来源：什亭之匣（{config.ba_shittim_url}）\n"
             " \n"
-            "Tip：下面指令中的可选参数介绍，每个参数间需以空格分隔：\n"
+            "下面指令中的可选参数介绍，每个参数间需以空格分隔：\n"
             f"- {FT_S}服务器名称{FT_E} 可选值 “官服” 或 “B服”，默认为官服；\n"
             f"- {FT_S}期数序号{FT_E} 可以使用指令 {FT_S}ba总力列表{FT_E} 查询，默认为最新一期；\n"
             " \n"
             "使用以下指令查询总力档线：（可选参数：服务器名称、期数序号）\n"
             f"- {FT_S}ba总力档线{FT_E}\n"
+            f"- {FT_S}ba档线{FT_E}\n"
             " \n"
             "使用以下指令查询总力排名：（可选参数：服务器名称、期数序号）\n"
             f"- {FT_S}ba总力排名{FT_E}\n"
+            f"- {FT_S}ba排名{FT_E}\n"
             " \n"
-            "使用以下指令查询总力统计：（无参数）\n"
+            "使用以下指令查询总力统计概览：（无参数）\n"
             f"- {FT_S}ba总力统计{FT_E}\n"
             " \n"
             "使用以下指令查询往期总力第 1 名：（可选参数：服务器名称）\n"
@@ -121,8 +123,16 @@ async def _(matcher: Matcher):
     )
 
 
-cmd_raid_rank = on_command("ba总力排名", state={"data_type": RankDataType.Rank})
-cmd_raid_score = on_command("ba总力档线", state={"data_type": RankDataType.Score})
+cmd_raid_rank = on_command(
+    "ba总力排名",
+    aliases={"ba排名"},
+    state={"data_type": RankDataType.Rank},
+)
+cmd_raid_score = on_command(
+    "ba总力档线",
+    aliases={"ba档线"},
+    state={"data_type": RankDataType.Score},
+)
 
 
 @cmd_raid_rank.handle()
