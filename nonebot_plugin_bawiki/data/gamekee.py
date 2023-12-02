@@ -30,18 +30,14 @@ from ..util import (
 from ..util import RespType as Rt
 
 
-async def game_kee_request(
-    url: str,
-    resp_type: Rt = Rt.JSON,
-    **kwargs: Unpack[AsyncReqKwargs],
-) -> Any:
+async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs["base_urls"] = config.ba_gamekee_url
 
     headers = kwargs.get("headers") or {}
     headers.update({"Game-Id": "829", "Game-Alias": "ba"})
     kwargs["headers"] = headers
 
-    resp = await async_req(url, resp_type=resp_type, **kwargs)
+    resp = await async_req(url, **kwargs)
     if resp["code"] != 0:
         raise ValueError(resp["msg"])
     return resp["data"]

@@ -13,13 +13,9 @@ from ..util import AsyncReqKwargs, async_req, recover_alia
 from ..util import RespType as Rt
 
 
-async def db_get(
-    suffix: str,
-    resp_type: Rt = Rt.JSON,
-    **kwargs: Unpack[AsyncReqKwargs],
-) -> Any:
+async def db_get(suffix: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs["base_urls"] = config.ba_bawiki_db_url
-    return await async_req(suffix, resp_type=resp_type, **kwargs)
+    return await async_req(suffix, **kwargs)
 
 
 async def db_get_wiki_data() -> Dict[str, Any]:

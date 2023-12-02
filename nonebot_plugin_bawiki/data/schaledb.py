@@ -35,13 +35,9 @@ PAGE_KWARGS = {
 }
 
 
-async def schale_get(
-    url: str,
-    resp_type: Rt = Rt.JSON,
-    **kwargs: Unpack[AsyncReqKwargs],
-) -> Any:
+async def schale_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
     kwargs["base_urls"] = config.ba_schale_url
-    return await async_req(url, resp_type=resp_type, **kwargs)
+    return await async_req(url, **kwargs)
 
 
 async def schale_get_stu_data(loc: str = "cn") -> List[Dict[str, Any]]:
