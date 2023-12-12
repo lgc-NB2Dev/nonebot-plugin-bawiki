@@ -15,7 +15,7 @@ Args:
 
 {%- for i, record in rank_list -%}
 {% set season = season_list[i] %}
-{%- call c.small_title() -%}第{{ i }}期 {{ season.season_map.value }} {{ season.boss }}{%- endcall -%}
+{%- call c.small_title() -%}第{{ season.season }}期 {{ season.season_map.value }} {{ season.boss }}{%- endcall -%}
 {{ c.rank_record(record) }}
 {%- if not loop.last -%}{{ c.segmentation() }}{%- endif -%}
 {%- endfor -%}
