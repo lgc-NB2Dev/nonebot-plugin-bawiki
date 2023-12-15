@@ -422,9 +422,11 @@ async def get_student_icon(student_id: Union[int, str]) -> bytes:
 
 # region render
 
+
 VIEWPORT_SIZE = ViewportSize(width=880, height=1080)
 
 CHART_SHOW_RANKS = [1, 1000, 2000, 4000, 8000, 20000]
+MULTIPLIER = 2
 CHART_W = 760
 CHART_H = 480
 DATE_FORMAT = "%m-%d %H:%M"
@@ -433,9 +435,13 @@ DATE_FORMATTER = mdates.DateFormatter(DATE_FORMAT)
 NUM_FORMATTER = mticker.StrMethodFormatter(NUM_FORMAT)
 
 
-def get_figure() -> "Figure":
+def get_figure() -> Figure:
     figure = pyplot.figure()
-    figure.set_size_inches(CHART_W / figure.dpi, CHART_H / figure.dpi)
+    figure.set_dpi(figure.dpi * MULTIPLIER)
+    figure.set_size_inches(
+        CHART_W * MULTIPLIER / figure.dpi,
+        CHART_H * MULTIPLIER / figure.dpi,
+    )
     return figure
 
 
@@ -543,7 +549,7 @@ async def render_rank_detail(
         viewport=VIEWPORT_SIZE,
     )(
         title=title,
-        season_list=season_list,
+        seasons={x.season: x for x in season_list},
         rank_list=sorted(rank_list.items(), key=lambda x: x[0], reverse=True),
         shittim_url=config.ba_shittim_url,
     )
