@@ -61,7 +61,7 @@ KEY_ILLEGAL_COUNT = "_ba_illegal_count"
 # 有必要重新写一个 request cache，可以参考 hishel
 
 
-wrapped_cache_functions: WeakSet["SupportDictCacheWrapper"] = WeakSet()
+wrapped_cache_functions: "WeakSet['SupportDictCacheWrapper']" = WeakSet()
 
 
 class SupportDictCacheWrapper(Generic[P, R], _LRUCacheWrapper[R]):  # type: ignore  # ignore final class
