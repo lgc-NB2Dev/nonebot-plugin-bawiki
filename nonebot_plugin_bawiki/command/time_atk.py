@@ -46,7 +46,10 @@ help_list: "HelpList" = [
 ]
 
 
-cmd_time_atk_wiki = on_command("ba综合战术考试", aliases={"ba合同火力演习", "ba战术考试", "ba火力演习"})
+cmd_time_atk_wiki = on_command(
+    "ba综合战术考试",
+    aliases={"ba合同火力演习", "ba战术考试", "ba火力演习"},
+)
 
 
 @cmd_time_atk_wiki.handle()
@@ -83,7 +86,9 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
 
     else:
         if (not str(arg).isdigit()) or ((arg := int(arg)) < 1):
-            await matcher.finish("综合战术考试ID需为整数，从1开始，代表第1个综合战术考试")
+            await matcher.finish(
+                "综合战术考试ID需为整数，从1开始，代表第1个综合战术考试",
+            )
         events.append(arg)
 
     try:

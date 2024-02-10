@@ -12,8 +12,7 @@ from ..data.bawiki import db_get_extra_l2d_list, recover_stu_alia, schale_to_gam
 from ..data.gamekee import game_kee_get_stu_cid_li, game_kee_grab_l2d
 from ..data.schaledb import draw_fav_li, get_fav_li, schale_get_stu_dict
 from ..help import FT_E, FT_S
-from ..util import RespType as Rt
-from ..util import async_req
+from ..util import RespType as Rt, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -62,7 +61,7 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
             logger.warning(f"{url} size too large ({size * 1024:.2f} KB > 10240 KB)")
         return ok
 
-    async def get_l2d(stu_name):
+    async def get_l2d(stu_name: str):
         if r := (await db_get_extra_l2d_list()).get(stu_name):
             return [f"{config.ba_bawiki_db_url}{x}" for x in r]
 
@@ -99,7 +98,9 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
             logger.exception("绘制图片出错")
             await matcher.finish("绘制图片出错，请检查后台输出")
 
-        await matcher.finish(f"羁绊等级 {arg} 时解锁L2D的学生有以下这些：" + MessageSegment.image(p))
+        await matcher.finish(
+            f"羁绊等级 {arg} 时解锁L2D的学生有以下这些：" + MessageSegment.image(p),
+        )
 
     # 学生名称
     arg = await recover_stu_alia(arg)

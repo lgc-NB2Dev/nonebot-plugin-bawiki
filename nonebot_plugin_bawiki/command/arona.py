@@ -177,14 +177,20 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
         await matcher.finish("抱歉，阿罗娜在尝试查找原名是否存在时遇到了一点小问题……")
 
     if (not resp) or (len(resp) > 1):
-        await matcher.finish("啊咧？阿罗娜找不到老师提供的原名，请老师检查一下您提供的名称是否正确")
+        await matcher.finish(
+            "啊咧？阿罗娜找不到老师提供的原名，请老师检查一下您提供的名称是否正确",
+        )
 
     ret_dict = set_alias(name, aliases)
     message = "\n".join(
         (
             "好的，阿罗娜已经成功帮你操作了以下别名~",
             *(
-                (f"成功将别名 {k} 指向的原名从 {v} 更改为 {name}" if v else f"成功设置 {k} 为 {name} 的别名")
+                (
+                    f"成功将别名 {k} 指向的原名从 {v} 更改为 {name}"
+                    if v
+                    else f"成功设置 {k} 为 {name} 的别名"
+                )
                 for k, v in ret_dict.items()
             ),
         ),
@@ -206,7 +212,11 @@ async def _(matcher: Matcher, args: Namespace = ShellCommandArgs()):
         (
             "好的，阿罗娜已经成功帮你操作了以下别名~",
             *(
-                (f"成功删除指向原名 {v} 的别名 {k} " if v else f"已设置的别名中未找到 {k}")
+                (
+                    f"成功删除指向原名 {v} 的别名 {k} "
+                    if v
+                    else f"已设置的别名中未找到 {k}"
+                )
                 for k, v in ret_dict.items()
             ),
         ),

@@ -14,8 +14,13 @@ from pil_utils import BuildImage
 from ..config import config
 from ..data.gamekee import MangaMetadata, get_manga_content, get_manga_list
 from ..help import FT_E, FT_S
-from ..util import IllegalOperationFinisher, async_req, send_forward_msg, split_list
-from ..util import RespType as Rt
+from ..util import (
+    IllegalOperationFinisher,
+    RespType as Rt,
+    async_req,
+    send_forward_msg,
+    split_list,
+)
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -82,7 +87,9 @@ async def _(matcher: Matcher, state: T_State, arg_msg: Message = CommandArg()):
             f"{i}. 【{x.category}】{x.name}" for i, x in enumerate(manga_list, 1)
         )
         too_much_tip = "\nTip：结果过多，仅显示前五个" if manga_total > 5 else ""
-        await matcher.pause(f"找到了多个结果，请发送序号选择，发送 0 退出选择：\n{list_msg}{too_much_tip}")
+        await matcher.pause(
+            f"找到了多个结果，请发送序号选择，发送 0 退出选择：\n{list_msg}{too_much_tip}",
+        )
 
 
 @cmd_random_manga.handle()
@@ -112,7 +119,7 @@ async def _(
 ):
     manga: MangaMetadata = state[KEY_SELECTED_MANGA]
 
-    async def get_pic(url):
+    async def get_pic(url: str):
         p = await async_req(url, resp_type=Rt.BYTES)
         if url.endswith(".webp"):
             p = BuildImage.open(BytesIO(p)).save_png()

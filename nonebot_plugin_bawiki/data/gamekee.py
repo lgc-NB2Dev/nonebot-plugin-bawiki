@@ -21,13 +21,13 @@ from ..config import config
 from ..resource import CALENDER_BANNER_PATH, GAMEKEE_UTIL_JS_PATH, GRADIENT_BG_PATH
 from ..util import (
     AsyncReqKwargs,
+    RespType as Rt,
     async_req,
     i2b,
     parse_time_delta,
     read_image,
     split_pic,
 )
-from ..util import RespType as Rt
 
 
 async def game_kee_request(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
@@ -157,7 +157,7 @@ async def game_kee_get_calender_page(
     ret: List[Dict],
     has_pic: bool = True,
 ) -> List[BytesIO]:
-    now = datetime.now()
+    now = datetime.now().astimezone()
 
     async def draw(it: dict) -> BuildImage:
         ev_pic = None
@@ -168,8 +168,8 @@ async def game_kee_get_calender_page(
             except Exception:
                 logger.exception("下载日程表图片失败")
 
-        begin = datetime.fromtimestamp(it["begin_at"])
-        end = datetime.fromtimestamp(it["end_at"])
+        begin = datetime.fromtimestamp(it["begin_at"]).astimezone()
+        end = datetime.fromtimestamp(it["end_at"]).astimezone()
         started = begin <= now
         time_remain = (end if started else begin) - now
         dd, hh, mm, ss = parse_time_delta(time_remain)
@@ -384,14 +384,15 @@ async def game_kee_get_voice(cid: int, is_chinese: bool = False) -> List[GameKee
     multi_lang_voices = [
         [parse_voice_elem(x) for x in audios]
         for table_fathers in bs.select(".slide-item")
-        if (
+        if
+        (
             # 选择 tables
             (tables := table_fathers.select(".table-overflow > .mould-table"))
             # 检查 tables 中是否有语音，如果有，就取出语音到变量 aus -> audios
             and (
                 audios := next(
                     (aus for child in tables if (aus := child.find_all("audio"))),
-                    None,
+                    None,  # type: ignore
                 )
             )
         )

@@ -1,4 +1,5 @@
 import datetime
+from contextlib import suppress
 from typing import TYPE_CHECKING, Literal, Optional
 
 from nonebot import on_command
@@ -108,20 +109,25 @@ async def _(matcher: Matcher, state: T_State, arg: Message = CommandArg()):
     if date:
         parsed_date = None
         for f in ["%Y/%m/%d", "%Y-%m-%d", "%Y年%m月%d日", "%m/%d", "%m-%d", "%m月%d日"]:
-            try:
-                parsed_date = datetime.datetime.strptime(date.replace(" ", ""), f)
+            with suppress(ValueError):
+                parsed_date = datetime.datetime.strptime(
+                    date.replace(" ", ""),
+                    f,
+                ).astimezone()
                 break
-            except ValueError:
-                pass
         if not parsed_date:
             await matcher.finish("日期格式不正确！")
         date = parsed_date
         if date.year == 1900:
-            now = datetime.datetime.now().replace(
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0,
+            now = (
+                datetime.datetime.now()
+                .astimezone()
+                .replace(
+                    hour=0,
+                    minute=0,
+                    second=0,
+                    microsecond=0,
+                )
             )
             date = date.replace(year=now.year)
             if date < now:

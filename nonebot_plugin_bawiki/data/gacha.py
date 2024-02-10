@@ -61,7 +61,7 @@ def get_gacha_cool_down(session_id: str) -> int:
 
     if last := COOL_DOWN_DICT.get(session_id):
         remain = config.ba_gacha_cool_down - round(now - last)
-        return remain if remain >= 0 else 0
+        return max(remain, 0)
 
     return 0
 

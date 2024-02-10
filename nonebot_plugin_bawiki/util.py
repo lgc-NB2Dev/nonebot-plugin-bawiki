@@ -169,8 +169,7 @@ async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
         if not isinstance(base_urls, list):
             base_urls = [base_urls]
         urls = tuple(
-            urljoin(base_url, url)
-            for base_url, url in itertools.product(base_urls, urls)
+            itertools.starmap(urljoin, itertools.product(base_urls, urls)),
         )
 
     async def do_request(current_url: str):
@@ -241,7 +240,7 @@ def clear_wrapped_alru_cache() -> int:
 
 
 def format_timestamp(t: int) -> str:
-    return datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S")  # noqa: DTZ006
 
 
 def recover_alia(origin: str, alia_dict: Dict[str, List[str]]):

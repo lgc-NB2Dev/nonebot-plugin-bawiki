@@ -53,7 +53,9 @@ async def _(matcher: Matcher, cmd_arg: Message = CommandArg()):
         await matcher.finish("未找到该学生")
 
     stu_name = data["PathName"]
-    await matcher.send(f"请稍等，正在截取SchaleDB页面～\n{config.ba_schale_url}?chara={stu_name}")
+    await matcher.send(
+        f"请稍等，正在截取SchaleDB页面～\n{config.ba_schale_url}?chara={stu_name}",
+    )
 
     try:
         img = MessageSegment.image(await schale_get_stu_info(stu_name))

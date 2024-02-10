@@ -21,13 +21,13 @@ from ..resource import (
 )
 from ..util import (
     AsyncReqKwargs,
+    RespType as Rt,
     async_req,
     img_invert_rgba,
     parse_time_delta,
     read_image,
     split_list,
 )
-from ..util import RespType as Rt
 
 PAGE_KWARGS = {
     "is_mobile": True,
@@ -105,10 +105,10 @@ def find_current_event(
     now: Optional[datetime] = None,
 ) -> Optional[CurrentEventTuple]:
     if not now:
-        now = datetime.now()
+        now = datetime.now().astimezone()
     for _e in ev:
-        _start = datetime.fromtimestamp(_e["start"])
-        _end = datetime.fromtimestamp(_e["end"])
+        _start = datetime.fromtimestamp(_e["start"]).astimezone()
+        _end = datetime.fromtimestamp(_e["end"]).astimezone()
         if _start <= now < _end:
             _remain = _end - now
             return CurrentEventTuple(_e, _start, _end, _remain)
@@ -123,7 +123,7 @@ async def schale_get_calender(
     raids: dict,
 ) -> BytesIO:
     region = s_config["Regions"][server_index]
-    now = datetime.now()
+    now = datetime.now().astimezone()
 
     pic_bg = BuildImage.new("RGBA", (1400, 640), (255, 255, 255, 70))
 
@@ -160,7 +160,7 @@ async def schale_get_calender(
         )
         stu = [students[x] for x in g["characters"]]
 
-        async def process_avatar(s):
+        async def process_avatar(s: dict):
             return (
                 BuildImage.open(
                     BytesIO(
@@ -511,7 +511,11 @@ async def schale_get_calender(
     img: List[BuildImage] = [x for x in img if x]
     if not img:
         img.append(
-            pic_bg.copy().draw_text((0, 0, 1400, 640), "没有获取到任何数据", max_fontsize=60),
+            pic_bg.copy().draw_text(
+                (0, 0, 1400, 640),
+                "没有获取到任何数据",
+                max_fontsize=60,
+            ),
         )
 
     bg_w = 1500

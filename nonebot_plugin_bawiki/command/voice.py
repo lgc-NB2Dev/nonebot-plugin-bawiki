@@ -12,8 +12,7 @@ from ..config import config
 from ..data.bawiki import recover_stu_alia, schale_to_gamekee
 from ..data.gamekee import GameKeeVoice, game_kee_get_stu_li, game_kee_get_voice
 from ..help import FT_E, FT_S
-from ..util import IllegalOperationFinisher, async_req
-from ..util import RespType as Rt
+from ..util import IllegalOperationFinisher, RespType as Rt, async_req
 
 if TYPE_CHECKING:
     from . import HelpList
@@ -118,7 +117,9 @@ async def _(matcher: Matcher, state: T_State, cmd_arg: Message = CommandArg()):
         state[KEY_VOICE_LIST] = voices
         list_msg = "\n".join(f"{i}. {x.title}：{x.cn}" for i, x in enumerate(voices, 1))
         too_much_tip = "\nTip：结果过多，仅显示前五个" if voice_total > 5 else ""
-        await matcher.pause(f"找到了多个结果，请发送序号选择，发送 0 退出选择：\n{list_msg}{too_much_tip}")
+        await matcher.pause(
+            f"找到了多个结果，请发送序号选择，发送 0 退出选择：\n{list_msg}{too_much_tip}",
+        )
 
 
 @cmd_voice.handle()

@@ -8,8 +8,7 @@ from pydantic import BaseModel
 
 from ..config import config
 from ..resource import CACHE_DIR, DATA_DIR
-from ..util import RespType as Rt
-from ..util import async_req
+from ..util import RespType as Rt, async_req
 
 ARONA_CACHE_DIR = CACHE_DIR / "arona"
 if config.ba_auto_clear_cache_path and ARONA_CACHE_DIR.exists():
@@ -51,7 +50,7 @@ async def get_image(path: str, hash_str: Optional[str] = None) -> bytes:
     )
 
     if not hash_str:
-        hash_str = hashlib.md5(content).hexdigest()
+        hash_str = hashlib.md5(content).hexdigest()  # noqa: S324
 
     file_path = anyio.Path(ARONA_CACHE_DIR / hash_str)
     await file_path.write_bytes(content)

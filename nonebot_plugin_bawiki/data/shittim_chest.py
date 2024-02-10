@@ -89,6 +89,7 @@ async_req = wrapped_alru_cache(ttl=config.ba_shittim_req_cache_ttl, maxsize=None
 template_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(RES_SHITTIM_TEMPLATES_DIR),
     enable_async=True,
+    autoescape=True,
 )
 
 

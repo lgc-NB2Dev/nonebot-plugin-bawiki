@@ -8,8 +8,7 @@ from nonebot.params import CommandArg
 
 from ..data.gamekee import extract_content_pic, get_level_list
 from ..help import FT_E, FT_S
-from ..util import RespType as Rt
-from ..util import async_req
+from ..util import RespType as Rt, async_req
 
 if TYPE_CHECKING:
     from . import HelpList

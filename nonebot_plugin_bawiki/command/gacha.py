@@ -141,7 +141,9 @@ async def _(
             pools_str = "\n".join(
                 f"{i}. {x['name']}" for i, x in enumerate(pool_data, 1)
             )
-            await matcher.pause(f"请选择要切换的卡池：\n{pools_str}\nTip: 发送 0 取消选择")
+            await matcher.pause(
+                f"请选择要切换的卡池：\n{pools_str}\nTip: 发送 0 取消选择",
+            )
 
     if current:
         gacha_pool_index[qq] = current

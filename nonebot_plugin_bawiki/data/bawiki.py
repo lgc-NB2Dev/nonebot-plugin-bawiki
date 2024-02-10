@@ -9,8 +9,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pil_utils import BuildImage
 
 from ..config import config
-from ..util import AsyncReqKwargs, async_req, recover_alia
-from ..util import RespType as Rt
+from ..util import AsyncReqKwargs, RespType as Rt, async_req, recover_alia
 
 
 async def db_get(suffix: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
@@ -61,7 +60,7 @@ async def schale_to_gamekee(o: str) -> str:
     return o.replace("(", "（").replace(")", "）")
 
 
-async def recover_stu_alia(a, game_kee=False) -> str:
+async def recover_stu_alia(a: str, game_kee: bool = False) -> str:
     ret = recover_alia(a, await db_get_stu_alias())
 
     if game_kee:
@@ -70,14 +69,19 @@ async def recover_stu_alia(a, game_kee=False) -> str:
     return ret
 
 
-async def db_wiki_stu(name):
+async def db_wiki_stu(name: str):
     wiki = (await db_get_wiki_data())["student"]
     if not (url := wiki.get(name)):
         return "没有找到该角色的角评，可能是学生名称错误或者插件还未收录该角色角评"
     return MessageSegment.image(await db_get(url, resp_type=Rt.BYTES))
 
 
-async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
+async def db_wiki_raid(
+    raid_id: Any,
+    servers: Optional[List[int]] = None,
+    is_wiki: bool = False,
+    terrain: Optional[str] = None,
+):
     if not servers:
         servers = [0, 1]
     wiki = (await db_get_wiki_data())["raid"]
@@ -105,8 +109,7 @@ async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
     else:
         img_ = [terrain_raid] if terrain_raid else list(boss["terrains"].values())
         for i in img_:
-            for s in servers:
-                img.append(i[s])
+            img.extend(i[s] for s in servers)
 
     return [
         MessageSegment.image(x)
@@ -114,7 +117,7 @@ async def db_wiki_raid(raid_id, servers=None, is_wiki=False, terrain=None):
     ]
 
 
-async def db_wiki_event(event_id):
+async def db_wiki_event(event_id: Any):
     event_id = str(event_id)
     wiki = (await db_get_wiki_data())["event"]
     if not (ev := wiki.get(event_id)):
@@ -126,7 +129,7 @@ async def db_wiki_event(event_id):
     )
 
 
-async def db_wiki_time_atk(raid_id):
+async def db_wiki_time_atk(raid_id: int):
     if raid_id >= 1000:
         raid_id = int(raid_id / 1000)
     wiki = (await db_get_wiki_data())["time_atk"]
@@ -166,10 +169,12 @@ async def db_future(
     if all_img:
         return MessageSegment.image(img)
 
-    compare_date = date or datetime.datetime.now()
+    compare_date = date or datetime.datetime.now().astimezone()
     index = -1
     for i, v in enumerate(parts := data["parts"]):
-        start, end = [datetime.datetime.strptime(x, "%Y/%m/%d") for x in v["date"]]
+        start, end = [
+            datetime.datetime.strptime(x, "%Y/%m/%d").astimezone() for x in v["date"]
+        ]
         if start <= compare_date < end:
             index = i
 

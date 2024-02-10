@@ -55,7 +55,11 @@ raid_wiki_parser.add_argument(
     help="服务器名称，`j`或`日`代表日服，`g`或`国际`代表国际服，`c`或`国`代表国服，可指定多个，默认全选",
     default=["j", "g", "c"],
 )
-raid_wiki_parser.add_argument("-t", "--terrain", help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效")
+raid_wiki_parser.add_argument(
+    "-t",
+    "--terrain",
+    help="指定总力战环境，不指定默认全选，不带Boss名称该参数无效",
+)
 raid_wiki_parser.add_argument(
     "-w",
     "--wiki",

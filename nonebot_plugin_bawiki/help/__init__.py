@@ -1,17 +1,12 @@
 from nonebot import on_command
 
 from ..command import help_list
-from .const import FT_E as FT_E
-from .const import FT_S as FT_S
+from .const import FT_E as FT_E, FT_S as FT_S
 
 try:
-    from .pic_menu import extra as extra
-    from .pic_menu import help_handle
-    from .pic_menu import usage as usage
+    from .pic_menu import extra as extra, help_handle, usage as usage
 except ImportError:
-    from .manual import extra as extra
-    from .manual import help_handle
-    from .manual import usage as usage
+    from .manual import extra as extra, help_handle, usage as usage
 
 
 def register_help_cmd():
