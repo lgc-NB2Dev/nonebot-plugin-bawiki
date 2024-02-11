@@ -16,7 +16,7 @@ _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 <a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
     <img src="https://img.shields.io/pypi/v/nonebot-plugin-bawiki.svg" alt="pypi">
 </a>
-<img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
+<img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="python">
 <a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
     <img src="https://img.shields.io/pypi/dm/nonebot-plugin-bawiki" alt="pypi download">
 </a>
