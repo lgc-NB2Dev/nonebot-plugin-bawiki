@@ -1,6 +1,6 @@
 from typing import Optional
 
-from nonebot import get_driver
+from nonebot import get_plugin_config
 from pydantic import BaseModel, Field, HttpUrl
 
 
@@ -35,4 +35,4 @@ class Cfg(BaseModel):
     ba_auto_clear_cache_path: bool = False
 
 
-config = Cfg.parse_obj(get_driver().config.dict())
+config = get_plugin_config(Cfg)

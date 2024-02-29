@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 from io import BytesIO
 from typing import (
+    Annotated,
     Any,
     AsyncIterable,
     Callable,
@@ -18,7 +19,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from typing_extensions import Unpack
 from urllib.parse import urljoin
 
 import anyio
@@ -30,10 +30,19 @@ from matplotlib import pyplot
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from nonebot import logger
+from nonebot.compat import PYDANTIC_V2, type_validate_python
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Route, ViewportSize
-from pydantic import BaseModel, Field, parse_obj_as, validator
+from pydantic import BaseModel, Field
+from typing_extensions import Unpack
 from yarl import URL
+
+from nonebot_plugin_bawiki.compat import field_validator
+
+if PYDANTIC_V2:
+    from pydantic import AfterValidator
+else:
+    from pydantic import validator
 
 from ..config import config
 from ..resource import (
@@ -199,11 +208,10 @@ class Season(CamelAliasModel):
     start_time: datetime
     end_time: datetime
 
-    _validator_time = validator(
+    _validator_time = field_validator(
         "start_time",
         "end_time",
-        pre=True,
-        allow_reuse=True,
+        mode="before",
     )(validator_time)
 
 
@@ -244,9 +252,8 @@ class RankRecord(RankSummary):
     try_number_infos: Optional[List[TryNumberInfo]]
     record_time: datetime
 
-    _validator_time = validator(
+    _validator_time = field_validator(
         "record_time",
-        allow_reuse=True,
     )(validator_time_as_local)
 
 
@@ -256,24 +263,31 @@ class Rank(PaginationModel):
 
 class RaidChart(CamelAliasModel):
     data: Dict[int, List[int]]
-    time: List[datetime]
 
-    _validator_time = validator(
-        "time",
-        each_item=True,
-        allow_reuse=True,
-    )(validator_time_as_local)
+    if PYDANTIC_V2:
+        time: List[Annotated[datetime, AfterValidator(validator_time_as_local)]]
+    else:
+        time: List[datetime]
+        _validator_time = validator(
+            "time",
+            each_item=True,
+            allow_reuse=True,
+        )(validator_time_as_local)
 
 
 class ParticipationChart(CamelAliasModel):
-    key: List[datetime]
     value: List[int]
 
-    _validator_time = validator(
-        "key",
-        each_item=True,
-        allow_reuse=True,
-    )(validator_time_as_local)
+    if PYDANTIC_V2:
+        key: List[Annotated[datetime, AfterValidator(validator_time_as_local)]]
+    else:
+        key: List[datetime]
+
+        _validator_time = validator(
+            "key",
+            each_item=True,
+            allow_reuse=True,
+        )(validator_time_as_local)
 
 
 # endregion
@@ -317,7 +331,7 @@ async def shittim_get(url: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
 
 
 async def get_season_list() -> List[Season]:
-    return parse_obj_as(List[Season], await shittim_get("api/season/list"))
+    return type_validate_python(List[Season], await shittim_get("api/season/list"))
 
 
 def get_rank_list(
@@ -328,7 +342,7 @@ def get_rank_list(
 ) -> AsyncIterable[RankRecord]:
     @iter_pagination_func(**pf_kwargs)
     async def iterator(page: int, size: int, delay: float):
-        ret = parse_obj_as(
+        ret = type_validate_python(
             Rank,
             await shittim_get(
                 f"api/rank/list/{server.value}/{data_type.value}/{season}",
@@ -345,7 +359,7 @@ async def get_rank_list_top(
     server: ServerType,
     season: int,
 ) -> List[RankSummary]:
-    return parse_obj_as(
+    return type_validate_python(
         List[RankSummary],
         await shittim_get(
             "api/rank/list_top",
@@ -358,7 +372,7 @@ async def get_rank_list_by_last_rank(
     server: ServerType,
     season: int,
 ) -> List[RankSummary]:
-    return parse_obj_as(
+    return type_validate_python(
         List[RankSummary],
         await shittim_get(
             "api/rank/list_by_last_rank",
@@ -368,7 +382,7 @@ async def get_rank_list_by_last_rank(
 
 
 async def get_raid_chart_data(server: ServerType, season: int) -> RaidChart:
-    return parse_obj_as(
+    return type_validate_python(
         RaidChart,
         await shittim_get(f"raid/new/charts/{server.value}", params={"s": season}),
     )
@@ -378,7 +392,7 @@ async def get_participation_chart_data(
     server: ServerType,
     season: int,
 ) -> ParticipationChart:
-    return parse_obj_as(
+    return type_validate_python(
         ParticipationChart,
         await shittim_get(
             "api/rank/season/lastRank/charts",
@@ -388,14 +402,14 @@ async def get_participation_chart_data(
 
 
 async def get_alice_friends(server: ServerType) -> Dict[int, RankRecord]:
-    return parse_obj_as(
+    return type_validate_python(
         Dict[int, RankRecord],
         await shittim_get("api/rank/list_20001", params={"server": server.value}),
     )
 
 
 async def get_diligent_achievers(server: ServerType) -> Dict[int, RankRecord]:
-    return parse_obj_as(
+    return type_validate_python(
         Dict[int, RankRecord],
         await shittim_get("api/rank/list_1", params={"server": server.value}),
     )
