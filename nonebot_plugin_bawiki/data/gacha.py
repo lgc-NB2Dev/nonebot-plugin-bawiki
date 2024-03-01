@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, cast
 import anyio
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
+from nonebot.compat import model_dump
 from pil_utils import BuildImage, Text2Image
 from pydantic import BaseModel, Field
 
@@ -73,7 +74,7 @@ def set_gacha_cool_down(session_id: str):
 async def set_gacha_data(user_id: str, data: GachaData):
     path = anyio.Path(GACHA_DATA_PATH)
     j = json.loads(await path.read_text(encoding="u8"))
-    j[user_id] = data.dict()
+    j[user_id] = model_dump(data)
     await path.write_text(json.dumps(j), encoding="u8")
 
 
