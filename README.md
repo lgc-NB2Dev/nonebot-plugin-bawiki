@@ -10,18 +10,27 @@
 
 _✨ 基于 NoneBot2 的碧蓝档案 Wiki 插件 ✨_
 
-<a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/lgc2333/nonebot-plugin-bawiki.svg" alt="license">
-</a>
-<a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
-    <img src="https://img.shields.io/pypi/v/nonebot-plugin-bawiki.svg" alt="pypi">
-</a>
 <img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="python">
-<a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
-    <img src="https://img.shields.io/pypi/dm/nonebot-plugin-bawiki" alt="pypi download">
+<a href="https://pdm.fming.dev">
+  <img src="https://img.shields.io/badge/pdm-managed-blueviolet" alt="pdm-managed">
 </a>
-<a href="https://wakatime.com/badge/user/b61b0f9a-f40b-4c82-bc51-0a75c67bfccf/project/371bbbba-9dba-4e40-883c-72b688876575">
-    <img src="https://wakatime.com/badge/user/b61b0f9a-f40b-4c82-bc51-0a75c67bfccf/project/371bbbba-9dba-4e40-883c-72b688876575.svg" alt="wakatime">
+<a href="https://wakatime.com/badge/user/b61b0f9a-f40b-4c82-bc51-0a75c67bfccf/project/f4778875-45a4-4688-8e1b-b8c844440abb">
+  <img src="https://wakatime.com/badge/user/b61b0f9a-f40b-4c82-bc51-0a75c67bfccf/project/f4778875-45a4-4688-8e1b-b8c844440abb.svg" alt="wakatime">
+</a>
+
+<br />
+
+<a href="https://pydantic.dev">
+  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/template/pyd-v1-or-v2.json" alt="Pydantic Version 1 Or 2" >
+</a>
+<a href="./LICENSE">
+  <img src="https://img.shields.io/github/license/lgc-NB2Dev/nonebot-plugin-bawiki.svg" alt="license">
+</a>
+<a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
+  <img src="https://img.shields.io/pypi/v/nonebot-plugin-bawiki.svg" alt="pypi">
+</a>
+<a href="https://pypi.python.org/pypi/nonebot-plugin-bawiki">
+  <img src="https://img.shields.io/pypi/dm/nonebot-plugin-bawiki" alt="pypi download">
 </a>
 
 </div>
@@ -198,6 +207,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.11.0
+
+- 适配 Pydantic V2 \([#55](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/55)\)
+
 ### 0.10.4 & 0.10.5
 
 - 修复 `ba爱丽丝的伙伴` 和 `ba小心卷狗` 显示的赛季标题错误问题
@@ -247,9 +260,6 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 ### 1.0.0
 
 - 使用 `nonebot-plugin-alconna` 实现多适配器支持
-
-### 0.11.0
-
 - 使用 `playwright` 重构现有的 Pillow 绘图
 
 </details>
