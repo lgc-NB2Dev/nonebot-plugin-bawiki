@@ -112,8 +112,7 @@ class PaginationCallable(Protocol, Generic[T]):
         page: int,
         size: int,
         delay: float,
-    ) -> Tuple[Optional[List[T]], bool]:
-        ...
+    ) -> Tuple[Optional[List[T]], bool]: ...
 
 
 class IterPFKwargs(TypedDict, total=False):
@@ -262,7 +261,7 @@ class Rank(PaginationModel):
 
 
 class RaidChart(CamelAliasModel):
-    data: Dict[int, List[int]]
+    data: Optional[Dict[int, List[Optional[int]]]] = None
 
     if PYDANTIC_V2:
         time: List[Annotated[datetime, AfterValidator(validator_time_as_local)]]
