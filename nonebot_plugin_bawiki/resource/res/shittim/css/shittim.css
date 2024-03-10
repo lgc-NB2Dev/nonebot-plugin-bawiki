@@ -110,6 +110,10 @@ body {
   text-align: center;
 }
 
+.grade-title.ins {
+  background-color: rgb(216, 212, 253);
+}
+
 .grade-title.extreme {
   background-color: rgb(252, 222, 253);
 }

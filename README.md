@@ -207,6 +207,10 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 📝 更新日志
 
+### 0.11.2
+
+- 小重构小修复
+
 ### 0.11.1
 
 - 修复 `ba档线` 指令的问题 \([#56](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/56))\

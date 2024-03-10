@@ -169,7 +169,7 @@ async def base_async_req(*urls: str, **kwargs: Unpack[AsyncReqKwargs]) -> Any:
         if not isinstance(base_urls, list):
             base_urls = [base_urls]
         urls = tuple(
-            itertools.starmap(urljoin, itertools.product(base_urls, urls)),
+            itertools.starmap(urljoin, itertools.product(base_urls, urls)),  # type: ignore
         )
 
     async def do_request(current_url: str):

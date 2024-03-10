@@ -64,7 +64,9 @@ Args:
 <div class="content grade-line">
   {%- for rank in summaries -%}
   <div class="grade">
-    <div class="grade-title {{ rank.hard_fullname | lower }}">{{ rank.hard_fullname }}</div>
+    {%- if rank.hard_fullname == "INS" -%}{%- set name = "Insane" -%}
+    {%- else -%}{%- set name = rank.hard_fullname -%}{%- endif -%}
+    <div class="grade-title {{ rank.hard_fullname | lower }}">{{ name }}</div>
     <div class="number">{{ rank.rank }}</div>
   </div>
   {%- endfor -%}

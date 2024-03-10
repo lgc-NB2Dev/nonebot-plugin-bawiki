@@ -5,12 +5,12 @@ from datetime import datetime
 from enum import Enum
 from io import BytesIO
 from typing import (
-    Annotated,
     Any,
     AsyncIterable,
     Callable,
     Dict,
     Generic,
+    Iterable,
     List,
     Optional,
     Protocol,
@@ -19,6 +19,7 @@ from typing import (
     TypeVar,
     Union,
 )
+from typing_extensions import Unpack
 from urllib.parse import urljoin
 
 import anyio
@@ -33,16 +34,15 @@ from nonebot import logger
 from nonebot.compat import PYDANTIC_V2, type_validate_python
 from nonebot_plugin_htmlrender import get_new_page
 from playwright.async_api import Route, ViewportSize
-from pydantic import BaseModel, Field
-from typing_extensions import Unpack
+from pydantic import BaseModel, ConfigDict, Field
 from yarl import URL
 
-from nonebot_plugin_bawiki.compat import field_validator
+from ..compat import field_validator
 
 if PYDANTIC_V2:
-    from pydantic import AfterValidator
+    pass
 else:
-    from pydantic import validator
+    pass
 
 from ..config import config
 from ..resource import (
@@ -112,7 +112,8 @@ class PaginationCallable(Protocol, Generic[T]):
         page: int,
         size: int,
         delay: float,
-    ) -> Tuple[Optional[List[T]], bool]: ...
+    ) -> Tuple[Optional[List[T]], bool]:
+        ...
 
 
 class IterPFKwargs(TypedDict, total=False):
@@ -167,7 +168,7 @@ class RankDataType(Enum):
 # region models
 
 
-def validator_time(v: str):
+def validator_time(cls, v: str):  # noqa: ANN001, ARG001
     try:
         return (
             datetime.strptime(v, "%Y-%m-%d %H:%M")
@@ -178,13 +179,24 @@ def validator_time(v: str):
         raise ValueError(f"Time `{v}` format error") from e
 
 
-def validator_time_as_local(v: datetime) -> datetime:
+def validator_time_as_local(cls, v: datetime) -> datetime:  # noqa: ANN001, ARG001
     return v.astimezone()
 
 
+def each_item_validator(func: Callable[[Any, T], T]):
+    def wrapper(cls, v: Iterable[T]) -> List[T]:  # noqa: ARG001, ANN001
+        return [func(cls, x) for x in v]
+
+    return wrapper
+
+
 class CamelAliasModel(BaseModel):
-    class Config:
-        alias_generator = camel_case
+    if PYDANTIC_V2:
+        model_config = ConfigDict(alias_generator=camel_case)
+    else:
+
+        class Config:
+            alias_generator = camel_case
 
 
 class PaginationModel(CamelAliasModel):
@@ -262,31 +274,20 @@ class Rank(PaginationModel):
 
 class RaidChart(CamelAliasModel):
     data: Optional[Dict[int, List[Optional[int]]]] = None
+    time: List[datetime]
 
-    if PYDANTIC_V2:
-        time: List[Annotated[datetime, AfterValidator(validator_time_as_local)]]
-    else:
-        time: List[datetime]
-        _validator_time = validator(
-            "time",
-            each_item=True,
-            allow_reuse=True,
-        )(validator_time_as_local)
+    _validator_time = field_validator("time")(
+        each_item_validator(validator_time_as_local),
+    )
 
 
 class ParticipationChart(CamelAliasModel):
     value: List[int]
+    key: List[datetime]
 
-    if PYDANTIC_V2:
-        key: List[Annotated[datetime, AfterValidator(validator_time_as_local)]]
-    else:
-        key: List[datetime]
-
-        _validator_time = validator(
-            "key",
-            each_item=True,
-            allow_reuse=True,
-        )(validator_time_as_local)
+    _validator_time = field_validator("key")(
+        each_item_validator(validator_time_as_local),
+    )
 
 
 # endregion
@@ -478,12 +479,12 @@ def render_raid_chart(data: RaidChart) -> bytes:
 
     ax = figure.add_subplot()
     for key in CHART_SHOW_RANKS:
-        if (key not in data.data) or (not (y := data.data[key])):
+        if (not data.data) or (key not in data.data) or (not (y := data.data[key])):
             continue
         x = data.time[: len(y)]
         ax.plot(
-            x,
-            y,
+            x,  # type: ignore
+            y,  # type: ignore
             label=(
                 f"{' ' * (10 - (len(str(key)) * 2))}{key} | "
                 f"{x[-1].strftime(DATE_FORMAT)} | "
@@ -501,7 +502,7 @@ def render_participation_chart(data: ParticipationChart) -> bytes:
 
     ax = figure.add_subplot()
     ax.plot(
-        data.key,
+        data.key,  # type: ignore
         data.value,
         label=(
             "Participants | "
