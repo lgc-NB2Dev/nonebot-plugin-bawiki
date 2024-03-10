@@ -38,12 +38,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from yarl import URL
 
 from ..compat import field_validator
-
-if PYDANTIC_V2:
-    pass
-else:
-    pass
-
 from ..config import config
 from ..resource import (
     CACHE_DIR,
