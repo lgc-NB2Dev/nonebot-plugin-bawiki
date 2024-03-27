@@ -213,7 +213,7 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ### 0.11.1
 
-- 修复 `ba档线` 指令的问题 \([#56](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/56))\
+- 修复 `ba档线` 指令的问题 \([#56](https://github.com/lgc-NB2Dev/nonebot-plugin-bawiki/pull/56)\)
 
 ### 0.11.0
 
