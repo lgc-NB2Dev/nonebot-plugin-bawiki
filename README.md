@@ -195,15 +195,9 @@ Telegram：[@lgc2333](https://t.me/lgc2333)
 
 ## 💰 赞助
 
-感谢各位大佬的投喂……！！本 fw 实在感激不尽……
+**[赞助我](https://blog.lgc2333.top/donate)**
 
-- [爱发电](https://afdian.net/@lgc2333)
-- <details>
-    <summary>赞助二维码（点击展开）</summary>
-
-  ![讨饭](https://raw.githubusercontent.com/lgc2333/ShigureBotMenu/master/src/imgs/sponsor.png)
-
-  </details>
+感谢大家的赞助！你们的赞助将是我继续创作的动力！
 
 ## 📝 更新日志
 
