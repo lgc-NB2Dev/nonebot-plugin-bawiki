@@ -287,7 +287,7 @@ def img_invert_rgba(im: Image.Image) -> Image.Image:
 
 
 def replace_brackets(original: str) -> str:
-    return original.replace("（", "(").replace("）", "(")
+    return original.replace("（", "(").replace("）", ")")
 
 
 def splice_msg(msgs: Sequence[Union[str, MessageSegment, Message]]) -> Message:
