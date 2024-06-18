@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+import operator
 import re
 import time
 import urllib.parse
@@ -60,7 +61,7 @@ async def game_kee_get_calender() -> List[dict]:
 
     li.sort(key=lambda x: x["begin_at"] if now < x["begin_at"] else x["end_at"])
     li.sort(key=lambda x: now < x["begin_at"])
-    li.sort(key=lambda x: x["importance"], reverse=True)
+    li.sort(key=operator.itemgetter("importance"), reverse=True)
     return li
 
 
@@ -240,7 +241,7 @@ async def game_kee_get_calender_page(
 
     async def draw_list(li: List[BuildImage], title: str) -> BuildImage:
         bg_w = 1500
-        bg_h = 200 + sum([x.height + 50 for x in li])
+        bg_h = 200 + sum(x.height + 50 for x in li)
         bg = (
             BuildImage.new("RGBA", (bg_w, bg_h))
             .paste((await read_image(CALENDER_BANNER_PATH)).resize((1500, 150)))
