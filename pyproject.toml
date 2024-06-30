@@ -4,19 +4,19 @@ dynamic = ["version"]
 description = "A nonebot2 plugin for Blue Archive."
 authors = [{ name = "student_2333", email = "lgc2333@126.com" }]
 dependencies = [
-    "nonebot2>=2.2.0",
-    "nonebot-adapter-onebot>=2.3.1",
-    "nonebot-plugin-htmlrender>=0.2.2",
-    "nonebot-plugin-apscheduler>=0.3.0",
-    "beautifulsoup4>=4.11.1",
-    "lxml>=4.9.1",
-    "pil-utils>=0.1.4",
-    "httpx>=0.24",
-    "pypinyin>=0.49.0",
-    "yarl>=1.9.2",
+    "nonebot2>=2.3.1",
+    "nonebot-adapter-onebot>=2.4.3",
+    "nonebot-plugin-htmlrender>=0.3.2",
+    "nonebot-plugin-apscheduler>=0.5.0",
+    "beautifulsoup4>=4.12.3",
+    "lxml>=5.2.2",
+    "pil-utils>=0.1.10",
+    "httpx>=0.27.0",
+    "pypinyin>=0.51.0",
+    "yarl>=1.9.4",
     "async-lru>=2.0.4",
-    "matplotlib>=3.7.4",
-    "pytz>=2023.3.post1",
+    "matplotlib>=3.9.0",
+    "pytz>=2024.1",
 ]
 requires-python = ">=3.9,<4.0"
 readme = "README.md"
@@ -41,7 +41,9 @@ classifiers = [
 homepage = "https://github.com/lgc2333/nonebot-plugin-bawiki/"
 
 [project.optional-dependencies]
-menu = ["nonebot-plugin-PicMenu>=0.2"]
+menu = [
+    "nonebot-plugin-PicMenu>=0.2",
+]
 
 [tool.pdm.version]
 source = "file"
