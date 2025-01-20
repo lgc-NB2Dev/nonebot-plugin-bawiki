@@ -1,5 +1,7 @@
 <!-- markdownlint-disable MD033 MD036 MD041 -->
 
+**本插件已放弃维护**
+
 <div align="center">
 
 <a href="https://v2.nonebot.dev/store"><img src="https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/bawiki/nonebot-plugin-bawiki.png" width="200" height="200" alt="BAWiki"></a>
